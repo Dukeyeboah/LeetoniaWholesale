@@ -1,0 +1,47 @@
+"use client"
+
+import type React from "react"
+
+import { AppSidebar } from "@/components/app-sidebar"
+import { useAuth } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { Loader2 } from "lucide-react"
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const { user, loading, isAdmin } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.push("/login")
+      } else if (!isAdmin) {
+        router.push("/inventory")
+      }
+    }
+  }, [user, loading, isAdmin, router])
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!isAdmin) return null
+
+  return (
+    <div className="flex min-h-screen bg-background">
+      <AppSidebar />
+      <main className="flex-1 md:ml-64 lg:ml-72 transition-all duration-300 ease-in-out">
+        <div className="container max-w-6xl py-8 md:py-10 px-4 md:px-8 mt-12 md:mt-0">{children}</div>
+      </main>
+    </div>
+  )
+}
