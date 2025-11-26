@@ -1,42 +1,56 @@
 export interface User {
-  id: string
-  email: string
-  role: "admin" | "client"
-  name?: string
-  phone?: string
-  createdAt: number
+  id: string;
+  email: string;
+  role: 'admin' | 'client';
+  name?: string;
+  phone?: string;
+  createdAt: number;
 }
 
 export interface Product {
-  id: string
-  name: string
-  category: string
-  price: number
-  stock: number
-  unit: string
-  description?: string
-  imageUrl?: string
-  updatedAt: number
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  unit: string;
+  description?: string;
+  imageUrl?: string;
+  expiryDate?: number; // Unix timestamp
+  code?: string; // Product code
+  updatedAt: number;
 }
 
 export interface CartItem extends Product {
-  quantity: number
+  quantity: number;
 }
 
 export interface Order {
-  id: string
-  userId: string
-  items: CartItem[]
-  status: "pending" | "checking_stock" | "pharmacy_confirmed" | "customer_confirmed" | "completed" | "cancelled"
-  total: number
-  createdAt: number
-  updatedAt: number
+  id: string;
+  userId: string;
+  userName?: string;
+  userEmail?: string;
+  items: CartItem[];
+  status:
+    | 'pending'
+    | 'checking_stock'
+    | 'pharmacy_confirmed'
+    | 'customer_confirmed'
+    | 'completed'
+    | 'cancelled';
+  total: number;
+  deliveryOption?: 'pickup' | 'delivery';
+  deliveryAddress?: string;
+  deliveryFee?: number;
+  notes?: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface Log {
-  id: string
-  action: string
-  userId: string
-  details: string
-  timestamp: number
+  id: string;
+  action: string;
+  userId: string;
+  details: string;
+  timestamp: number;
 }

@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Product images
+    match /products/{productId}/{allPaths=**} {
+      // Anyone authenticated can read product images
+      allow read: if isAuthenticated();
+      
+      // Only admins can upload/update/delete product images
+      allow write: if isAdmin();
+    }
+
+    // User avatars
+    match /avatars/{userId}/{allPaths=**} {
+      // Users can read any avatar
+      allow read: if isAuthenticated();
+      
+      // Users can upload their own avatar, admins can upload any avatar
+      allow write: if isAuthenticated() && (
+        request.auth.uid == userId || 
+        isAdmin()
+      );
+    }
+
+    // Order documents (invoices, receipts, etc.)
+    match /orders/{orderId}/{allPaths=**} {
+      // Users can read documents for their own orders, admins can read all
+      allow read: if isAuthenticated() && (
+        firestore.get(/databases/(default)/documents/orders/$(orderId)).data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      
+      // Only admins can upload order documents
+      allow write: if isAdmin();
+    }
+  }
+}
+
