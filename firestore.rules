@@ -42,8 +42,8 @@ service cloud.firestore {
 
     // Inventory collection
     match /inventory/{productId} {
-      // Anyone authenticated can read inventory
-      allow read: if isAuthenticated();
+      // Anyone can read inventory (including unauthenticated users for browsing)
+      allow read: if true;
       
       // Only admins can create, update, or delete inventory
       allow create, update, delete: if isAdmin();
@@ -80,6 +80,12 @@ service cloud.firestore {
       
       // Only admins can update or delete logs
       allow update, delete: if isAdmin();
+    }
+
+    // Carts collection (user shopping carts)
+    match /carts/{userId} {
+      // Users can read and write their own cart
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
     }
   }
 }

@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, AlertCircle, Minus } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { LoginDialog } from '@/components/login-dialog';
 
 interface ProductCardProps {
   product: Product;
@@ -22,7 +23,8 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [quantity, setQuantity] = useState(1);
-  const { isAdmin, viewMode } = useAuth();
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const { user, isAdmin, viewMode } = useAuth();
   const showPrice = isAdmin || viewMode === 'admin';
   const isOutOfStock = product.stock <= 0;
   const isLowStock = product.stock > 0 && product.stock < 10;
@@ -46,6 +48,10 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   };
 
   const handleAddToCart = () => {
+    if (!user) {
+      setShowLoginDialog(true);
+      return;
+    }
     if (!isOutOfStock && quantity > 0 && quantity <= product.stock) {
       onAddToCart(product, quantity);
       setQuantity(1); // Reset to 1 after adding
@@ -53,8 +59,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   };
 
   return (
-    <Card className='overflow-hidden transition-all hover:shadow-md border-border/60 bg-card'>
-      <div className='aspect-square relative bg-secondary/20 flex items-center justify-center text-muted-foreground'>
+    <Card className='overflow-hidden transition-all hover:shadow-md border-border/60 bg-card flex flex-col h-full'>
+      <div className='aspect-[4/3] relative bg-secondary/20 flex items-center justify-center text-muted-foreground'>
         {/* Placeholder for image - in real app use Next/Image */}
         {product.imageUrl ? (
           <img
@@ -63,35 +69,35 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             className='w-full h-full object-cover'
           />
         ) : (
-          <span className='text-4xl font-serif opacity-20'>
+          <span className='text-2xl font-serif opacity-30'>
             {product.name.charAt(0)}
           </span>
         )}
 
         {isOutOfStock && (
           <div className='absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center'>
-            <Badge variant='destructive' className='text-sm px-3 py-1'>
+            <Badge variant='destructive' className='text-xs px-2 py-0.5'>
               Out of Stock
             </Badge>
           </div>
         )}
       </div>
-      <CardHeader className='p-4 pb-2'>
+      <CardHeader className='p-3 pb-0 flex-shrink-0'>
         <div className='flex justify-between items-start gap-2'>
-          <div className='space-y-1'>
+          <div className='flex-1 min-w-0 space-y-1'>
             <Badge
               variant='outline'
               className='text-[10px] text-muted-foreground tracking-wider uppercase bg-transparent border-muted-foreground/30'
             >
               {product.category}
             </Badge>
-            <CardTitle className='font-serif text-lg leading-tight line-clamp-2 min-h-[3rem]'>
+            <CardTitle className='font-serif text-base leading-tight line-clamp-2'>
               {product.name}
             </CardTitle>
           </div>
           {showPrice && (
-            <div className='text-right'>
-              <span className='block font-bold text-primary text-lg'>
+            <div className='text-right flex-shrink-0'>
+              <span className='block font-bold text-primary text-base'>
                 ₵{product.price.toFixed(2)}
               </span>
               <span className='text-xs text-muted-foreground'>
@@ -100,7 +106,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             </div>
           )}
           {!showPrice && (
-            <div className='text-right'>
+            <div className='text-right flex-shrink-0'>
               <span className='text-xs text-muted-foreground'>
                 {product.unit}
               </span>
@@ -108,14 +114,10 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           )}
         </div>
       </CardHeader>
-      <CardContent className='p-4 pt-2'>
-        <p className='text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]'>
-          {product.description || 'No description available.'}
-        </p>
-
-        <div className='mt-3 flex items-center gap-2 text-xs'>
+      <CardContent className='p-3 pt-0 flex-shrink-0'>
+        <div className='flex items-center gap-2 text-xs'>
           <div
-            className={`h-2 w-2 rounded-full ${
+            className={`h-2 w-2 rounded-full flex-shrink-0 ${
               isOutOfStock
                 ? 'bg-destructive'
                 : isLowStock
@@ -136,7 +138,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </span>
         </div>
       </CardContent>
-      <CardFooter className='p-4 pt-0 space-y-2 flex-col'>
+      <CardFooter className='p-3 pt-0 space-y-2 flex-col mt-auto'>
         {!isOutOfStock && (
           <div className='flex items-center gap-2 w-full'>
             <Button
@@ -188,6 +190,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           )}
         </Button>
       </CardFooter>
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </Card>
   );
 }

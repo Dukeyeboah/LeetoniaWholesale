@@ -1,6 +1,7 @@
 'use client';
 
 import type React from 'react';
+import Image from 'next/image';
 
 import { useRouter } from 'next/navigation';
 import {
@@ -253,6 +254,7 @@ export default function LoginPage() {
           phone: phoneNumber || firebaseUser.phoneNumber || '',
           role: shouldBeAdmin ? 'admin' : 'client',
           name: firebaseUser.displayName || '',
+          photoURL: firebaseUser.photoURL || undefined,
           createdAt: Date.now(),
         };
 
@@ -302,6 +304,17 @@ export default function LoginPage() {
     <div className='flex min-h-screen items-center justify-center bg-secondary/30 p-4'>
       <Card className='w-full max-w-md shadow-lg border-border/60'>
         <CardHeader className='space-y-1 text-center'>
+          <div className='flex justify-center mb-4'>
+            <div className='relative h-16 w-16'>
+              <Image
+                src='/images/LeetoniaWholesaleLogo.jpg'
+                alt='Leetonia Wholesale'
+                fill
+                className='object-contain'
+                priority
+              />
+            </div>
+          </div>
           <CardTitle className='text-2xl font-serif text-primary'>
             Leetonia Wholesale
           </CardTitle>

@@ -26,7 +26,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function OrdersPage() {
-  const { user } = useAuth();
+  const { user, isAdmin, viewMode } = useAuth();
+  const showPrice = isAdmin || viewMode === 'admin';
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,9 +173,11 @@ export default function OrdersPage() {
                 </p>
               </div>
               <div className='flex items-center gap-4'>
-                <span className='font-bold hidden sm:inline-block'>
-                  ₵{order.total.toFixed(2)}
-                </span>
+                {showPrice && (
+                  <span className='font-bold hidden sm:inline-block'>
+                    ₵{(order.total + (order.deliveryFee || 0)).toFixed(2)}
+                  </span>
+                )}
                 {getStatusBadge(order.status)}
               </div>
             </CardHeader>
@@ -187,9 +190,11 @@ export default function OrdersPage() {
                         <span className='font-medium'>{item.quantity}x</span>{' '}
                         {item.name}
                       </span>
-                      <span className='text-muted-foreground'>
-                        ₵{(item.price * item.quantity).toFixed(2)}
-                      </span>
+                      {showPrice && (
+                        <span className='text-muted-foreground hidden sm:inline-block'>
+                          ₵{(item.price * item.quantity).toFixed(2)}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -210,12 +215,14 @@ export default function OrdersPage() {
                   </div>
                 )}
 
-                <div className='pt-2 border-t flex justify-between font-bold'>
-                  <span>Total</span>
-                  <span>
-                    ₵{(order.total + (order.deliveryFee || 0)).toFixed(2)}
-                  </span>
-                </div>
+                {showPrice && (
+                  <div className='pt-2 border-t flex justify-between font-bold'>
+                    <span>Total</span>
+                    <span>
+                      ₵{(order.total + (order.deliveryFee || 0)).toFixed(2)}
+                    </span>
+                  </div>
+                )}
 
                 {order.status === 'pharmacy_confirmed' && (
                   <Link href={`/orders/${order.id}`}>

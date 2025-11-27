@@ -13,14 +13,21 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowRight, Trash2, Minus, Plus, ShoppingBag } from 'lucide-react';
+import { ArrowRight, Trash2, ShoppingBag } from 'lucide-react';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import type { Order } from '@/types';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, clearCart, total } = useCart();
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    total,
+    isInitialized,
+  } = useCart();
   const { user, isAdmin, viewMode } = useAuth();
   const showPrice = isAdmin || viewMode === 'admin';
   const router = useRouter();
@@ -71,6 +78,16 @@ export default function CartPage() {
     }
   };
 
+  // Show loading state while cart is being initialized
+  if (!isInitialized) {
+    return (
+      <div className='flex flex-col items-center justify-center min-h-[60vh] space-y-4 text-center'>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary'></div>
+        <p className='text-muted-foreground'>Loading cart...</p>
+      </div>
+    );
+  }
+
   if (cart.length === 0) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[60vh] space-y-4 text-center'>
@@ -95,66 +112,63 @@ export default function CartPage() {
       <h1 className='text-3xl font-serif font-bold text-primary'>Your Cart</h1>
 
       <div className='grid gap-8 md:grid-cols-3'>
-        <div className='md:col-span-2 space-y-4'>
-          {cart.map((item) => (
-            <Card
-              key={item.id}
-              className='flex flex-col sm:flex-row overflow-hidden'
-            >
-              <div className='h-32 sm:w-32 bg-secondary/20 flex items-center justify-center'>
-                {/* Placeholder Image */}
-                <span className='text-2xl text-muted-foreground/50 font-serif'>
-                  {item.name.charAt(0)}
-                </span>
-              </div>
-              <div className='flex-1 flex flex-col justify-between p-4'>
-                <div className='flex justify-between items-start'>
-                  <div>
-                    <h3 className='font-semibold text-lg'>{item.name}</h3>
-                    <p className='text-sm text-muted-foreground'>{item.unit}</p>
-                  </div>
-                  {showPrice && (
-                    <p className='font-bold text-lg'>
-                      ₵{(item.price * item.quantity).toFixed(2)}
-                    </p>
+        <div className='md:col-span-2'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            {cart.map((item) => (
+              <Card
+                key={item.id}
+                className='flex flex-col overflow-hidden h-full'
+              >
+                {/* Image - reduced height */}
+                <div className='aspect-[5/3] relative bg-secondary/20 flex items-center justify-center'>
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className='w-full h-full object-cover'
+                    />
+                  ) : (
+                    <span className='text-2xl text-muted-foreground/50 font-serif'>
+                      {item.name.charAt(0)}
+                    </span>
                   )}
                 </div>
 
-                <div className='flex justify-between items-center mt-4'>
-                  <div className='flex items-center border rounded-md'>
+                {/* Content */}
+                <CardContent className='flex-1 flex flex-col p-3'>
+                  <div className='flex items-start justify-between gap-2'>
+                    <div className='flex-1 min-w-0'>
+                      <h3 className='font-semibold text-sm line-clamp-2'>
+                        {item.name}
+                      </h3>
+                      <div className='flex items-center gap-2 mt-1'>
+                        <p className='text-xs text-muted-foreground'>
+                          {item.unit}
+                        </p>
+                        <span className='text-xs text-muted-foreground'>
+                          • Qty: {item.quantity}
+                        </span>
+                      </div>
+                      {showPrice && (
+                        <p className='font-bold text-sm text-primary mt-1'>
+                          ₵{(item.price * item.quantity).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
                     <Button
                       variant='ghost'
                       size='icon'
-                      className='h-8 w-8'
-                      onClick={() => updateQuantity(item.id, -1)}
+                      className='h-7 w-7 flex-shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10'
+                      onClick={() => removeFromCart(item.id)}
+                      title='Remove item'
                     >
-                      <Minus className='h-3 w-3' />
-                    </Button>
-                    <span className='w-12 text-center text-sm font-medium'>
-                      {item.quantity}
-                    </span>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='h-8 w-8'
-                      onClick={() => updateQuantity(item.id, 1)}
-                    >
-                      <Plus className='h-3 w-3' />
+                      <Trash2 className='h-3.5 w-3.5' />
                     </Button>
                   </div>
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    className='text-destructive hover:text-destructive hover:bg-destructive/10'
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    <Trash2 className='h-4 w-4 mr-2' />
-                    Remove
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         <div className='h-fit'>
@@ -163,6 +177,35 @@ export default function CartPage() {
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
+              {/* Items list */}
+              <div className='space-y-2'>
+                <h4 className='text-sm font-medium text-muted-foreground'>
+                  Items ({cart.length})
+                </h4>
+                <div className='space-y-1.5 max-h-[80vh] overflow-y-auto pr-2'>
+                  {cart.map((item) => (
+                    <div
+                      key={item.id}
+                      className='flex justify-between items-start text-sm'
+                    >
+                      <div className='flex-1 min-w-0 pr-2'>
+                        <p className='font-medium line-clamp-1'>{item.name}</p>
+                        <p className='text-xs text-muted-foreground'>
+                          {item.quantity}x {item.unit}
+                        </p>
+                      </div>
+                      {showPrice && (
+                        <p className='text-sm font-medium flex-shrink-0'>
+                          ₵{(item.price * item.quantity).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
               {showPrice && (
                 <>
                   <div className='flex justify-between text-sm'>

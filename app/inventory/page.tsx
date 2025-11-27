@@ -135,6 +135,7 @@ export default function InventoryPage() {
       </div>
 
       <div className='flex flex-col md:flex-row gap-4 bg-card p-4 rounded-lg shadow-sm border'>
+        {/* <div className='relative md:max-w- flex-1'> */}
         <div className='relative flex-1'>
           <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
           <Input
@@ -145,16 +146,21 @@ export default function InventoryPage() {
           />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className='w-full md:w-[200px] bg-background border-border/60'>
-            <div className='flex items-center gap-2 text-muted-foreground'>
-              <Filter className='h-4 w-4' />
-              <SelectValue placeholder='Category' />
+          <SelectTrigger className='w-full md:w-[280px] bg-background border-border/60 max-w-full'>
+            <div className='flex items-center gap-2 text-muted-foreground min-w-0 flex-1'>
+              <Filter className='h-4 w-4 flex-shrink-0' />
+              <SelectValue placeholder='Category' className='truncate' />
             </div>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className='max-w-[280px]'>
             {categories.map((cat) => (
-              <SelectItem key={cat} value={cat} className='capitalize'>
-                {cat}
+              <SelectItem
+                key={cat}
+                value={cat}
+                className='truncate pr-8 max-w-[280px]'
+                title={cat}
+              >
+                {cat === 'all' ? 'All Categories' : cat}
               </SelectItem>
             ))}
           </SelectContent>
@@ -162,15 +168,9 @@ export default function InventoryPage() {
       </div>
 
       {loading ? (
-        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className='space-y-4'>
-              <Skeleton className='h-[200px] w-full rounded-lg' />
-              <div className='space-y-2'>
-                <Skeleton className='h-4 w-3/4' />
-                <Skeleton className='h-4 w-1/2' />
-              </div>
-            </div>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className='h-[320px] w-full rounded-lg' />
           ))}
         </div>
       ) : filteredProducts.length === 0 ? (
@@ -194,7 +194,7 @@ export default function InventoryPage() {
           </Button>
         </div>
       ) : (
-        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
           {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}

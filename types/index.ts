@@ -4,6 +4,7 @@ export interface User {
   role: 'admin' | 'client';
   name?: string;
   phone?: string;
+  photoURL?: string; // Profile image URL from Google/Gmail
   createdAt: number;
 }
 

@@ -1,30 +1,61 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Package } from "lucide-react"
+'use client';
+
+import Image from 'next/image';
+import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarProvider, useSidebar } from '@/components/sidebar-context';
+
+function HomeContent() {
+  const { isCollapsed } = useSidebar();
+
+  return (
+    <div className='flex min-h-screen bg-background'>
+      <AppSidebar />
+      <main
+        className={`flex-1 transition-all duration-300 ease-in-out ${
+          isCollapsed ? 'md:ml-20' : 'md:ml-64 lg:ml-72'
+        }`}
+      >
+        <div
+          className={`w-full py-8 md:py-10 px-4 md:px-8 mt-12 md:mt-0 ${
+            isCollapsed ? 'max-w-full' : 'container max-w-6xl'
+          }`}
+        >
+          <div className='flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8'>
+            <div className='relative h-32 w-32 md:h-40 md:w-40'>
+              <Image
+                src='/images/LeetoniaWholesaleLogo.jpg'
+                alt='Leetonia Wholesale'
+                fill
+                className='object-contain'
+                priority
+              />
+            </div>
+            <div className='space-y-2'>
+              <h1 className='text-3xl md:text-4xl font-serif font-bold text-foreground'>
+                Leetonia Wholesale
+              </h1>
+              <p className='text-muted-foreground text-lg'>
+                Accra's premier wholesale pharmacy ordering system.
+              </p>
+            </div>
+            <div className='pt-4'>
+              <a href='/inventory'>
+                <button className='px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors'>
+                  Browse Inventory
+                </button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
-      <div className="bg-card p-8 md:p-12 rounded-xl shadow-sm border border-border max-w-md w-full space-y-8">
-        <div className="flex justify-center">
-          <div className="bg-primary/10 p-4 rounded-full">
-            <Package className="h-10 w-10 text-primary" />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <h1 className="text-3xl font-serif text-foreground">Leetonia Wholesale</h1>
-          <p className="text-muted-foreground">Accra's premier wholesale pharmacy ordering system.</p>
-        </div>
-        <div className="space-y-4">
-          <Link href="/login" className="block">
-            <Button className="w-full h-12 text-base" size="lg">
-              Sign In to Order
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-          <p className="text-sm text-muted-foreground">New client? Contact administration to register.</p>
-        </div>
-      </div>
-    </div>
-  )
+    <SidebarProvider>
+      <HomeContent />
+    </SidebarProvider>
+  );
 }

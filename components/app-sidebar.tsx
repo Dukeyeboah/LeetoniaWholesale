@@ -7,20 +7,33 @@ import {
   ShoppingCart,
   ClipboardList,
   LayoutDashboard,
+  ChevronLeft,
+  ChevronRight,
+  MoreVertical,
+  MoreHorizontal,
   LogOut,
-  Menu,
-  ToggleLeft,
-  ToggleRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/lib/auth-context';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import Image from 'next/image';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { Menu } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useSidebar } from './sidebar-context';
 
 export function AppSidebar() {
   const pathname = usePathname();
   const { user, logout, isAdmin, viewMode, setViewMode } = useAuth();
+  const { isCollapsed, setIsCollapsed } = useSidebar();
 
   // Show client routes when in client view or not admin
   const showClientRoutes = !isAdmin || viewMode === 'client';
@@ -54,13 +67,27 @@ export function AppSidebar() {
     },
   ];
 
-  const NavContent = () => (
+  const NavContent = ({ collapsed = false }: { collapsed?: boolean }) => (
     <div className='flex h-full flex-col gap-4'>
-      <div className='flex h-16 items-center border-b px-6'>
-        <Package className='mr-2 h-6 w-6 text-primary' />
-        <span className='text-lg font-serif font-bold text-primary'>
-          Leetonia Wholesale
-        </span>
+      <div
+        className={`flex items-center border-b gap-3 ${
+          collapsed ? 'px-3 py-4 justify-center' : 'px-6 py-4'
+        }`}
+      >
+        <div className='relative h-10 w-10 flex-shrink-0'>
+          <Image
+            src='/images/LeetoniaWholesaleLogo.jpg'
+            alt='Leetonia Wholesale'
+            fill
+            className='object-contain'
+            priority
+          />
+        </div>
+        {!collapsed && (
+          <span className='text-lg font-serif font-bold text-primary truncate'>
+            Leetonia Wholesale
+          </span>
+        )}
       </div>
       <div className='flex-1 px-4 py-4'>
         <nav className='grid gap-2'>
@@ -72,80 +99,155 @@ export function AppSidebar() {
                 <Link
                   key={route.path}
                   href={route.path}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  ${
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    collapsed ? 'justify-center' : ''
+                  } ${
                     isActive
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                   }`}
+                  title={collapsed ? route.name : undefined}
                 >
-                  <route.icon className='h-4 w-4' />
-                  {route.name}
+                  <route.icon className='h-4 w-4 flex-shrink-0' />
+                  {!collapsed && <span>{route.name}</span>}
                 </Link>
               );
             })}
         </nav>
       </div>
-      <div className='border-t p-4'>
-        <div className='mb-4 flex items-center gap-3 px-2'>
-          <div className='h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-primary font-bold'>
-            {user?.email?.charAt(0).toUpperCase() || 'U'}
+      {user && (
+        <div className='border-t p-4'>
+          <div
+            className={`mb-4 flex items-center gap-3 ${
+              collapsed ? 'justify-center' : 'px-2'
+            }`}
+          >
+            {collapsed ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='h-10 w-10 rounded-full relative'
+                  >
+                    <Avatar className='h-10 w-10'>
+                      <AvatarImage
+                        src={user.photoURL}
+                        alt={user.name || user.email}
+                      />
+                      <AvatarFallback className='bg-secondary text-primary font-bold'>
+                        {user.name?.charAt(0).toUpperCase() ||
+                          user.email?.charAt(0).toUpperCase() ||
+                          'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <MoreHorizontal className='absolute -bottom-1 -right-1 h-3 w-3 bg-background rounded-full p-0.5' />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align='end'>
+                  <DropdownMenuItem
+                    onClick={() => logout()}
+                    variant='destructive'
+                  >
+                    <LogOut className='mr-2 h-4 w-4' />
+                    Log Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Avatar className='h-8 w-8'>
+                  <AvatarImage
+                    src={user.photoURL}
+                    alt={user.name || user.email}
+                  />
+                  <AvatarFallback className='bg-secondary text-primary font-bold'>
+                    {user.name?.charAt(0).toUpperCase() ||
+                      user.email?.charAt(0).toUpperCase() ||
+                      'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className='overflow-hidden flex-1'>
+                  <p className='truncate text-sm font-medium'>
+                    {user.name || 'User'}
+                  </p>
+                  <p className='truncate text-xs text-muted-foreground'>
+                    {user.email}
+                  </p>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant='ghost' size='icon' className='h-8 w-8'>
+                      <MoreVertical className='h-4 w-4' />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align='end'>
+                    <DropdownMenuItem
+                      onClick={() => logout()}
+                      variant='destructive'
+                    >
+                      <LogOut className='mr-2 h-4 w-4' />
+                      Log Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
           </div>
-          <div className='overflow-hidden'>
-            <p className='truncate text-sm font-medium'>
-              {user?.name || 'User'}
-            </p>
-            <p className='truncate text-xs text-muted-foreground'>
-              {user?.email}
-            </p>
-          </div>
-        </div>
 
-        {isAdmin && (
-          <div className='mb-4 p-3 rounded-lg bg-secondary/50 border border-border/50'>
-            <div className='flex items-center justify-between mb-2'>
-              <Label
-                htmlFor='view-mode'
-                className='text-xs font-medium flex items-center gap-2'
-              >
-                {viewMode === 'admin' ? (
-                  <LayoutDashboard className='h-3 w-3' />
-                ) : (
-                  <ShoppingCart className='h-3 w-3' />
-                )}
-                {viewMode === 'admin' ? 'Admin View' : 'Client View'}
-              </Label>
-              <Switch
-                id='view-mode'
-                checked={viewMode === 'admin'}
-                onCheckedChange={(checked) =>
-                  setViewMode(checked ? 'admin' : 'client')
-                }
-              />
+          {isAdmin && !collapsed && (
+            <div className='mb-4 p-3 rounded-lg bg-secondary/50 border border-border/50'>
+              <div className='flex items-center justify-between mb-2'>
+                <Label
+                  htmlFor='view-mode'
+                  className='text-xs font-medium flex items-center gap-2'
+                >
+                  {viewMode === 'admin' ? (
+                    <LayoutDashboard className='h-3 w-3' />
+                  ) : (
+                    <ShoppingCart className='h-3 w-3' />
+                  )}
+                  {viewMode === 'admin' ? 'Admin View' : 'Client View'}
+                </Label>
+                <Switch
+                  id='view-mode'
+                  checked={viewMode === 'admin'}
+                  onCheckedChange={(checked) =>
+                    setViewMode(checked ? 'admin' : 'client')
+                  }
+                />
+              </div>
+              <p className='text-[10px] text-muted-foreground'>
+                Switch between admin and client interfaces
+              </p>
             </div>
-            <p className='text-[10px] text-muted-foreground'>
-              Switch between admin and client interfaces
-            </p>
-          </div>
-        )}
-
-        <Button
-          variant='outline'
-          className='w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 bg-transparent'
-          onClick={() => logout()}
-        >
-          <LogOut className='mr-2 h-4 w-4' />
-          Log Out
-        </Button>
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className='hidden border-r bg-sidebar md:block md:w-64 lg:w-72 fixed inset-y-0 z-30'>
-        <NavContent />
+      <div
+        className={`hidden border-r bg-sidebar md:block fixed inset-y-0 z-30 transition-all duration-300 ${
+          isCollapsed ? 'w-20' : 'w-64 lg:w-72'
+        }`}
+      >
+        <NavContent collapsed={isCollapsed} />
+        <Button
+          variant='ghost'
+          size='icon'
+          className='absolute -right-3 top-20 h-6 w-6 rounded-full border bg-background shadow-sm hover:bg-secondary z-10'
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          {isCollapsed ? (
+            <ChevronRight className='h-3 w-3' />
+          ) : (
+            <ChevronLeft className='h-3 w-3' />
+          )}
+        </Button>
       </div>
 
       {/* Mobile Sheet */}

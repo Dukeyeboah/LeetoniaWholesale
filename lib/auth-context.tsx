@@ -53,9 +53,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (userDoc.exists()) {
             const userData = userDoc.data() as User;
-            setUser(userData);
+            // Update photoURL from Firebase Auth if available
+            const updatedUser = {
+              ...userData,
+              photoURL: firebaseUser.photoURL || userData.photoURL,
+            };
+            setUser(updatedUser);
             // Set view mode based on role
-            if (userData.role === 'admin') {
+            if (updatedUser.role === 'admin') {
               setViewMode('admin');
             }
           } else {
@@ -70,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               role: shouldBeAdmin ? 'admin' : 'client',
               name: firebaseUser.displayName || '',
               phone: firebaseUser.phoneNumber || '',
+              photoURL: firebaseUser.photoURL || undefined,
               createdAt: Date.now(),
             };
 
@@ -105,11 +111,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = async () => {
-    if (auth) {
-      await signOut(auth);
+    try {
+      if (auth) {
+        await signOut(auth);
+      }
+      setUser(null);
+      setViewMode('client');
+      router.push('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Still clear local state even if Firebase signOut fails
+      setUser(null);
+      setViewMode('client');
+      router.push('/');
     }
-    setUser(null);
-    router.push('/login');
   };
 
   return (

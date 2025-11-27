@@ -2,6 +2,20 @@
  * Seed script to populate Firestore with inventory data from JSON file
  * Run with: pnpm seed
  *
+ * IMPORTANT: Before running this script, you need to temporarily allow writes
+ * to the inventory collection in Firestore rules:
+ *
+ * 1. Go to Firebase Console > Firestore Database > Rules
+ * 2. Temporarily change the inventory rules to:
+ *    match /inventory/{productId} {
+ *      allow read: if true;
+ *      allow write: if true;  // Temporary - allows seeding
+ *    }
+ * 3. Publish the rules
+ * 4. Run: pnpm seed
+ * 5. Revert the rules back to the secure version (only admins can write)
+ * 6. Publish the secure rules again
+ *
  * Make sure your .env.local file is configured with Firebase credentials
  */
 
@@ -158,20 +172,29 @@ async function seedInventory() {
       const subCategory = item.Sub_Category?.toString().trim() || undefined;
       const imageUrl = item.Image_Url?.toString().trim() || undefined;
 
-      const product = {
+      // Build product object, only including fields that have values
+      const product: any = {
         id: productId,
         name: name,
         category: category,
-        subCategory: subCategory || undefined,
         price: price,
         stock: stock,
         unit: unit,
         description: name, // Use name as description for now
         code: code,
-        imageUrl: imageUrl || undefined,
-        expiryDate: expiryDate,
         updatedAt: Date.now(),
       };
+
+      // Only add optional fields if they have values
+      if (subCategory && subCategory.trim() !== '') {
+        product.subCategory = subCategory.trim();
+      }
+      if (imageUrl && imageUrl.trim() !== '') {
+        product.imageUrl = imageUrl.trim();
+      }
+      if (expiryDate) {
+        product.expiryDate = expiryDate;
+      }
 
       await setDoc(doc(db, 'inventory', productId), product);
       successCount++;
