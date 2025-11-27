@@ -19,78 +19,15 @@ import type { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { PRODUCT_CATEGORIES } from '@/lib/categories';
 
-// Helper to create mock data if empty (for demo)
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: '1',
-    name: 'Paracetamol 500mg',
-    category: 'ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)',
-    price: 15.0,
-    stock: 500,
-    unit: 'Box (10x10)',
-    updatedAt: Date.now(),
-    description: 'Effective pain relief and fever reducer.',
-  },
-  {
-    id: '2',
-    name: 'Amoxicillin 500mg',
-    category: 'ANTIBIOTICS',
-    price: 45.0,
-    stock: 120,
-    unit: 'Box (10x10)',
-    updatedAt: Date.now(),
-    description: 'Broad-spectrum antibiotic for bacterial infections.',
-  },
-  {
-    id: '3',
-    name: 'Ibuprofen 400mg',
-    category: 'ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)',
-    price: 22.5,
-    stock: 0,
-    unit: 'Box (10x10)',
-    updatedAt: Date.now(),
-    description: 'Anti-inflammatory drug for pain and swelling.',
-  },
-  {
-    id: '4',
-    name: 'Cetirizine 10mg',
-    category: 'Allergy',
-    price: 18.0,
-    stock: 200,
-    unit: 'Box (30)',
-    updatedAt: Date.now(),
-    description: 'Relief from allergy symptoms like runny nose and sneezing.',
-  },
-  {
-    id: '5',
-    name: 'Vitamin C 1000mg',
-    category: 'Supplements',
-    price: 60.0,
-    stock: 50,
-    unit: 'Bottle (100)',
-    updatedAt: Date.now(),
-    description: 'Immune system support supplement.',
-  },
-  {
-    id: '6',
-    name: 'Omeprazole 20mg',
-    category: 'Gastrointestinal',
-    price: 35.0,
-    stock: 8,
-    unit: 'Box (28)',
-    updatedAt: Date.now(),
-    description: 'Reduces stomach acid for heartburn relief.',
-  },
-];
-
 export default function InventoryPage() {
   const { products, loading, offline } = useInventory();
   const { addToCart } = useCart(); // Use hook
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
-  // Use mock data if real data is empty (for demo purposes)
-  const displayProducts = products.length > 0 ? products : MOCK_PRODUCTS;
+  // Always use products from Firebase/IndexedDB - don't fall back to mock data
+  // Mock data is only for development/testing when no data is seeded
+  const displayProducts = products;
 
   // Get unique categories from products, merge with predefined categories
   const productCategories = Array.from(
@@ -123,7 +60,7 @@ export default function InventoryPage() {
             Browse available stock for order.
           </p>
         </div>
-        {offline && (
+        {offline && products.length === 0 && (
           <Badge
             variant='outline'
             className='bg-yellow-50/50 text-yellow-700 border-yellow-200 w-fit flex gap-1.5 items-center px-3 py-1'
@@ -146,10 +83,13 @@ export default function InventoryPage() {
           />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className='w-full md:w-[280px] bg-background border-border/60 max-w-full'>
-            <div className='flex items-center gap-2 text-muted-foreground min-w-0 flex-1'>
+          <SelectTrigger className='w-full md:w-[280px] bg-background border-border/60 overflow-hidden'>
+            <div className='flex items-center gap-2 text-muted-foreground min-w-0 flex-1 overflow-hidden'>
               <Filter className='h-4 w-4 flex-shrink-0' />
-              <SelectValue placeholder='Category' className='truncate' />
+              <SelectValue
+                placeholder='Category'
+                className='truncate min-w-0 flex-1'
+              />
             </div>
           </SelectTrigger>
           <SelectContent className='max-w-[280px]'>
@@ -157,7 +97,7 @@ export default function InventoryPage() {
               <SelectItem
                 key={cat}
                 value={cat}
-                className='truncate pr-8 max-w-[280px]'
+                className='truncate pr-8'
                 title={cat}
               >
                 {cat === 'all' ? 'All Categories' : cat}

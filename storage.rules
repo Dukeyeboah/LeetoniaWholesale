@@ -15,8 +15,8 @@ service firebase.storage {
 
     // Product images
     match /products/{productId}/{allPaths=**} {
-      // Anyone authenticated can read product images
-      allow read: if isAuthenticated();
+      // Anyone can read product images (authenticated or not) - for browsing
+      allow read: if true;
       
       // Only admins can upload/update/delete product images
       allow write: if isAdmin();

@@ -174,8 +174,19 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         <Button
           className='w-full'
           variant={isOutOfStock ? 'outline' : 'default'}
-          disabled={isOutOfStock}
-          onClick={handleAddToCart}
+          disabled={isOutOfStock && user !== null}
+          onClick={() => {
+            if (!user) {
+              setShowLoginDialog(true);
+              return;
+            }
+            if (isOutOfStock) {
+              // Handle notify me functionality for authenticated users
+              // For now, just show a message
+              return;
+            }
+            handleAddToCart();
+          }}
         >
           {isOutOfStock ? (
             <>
