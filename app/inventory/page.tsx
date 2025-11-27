@@ -17,13 +17,14 @@ import {
 } from '@/components/ui/select';
 import type { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
+import { PRODUCT_CATEGORIES } from '@/lib/categories';
 
 // Helper to create mock data if empty (for demo)
 const MOCK_PRODUCTS: Product[] = [
   {
     id: '1',
     name: 'Paracetamol 500mg',
-    category: 'Pain Relief',
+    category: 'ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)',
     price: 15.0,
     stock: 500,
     unit: 'Box (10x10)',
@@ -33,19 +34,21 @@ const MOCK_PRODUCTS: Product[] = [
   {
     id: '2',
     name: 'Amoxicillin 500mg',
-    category: 'Antibiotics',
+    category: 'ANTIBIOTICS',
     price: 45.0,
     stock: 120,
     unit: 'Box (10x10)',
+    updatedAt: Date.now(),
     description: 'Broad-spectrum antibiotic for bacterial infections.',
   },
   {
     id: '3',
     name: 'Ibuprofen 400mg',
-    category: 'Pain Relief',
+    category: 'ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)',
     price: 22.5,
     stock: 0,
     unit: 'Box (10x10)',
+    updatedAt: Date.now(),
     description: 'Anti-inflammatory drug for pain and swelling.',
   },
   {
@@ -89,10 +92,12 @@ export default function InventoryPage() {
   // Use mock data if real data is empty (for demo purposes)
   const displayProducts = products.length > 0 ? products : MOCK_PRODUCTS;
 
-  const categories = [
-    'all',
-    ...Array.from(new Set(displayProducts.map((p) => p.category))),
-  ];
+  // Get unique categories from products, merge with predefined categories
+  const productCategories = Array.from(
+    new Set(displayProducts.map((p) => p.category).filter(Boolean))
+  );
+  const allCategories = new Set([...PRODUCT_CATEGORIES, ...productCategories]);
+  const categories = ['all', ...Array.from(allCategories).sort()];
 
   const filteredProducts = displayProducts.filter((product) => {
     const matchesSearch =

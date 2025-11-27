@@ -11,6 +11,7 @@ export interface Product {
   id: string;
   name: string;
   category: string;
+  subCategory?: string; // Optional subcategory for future filtering
   price: number;
   stock: number;
   unit: string;

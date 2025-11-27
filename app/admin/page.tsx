@@ -56,6 +56,7 @@ import {
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import type { User } from '@/types';
+import { PRODUCT_CATEGORIES } from '@/lib/categories';
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -75,6 +76,7 @@ export default function AdminDashboard() {
   const [productForm, setProductForm] = useState<Partial<Product>>({
     name: '',
     category: '',
+    subCategory: undefined,
     price: 0,
     stock: 0,
     unit: '',
@@ -170,6 +172,7 @@ export default function AdminDashboard() {
       setProductForm({
         name: '',
         category: '',
+        subCategory: undefined,
         price: 0,
         stock: 0,
         unit: '',
@@ -206,6 +209,7 @@ export default function AdminDashboard() {
       setProductForm({
         name: '',
         category: '',
+        subCategory: undefined,
         price: 0,
         stock: 0,
         unit: '',
@@ -834,11 +838,37 @@ export default function AdminDashboard() {
               <Label htmlFor='category' className='text-right'>
                 Category
               </Label>
-              <Input
-                id='category'
+              <Select
                 value={productForm.category}
+                onValueChange={(value) =>
+                  setProductForm({ ...productForm, category: value })
+                }
+              >
+                <SelectTrigger className='col-span-3'>
+                  <SelectValue placeholder='Select category' />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='subCategory' className='text-right'>
+                Sub Category
+              </Label>
+              <Input
+                id='subCategory'
+                placeholder='Optional subcategory'
+                value={productForm.subCategory || ''}
                 onChange={(e) =>
-                  setProductForm({ ...productForm, category: e.target.value })
+                  setProductForm({
+                    ...productForm,
+                    subCategory: e.target.value || undefined,
+                  })
                 }
                 className='col-span-3'
               />

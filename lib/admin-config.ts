@@ -14,8 +14,12 @@ export interface AdminConfig {
 // Admin email whitelist with passkeys
 // In production, consider storing this in Firestore or environment variables
 export const ADMIN_WHITELIST: AdminConfig[] = [
-    { email: "dkyeboah1@gmail.com", passkey: "M@trix", name: "Duke Yeboah" },
-    { email: "judithbanquist@gmail.com", passkey: "3mpre$$", name: "Nana Afrakuma" },
+  { email: 'dkyeboah1@gmail.com', passkey: 'M@trix', name: 'Duke Yeboah' },
+  {
+    email: 'judithbanquist@gmail.com',
+    passkey: '3mpre$$',
+    name: 'Nana Afrakuma',
+  },
 
   // Add your admin emails and passkeys here
   // Example:
