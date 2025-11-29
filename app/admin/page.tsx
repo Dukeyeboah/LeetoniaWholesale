@@ -13,7 +13,7 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Order, Product } from '@/types';
+import type { Order, Product, CartItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -55,8 +55,11 @@ import {
   Users,
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
 import type { User } from '@/types';
 import { PRODUCT_CATEGORIES } from '@/lib/categories';
+import { createOrderStatusNotification } from '@/lib/notifications';
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -69,6 +72,7 @@ export default function AdminDashboard() {
   const [userFilter, setUserFilter] = useState<string>('all');
   const [productFilter, setProductFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<string>('orders');
 
   // Product Form State
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
@@ -85,6 +89,14 @@ export default function AdminDashboard() {
     expiryDate: undefined,
     code: '',
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Order editing state
+  const [isOrderEditDialogOpen, setIsOrderEditDialogOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [editedOrderItems, setEditedOrderItems] = useState<CartItem[]>([]);
 
   useEffect(() => {
     if (!db) {
@@ -130,6 +142,50 @@ export default function AdminDashboard() {
     };
   }, []);
 
+  const openOrderEditDialog = (order: Order) => {
+    setEditingOrder(order);
+    setEditedOrderItems([...order.items]);
+    setIsOrderEditDialogOpen(true);
+  };
+
+  const handleSaveOrderEdit = async () => {
+    if (!db || !editingOrder) return;
+
+    try {
+      // Recalculate total
+      const newTotal = editedOrderItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+
+      await updateDoc(doc(db, 'orders', editingOrder.id), {
+        items: editedOrderItems,
+        total: newTotal,
+        updatedAt: Date.now(),
+      });
+
+      toast.success('Order updated successfully');
+      setIsOrderEditDialogOpen(false);
+      setEditingOrder(null);
+    } catch (error) {
+      console.error('Error updating order:', error);
+      toast.error('Failed to update order');
+    }
+  };
+
+  const removeItemFromOrder = (itemId: string) => {
+    setEditedOrderItems((prev) => prev.filter((item) => item.id !== itemId));
+  };
+
+  const updateItemQuantity = (itemId: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+    setEditedOrderItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      )
+    );
+  };
+
   const updateOrderStatus = async (
     orderId: string,
     newStatus: Order['status']
@@ -139,13 +195,47 @@ export default function AdminDashboard() {
       return;
     }
     try {
+      const order = orders.find((o) => o.id === orderId);
+      if (!order) {
+        toast.error('Order not found');
+        return;
+      }
+
       await updateDoc(doc(db, 'orders', orderId), {
         status: newStatus,
         updatedAt: Date.now(),
       });
+
+      // Create notification for the user
+      if (order.userId) {
+        await createOrderStatusNotification(
+          order.userId,
+          orderId,
+          newStatus,
+          order.items.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+          }))
+        );
+      }
+
       toast.success(`Order status updated to ${newStatus}`);
     } catch (error) {
+      console.error('Error updating order status:', error);
       toast.error('Failed to update status');
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -154,11 +244,43 @@ export default function AdminDashboard() {
       toast.error('Database not available');
       return;
     }
+
     try {
+      let imageUrl = productForm.imageUrl || '';
+
+      // Upload image if a new file is selected
+      if (imageFile && storage) {
+        setUploadingImage(true);
+        try {
+          const imageRef = ref(
+            storage,
+            `products/${editingProduct?.id || Date.now()}_${imageFile.name}`
+          );
+          await uploadBytes(imageRef, imageFile);
+          imageUrl = await getDownloadURL(imageRef);
+          toast.success('Image uploaded successfully');
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          toast.error('Failed to upload image');
+          setUploadingImage(false);
+          return;
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+
       const productData = {
         ...productForm,
+        imageUrl: imageUrl || productForm.imageUrl,
         updatedAt: Date.now(),
       };
+
+      // Remove undefined fields
+      Object.keys(productData).forEach((key) => {
+        if (productData[key as keyof typeof productData] === undefined) {
+          delete productData[key as keyof typeof productData];
+        }
+      });
 
       if (editingProduct) {
         await updateDoc(doc(db, 'inventory', editingProduct.id), productData);
@@ -169,6 +291,8 @@ export default function AdminDashboard() {
       }
       setIsProductDialogOpen(false);
       setEditingProduct(null);
+      setImageFile(null);
+      setImagePreview(null);
       setProductForm({
         name: '',
         category: '',
@@ -182,6 +306,7 @@ export default function AdminDashboard() {
         code: '',
       });
     } catch (error) {
+      console.error('Error saving product:', error);
       toast.error('Failed to save product');
     }
   };
@@ -204,6 +329,8 @@ export default function AdminDashboard() {
     if (product) {
       setEditingProduct(product);
       setProductForm(product);
+      setImagePreview(product.imageUrl || null);
+      setImageFile(null);
     } else {
       setEditingProduct(null);
       setProductForm({
@@ -218,6 +345,8 @@ export default function AdminDashboard() {
         expiryDate: undefined,
         code: '',
       });
+      setImagePreview(null);
+      setImageFile(null);
     }
     setIsProductDialogOpen(true);
   };
@@ -250,7 +379,10 @@ export default function AdminDashboard() {
   const productSales = products.map((product) => {
     const soldQuantity = orders
       .filter(
-        (o) => o.status === 'completed' || o.status === 'customer_confirmed'
+        (o) =>
+          o.status === 'completed' ||
+          o.status === 'processing' ||
+          o.status === 'customer_confirmed'
       )
       .reduce((sum, order) => {
         const item = order.items.find((i) => i.id === product.id);
@@ -258,7 +390,10 @@ export default function AdminDashboard() {
       }, 0);
     const revenue = orders
       .filter(
-        (o) => o.status === 'completed' || o.status === 'customer_confirmed'
+        (o) =>
+          o.status === 'completed' ||
+          o.status === 'processing' ||
+          o.status === 'customer_confirmed'
       )
       .reduce((sum, order) => {
         const item = order.items.find((i) => i.id === product.id);
@@ -278,7 +413,10 @@ export default function AdminDashboard() {
 
   const totalRevenue = orders
     .filter(
-      (o) => o.status === 'completed' || o.status === 'customer_confirmed'
+      (o) =>
+        o.status === 'completed' ||
+        o.status === 'processing' ||
+        o.status === 'customer_confirmed'
     )
     .reduce((sum, order) => sum + order.total + (order.deliveryFee || 0), 0);
 
@@ -305,15 +443,99 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+        <Card
+          className='cursor-pointer hover:shadow-md transition-shadow'
+          onClick={() => {
+            setStatusFilter('pending');
+            setActiveTab('orders');
+          }}
+        >
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-sm font-medium text-muted-foreground'>
+              Pending
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold text-yellow-600'>
+              {orders.filter((o) => o.status === 'pending').length}
+            </div>
+          </CardContent>
+        </Card>
+        <Card
+          className='cursor-pointer hover:shadow-md transition-shadow'
+          onClick={() => {
+            setStatusFilter('pharmacy_confirmed');
+            setActiveTab('orders');
+          }}
+        >
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-sm font-medium text-muted-foreground'>
+              Awaiting Customer
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold text-blue-600'>
+              {orders.filter((o) => o.status === 'pharmacy_confirmed').length}
+            </div>
+          </CardContent>
+        </Card>
+        <Card
+          className='cursor-pointer hover:shadow-md transition-shadow'
+          onClick={() => {
+            setStatusFilter('customer_confirmed');
+            setActiveTab('orders');
+          }}
+        >
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-sm font-medium text-muted-foreground'>
+              Customer Confirmed
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold text-green-600'>
+              {orders.filter((o) => o.status === 'customer_confirmed').length}
+            </div>
+          </CardContent>
+        </Card>
+        <Card
+          className='cursor-pointer hover:shadow-md transition-shadow'
+          onClick={() => {
+            setStatusFilter('processing');
+            setActiveTab('orders');
+          }}
+        >
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-sm font-medium text-muted-foreground'>
+              Processing
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold text-purple-600'>
+              {orders.filter((o) => o.status === 'processing').length}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className='grid gap-4 md:grid-cols-3'>
         <Card>
           <CardHeader className='pb-2'>
             <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Pending Orders
+              Completed Today
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{pendingOrders.length}</div>
+            <div className='text-2xl font-bold text-green-600'>
+              {
+                orders.filter(
+                  (o) =>
+                    o.status === 'completed' &&
+                    new Date(o.updatedAt).toDateString() ===
+                      new Date().toDateString()
+                ).length
+              }
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -340,7 +562,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Tabs defaultValue='orders' className='w-full'>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
         <TabsList className='w-full justify-start h-12 bg-muted/50 p-1'>
           <TabsTrigger value='orders' className='h-full px-6'>
             Manage Orders
@@ -357,13 +579,87 @@ export default function AdminDashboard() {
         </TabsList>
 
         <TabsContent value='orders' className='mt-6 space-y-6'>
+          {/* Status Filter Tabs */}
+          <div className='flex flex-wrap gap-2 border-b pb-4'>
+            <Button
+              variant={statusFilter === 'all' ? 'default' : 'outline'}
+              size='sm'
+              onClick={() => setStatusFilter('all')}
+            >
+              All Orders ({orders.length})
+            </Button>
+            <Button
+              variant={statusFilter === 'pending' ? 'default' : 'outline'}
+              size='sm'
+              onClick={() => setStatusFilter('pending')}
+            >
+              Pending ({orders.filter((o) => o.status === 'pending').length})
+            </Button>
+            <Button
+              variant={
+                statusFilter === 'checking_stock' ? 'default' : 'outline'
+              }
+              size='sm'
+              onClick={() => setStatusFilter('checking_stock')}
+            >
+              Checking Stock (
+              {orders.filter((o) => o.status === 'checking_stock').length})
+            </Button>
+            <Button
+              variant={
+                statusFilter === 'pharmacy_confirmed' ? 'default' : 'outline'
+              }
+              size='sm'
+              onClick={() => setStatusFilter('pharmacy_confirmed')}
+            >
+              Awaiting Customer (
+              {orders.filter((o) => o.status === 'pharmacy_confirmed').length})
+            </Button>
+            <Button
+              variant={
+                statusFilter === 'customer_confirmed' ? 'default' : 'outline'
+              }
+              size='sm'
+              onClick={() => setStatusFilter('customer_confirmed')}
+            >
+              Customer Confirmed (
+              {orders.filter((o) => o.status === 'customer_confirmed').length})
+            </Button>
+            <Button
+              variant={statusFilter === 'processing' ? 'default' : 'outline'}
+              size='sm'
+              onClick={() => setStatusFilter('processing')}
+            >
+              Processing (
+              {orders.filter((o) => o.status === 'processing').length})
+            </Button>
+            <Button
+              variant={statusFilter === 'completed' ? 'default' : 'outline'}
+              size='sm'
+              onClick={() => setStatusFilter('completed')}
+            >
+              Completed ({orders.filter((o) => o.status === 'completed').length}
+              )
+            </Button>
+            <Button
+              variant={statusFilter === 'cancelled' ? 'default' : 'outline'}
+              size='sm'
+              onClick={() => setStatusFilter('cancelled')}
+            >
+              Cancelled ({orders.filter((o) => o.status === 'cancelled').length}
+              )
+            </Button>
+          </div>
+
           <div className='space-y-4'>
-            {pendingOrders.length === 0 ? (
+            {filteredOrders.length === 0 ? (
               <div className='text-center py-12 text-muted-foreground'>
-                No pending orders.
+                {statusFilter === 'all'
+                  ? 'No orders found.'
+                  : `No orders with status: ${statusFilter.replace('_', ' ')}.`}
               </div>
             ) : (
-              pendingOrders.map((order) => (
+              filteredOrders.map((order) => (
                 <Card key={order.id} className='overflow-hidden'>
                   <CardHeader className='bg-secondary/30 py-4 flex flex-row items-center justify-between'>
                     <div>
@@ -378,6 +674,8 @@ export default function AdminDashboard() {
                     <Badge
                       variant={
                         order.status === 'completed'
+                          ? 'default'
+                          : order.status === 'processing'
                           ? 'default'
                           : order.status === 'customer_confirmed'
                           ? 'default'
@@ -426,6 +724,14 @@ export default function AdminDashboard() {
                                 Delivery Fee: ₵{order.deliveryFee.toFixed(2)}
                               </p>
                             )}
+                            {order.paymentMethod && (
+                              <p>
+                                Payment:{' '}
+                                {order.paymentMethod === 'momo'
+                                  ? 'Mobile Money (Momo)'
+                                  : 'Cash'}
+                              </p>
+                            )}
                           </div>
                         )}
                         <div className='pt-2 flex justify-between font-bold'>
@@ -440,6 +746,17 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className='md:w-64 space-y-3 bg-muted/10 p-4 rounded-lg border'>
+                        {order.status === 'pending' ||
+                        order.status === 'checking_stock' ? (
+                          <Button
+                            variant='outline'
+                            className='w-full'
+                            onClick={() => openOrderEditDialog(order)}
+                          >
+                            <Edit className='mr-2 h-4 w-4' />
+                            Edit Order
+                          </Button>
+                        ) : null}
                         <div className='text-sm font-medium'>Update Status</div>
                         <Select
                           value={order.status}
@@ -460,6 +777,9 @@ export default function AdminDashboard() {
                             </SelectItem>
                             <SelectItem value='customer_confirmed'>
                               Customer Confirmed
+                            </SelectItem>
+                            <SelectItem value='processing'>
+                              Processing/Fulfilling
                             </SelectItem>
                             <SelectItem value='completed'>Completed</SelectItem>
                             <SelectItem value='cancelled'>Cancelled</SelectItem>
@@ -507,6 +827,9 @@ export default function AdminDashboard() {
                 </SelectItem>
                 <SelectItem value='customer_confirmed'>
                   Customer Confirmed
+                </SelectItem>
+                <SelectItem value='processing'>
+                  Processing/Fulfilling
                 </SelectItem>
                 <SelectItem value='completed'>Completed</SelectItem>
                 <SelectItem value='cancelled'>Cancelled</SelectItem>
@@ -570,6 +893,8 @@ export default function AdminDashboard() {
                         variant={
                           order.status === 'completed'
                             ? 'default'
+                            : order.status === 'processing'
+                            ? 'default'
                             : order.status === 'customer_confirmed'
                             ? 'default'
                             : order.status === 'pharmacy_confirmed'
@@ -606,6 +931,14 @@ export default function AdminDashboard() {
                           </p>
                           {order.deliveryFee && order.deliveryFee > 0 && (
                             <p>Delivery Fee: ₵{order.deliveryFee.toFixed(2)}</p>
+                          )}
+                          {order.paymentMethod && (
+                            <p>
+                              Payment:{' '}
+                              {order.paymentMethod === 'momo'
+                                ? 'Mobile Money (Momo)'
+                                : 'Cash'}
+                            </p>
                           )}
                         </div>
                       )}
@@ -952,19 +1285,32 @@ export default function AdminDashboard() {
               />
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
-              <Label htmlFor='imageUrl' className='text-right'>
-                Image URL
+              <Label htmlFor='image' className='text-right'>
+                Product Image
               </Label>
-              <Input
-                id='imageUrl'
-                type='url'
-                placeholder='https://example.com/image.jpg'
-                value={productForm.imageUrl || ''}
-                onChange={(e) =>
-                  setProductForm({ ...productForm, imageUrl: e.target.value })
-                }
-                className='col-span-3'
-              />
+              <div className='col-span-3 space-y-2'>
+                <Input
+                  id='image'
+                  type='file'
+                  accept='image/*'
+                  onChange={handleImageChange}
+                  className='cursor-pointer'
+                />
+                {(imagePreview || productForm.imageUrl) && (
+                  <div className='relative w-32 h-32 border rounded-md overflow-hidden'>
+                    <img
+                      src={imagePreview || productForm.imageUrl || ''}
+                      alt='Preview'
+                      className='w-full h-full object-cover'
+                    />
+                  </div>
+                )}
+                {productForm.imageUrl && !imageFile && (
+                  <p className='text-xs text-muted-foreground'>
+                    Current image URL: {productForm.imageUrl}
+                  </p>
+                )}
+              </div>
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
               <Label htmlFor='expiryDate' className='text-right'>
@@ -993,7 +1339,124 @@ export default function AdminDashboard() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleSaveProduct}>Save Product</Button>
+            <Button onClick={handleSaveProduct} disabled={uploadingImage}>
+              {uploadingImage ? 'Uploading...' : 'Save Product'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Edit Dialog */}
+      <Dialog
+        open={isOrderEditDialogOpen}
+        onOpenChange={setIsOrderEditDialogOpen}
+      >
+        <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
+          <DialogHeader>
+            <DialogTitle>
+              Edit Order #{editingOrder?.id.slice(0, 8)}
+            </DialogTitle>
+            <DialogDescription>
+              Modify items, quantities, or remove items from this order.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-4 py-4'>
+            {editedOrderItems.length === 0 ? (
+              <p className='text-center text-muted-foreground py-8'>
+                No items in order
+              </p>
+            ) : (
+              editedOrderItems.map((item) => (
+                <div
+                  key={item.id}
+                  className='flex items-center justify-between p-4 border rounded-lg'
+                >
+                  <div className='flex-1'>
+                    <p className='font-medium'>{item.name}</p>
+                    <p className='text-sm text-muted-foreground'>
+                      ₵{item.price.toFixed(2)} per {item.unit}
+                    </p>
+                  </div>
+                  <div className='flex items-center gap-3'>
+                    <div className='flex items-center gap-2'>
+                      <Button
+                        variant='outline'
+                        size='icon'
+                        className='h-8 w-8'
+                        onClick={() =>
+                          updateItemQuantity(item.id, item.quantity - 1)
+                        }
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </Button>
+                      <Input
+                        type='number'
+                        min={1}
+                        value={item.quantity}
+                        onChange={(e) =>
+                          updateItemQuantity(
+                            item.id,
+                            parseInt(e.target.value) || 1
+                          )
+                        }
+                        className='w-16 text-center'
+                      />
+                      <Button
+                        variant='outline'
+                        size='icon'
+                        className='h-8 w-8'
+                        onClick={() =>
+                          updateItemQuantity(item.id, item.quantity + 1)
+                        }
+                        disabled={item.quantity >= item.stock}
+                      >
+                        +
+                      </Button>
+                    </div>
+                    <p className='font-bold w-20 text-right'>
+                      ₵{(item.price * item.quantity).toFixed(2)}
+                    </p>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-8 w-8 text-destructive'
+                      onClick={() => removeItemFromOrder(item.id)}
+                    >
+                      <Trash2 className='h-4 w-4' />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+            {editedOrderItems.length > 0 && (
+              <div className='pt-4 border-t flex justify-between font-bold text-lg'>
+                <span>New Total:</span>
+                <span>
+                  ₵
+                  {editedOrderItems
+                    .reduce((sum, item) => sum + item.price * item.quantity, 0)
+                    .toFixed(2)}
+                </span>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => {
+                setIsOrderEditDialogOpen(false);
+                setEditingOrder(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveOrderEdit}
+              disabled={editedOrderItems.length === 0}
+            >
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

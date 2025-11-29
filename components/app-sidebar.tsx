@@ -12,6 +12,7 @@ import {
   MoreVertical,
   MoreHorizontal,
   LogOut,
+  Bell,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -29,11 +30,14 @@ import {
 import { Menu } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSidebar } from './sidebar-context';
+import { useNotifications } from '@/hooks/use-notifications';
+import { Badge } from '@/components/ui/badge';
 
 export function AppSidebar() {
   const pathname = usePathname();
   const { user, logout, isAdmin, viewMode, setViewMode } = useAuth();
   const { isCollapsed, setIsCollapsed } = useSidebar();
+  const { unreadCount } = useNotifications(user?.id);
 
   // Show client routes when in client view or not admin
   const showClientRoutes = !isAdmin || viewMode === 'client';
@@ -113,6 +117,30 @@ export function AppSidebar() {
                 </Link>
               );
             })}
+          {user && (
+            <Link
+              href='/notifications'
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors relative ${
+                collapsed ? 'justify-center' : ''
+              } ${
+                pathname === '/notifications'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+              }`}
+              title={collapsed ? 'Notifications' : undefined}
+            >
+              <Bell className='h-4 w-4 flex-shrink-0' />
+              {!collapsed && <span>Notifications</span>}
+              {unreadCount > 0 && (
+                <Badge
+                  variant='destructive'
+                  className='absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs'
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </Badge>
+              )}
+            </Link>
+          )}
         </nav>
       </div>
       {user && (

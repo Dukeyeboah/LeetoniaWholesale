@@ -50,12 +50,24 @@ Your local `firestore.rules` and `storage.rules` files are already configured co
    - Paste into the rules editor
    - Click **Publish**
 
+## Important: Create Firestore Index for Notifications
+
+The notifications query requires a composite index. When you first try to query notifications, Firebase will show an error with a link to create the index. Click that link, or manually create it:
+
+**Collection**: `notifications`
+**Fields to index**:
+
+- `userId` (Ascending)
+- `createdAt` (Descending)
+
+You can also create it via Firebase Console → Firestore Database → Indexes → Create Index
+
 ## Verify the Rules
 
 After deploying, your rules should allow:
 
 - ✅ **Unauthenticated users** can read inventory (browse products)
-- ✅ **Authenticated users** can read/write their own cart
+- ✅ **Authenticated users** can read/write their own cart and notifications
 - ✅ **Clients** can create orders
 - ✅ **Admins** can manage inventory, orders, and users
 
@@ -67,6 +79,7 @@ After deploying, your rules should allow:
 - **Carts**: Users can read/write their own cart
 - **Orders**: Users can read their own orders, create orders
 - **Users**: Users can read/update their own profile
+- **Notifications**: Users can read/update their own notifications
 
 ### Storage Rules:
 

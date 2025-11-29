@@ -41,7 +41,7 @@ function HomeContent() {
             <div className='pt-4'>
               <a href='/inventory'>
                 <button className='px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors'>
-                  Browse Inventory
+                  Browse Products
                 </button>
               </a>
             </div>

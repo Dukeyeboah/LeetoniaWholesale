@@ -52,13 +52,19 @@ export default function CartPage() {
     setIsSubmitting(true);
 
     try {
+      // Recalculate total to ensure it's correct (price * quantity for each item)
+      const calculatedTotal = cart.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+
       const newOrder: Omit<Order, 'id'> = {
         userId: user.id,
         userName: user.name || user.email,
         userEmail: user.email,
         items: cart,
         status: 'pending',
-        total: total,
+        total: calculatedTotal,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -101,7 +107,7 @@ export default function CartPage() {
           Browse our inventory to find the medicines you need.
         </p>
         <Button onClick={() => router.push('/inventory')} className='mt-4'>
-          Browse Inventory
+          Browse Products
         </Button>
       </div>
     );

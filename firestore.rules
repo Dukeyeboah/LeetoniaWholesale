@@ -25,7 +25,9 @@ service cloud.firestore {
     // Users collection
     match /users/{userId} {
       // Users can read their own profile
-      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      // Authenticated users can read other users' profiles (needed for querying admin users for notifications)
+      // Admins can read any profile
+      allow read: if isAuthenticated();
       
       // Users can create their own profile on first login
       allow create: if isAuthenticated() && request.auth.uid == userId;
@@ -60,9 +62,16 @@ service cloud.firestore {
       // Clients can create orders
       allow create: if isClient() && request.resource.data.userId == request.auth.uid;
       
-      // Clients can update their own pending orders, admins can update any order
+      // Clients can only update delivery/payment info on pharmacy_confirmed orders (for order confirmation)
+      // They cannot change the status - only admins can do that
+      // Admins can update any order and any field
       allow update: if isAuthenticated() && (
-        (resource.data.userId == request.auth.uid && resource.data.status == 'pending') ||
+        // Client updating their own pharmacy_confirmed order
+        (resource.data.userId == request.auth.uid && 
+         resource.data.status == 'pharmacy_confirmed' &&
+         // Only allow updating specific fields (not status)
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'userId', 'items', 'total', 'createdAt', 'userName', 'userEmail'])) ||
+        // Admin can update any order
         isAdmin()
       );
       
@@ -86,6 +95,20 @@ service cloud.firestore {
     match /carts/{userId} {
       // Users can read and write their own cart
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // Users can update their own notifications (to mark as read)
+      allow update: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      
+      // System/admins can create notifications
+      allow create: if isAuthenticated();
     }
   }
 }

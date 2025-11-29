@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInventory } from '@/hooks/use-inventory';
 import { useCart } from '@/hooks/use-cart'; // Import useCart
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,12 @@ export default function InventoryPage() {
   const { addToCart } = useCart(); // Use hook
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Fix hydration errors by only rendering Select after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Always use products from Firebase/IndexedDB - don't fall back to mock data
   // Mock data is only for development/testing when no data is seeded
@@ -82,29 +88,36 @@ export default function InventoryPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className='w-full md:w-[280px] bg-background border-border/60 overflow-hidden'>
-            <div className='flex items-center gap-2 text-muted-foreground min-w-0 flex-1 overflow-hidden'>
-              <Filter className='h-4 w-4 flex-shrink-0' />
-              <SelectValue
-                placeholder='Category'
-                className='truncate min-w-0 flex-1'
-              />
-            </div>
-          </SelectTrigger>
-          <SelectContent className='max-w-[280px]'>
-            {categories.map((cat) => (
-              <SelectItem
-                key={cat}
-                value={cat}
-                className='truncate pr-8'
-                title={cat}
-              >
-                {cat === 'all' ? 'All Categories' : cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {isMounted ? (
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className='w-full md:w-[280px] bg-background border-border/60 overflow-hidden'>
+              <div className='flex items-center gap-2 text-muted-foreground min-w-0 flex-1 overflow-hidden'>
+                <Filter className='h-4 w-4 flex-shrink-0' />
+                <SelectValue
+                  placeholder='Category'
+                  className='truncate min-w-0 flex-1'
+                />
+              </div>
+            </SelectTrigger>
+            <SelectContent className='max-w-[280px]'>
+              {categories.map((cat) => (
+                <SelectItem
+                  key={cat}
+                  value={cat}
+                  className='truncate pr-8'
+                  title={cat}
+                >
+                  {cat === 'all' ? 'All Categories' : cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <div className='w-full md:w-[280px] h-10 bg-background border border-border/60 rounded-md flex items-center gap-2 px-3 text-muted-foreground'>
+            <Filter className='h-4 w-4' />
+            <span>Category</span>
+          </div>
+        )}
       </div>
 
       {loading ? (

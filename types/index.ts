@@ -38,12 +38,14 @@ export interface Order {
     | 'checking_stock'
     | 'pharmacy_confirmed'
     | 'customer_confirmed'
+    | 'processing'
     | 'completed'
     | 'cancelled';
   total: number;
   deliveryOption?: 'pickup' | 'delivery';
   deliveryAddress?: string;
   deliveryFee?: number;
+  paymentMethod?: 'momo' | 'cash';
   notes?: string;
   createdAt: number;
   updatedAt: number;
@@ -55,4 +57,15 @@ export interface Log {
   userId: string;
   details: string;
   timestamp: number;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'order_update' | 'order_confirmation' | 'admin_message' | 'system';
+  title: string;
+  message: string;
+  orderId?: string;
+  read: boolean;
+  createdAt: number;
 }

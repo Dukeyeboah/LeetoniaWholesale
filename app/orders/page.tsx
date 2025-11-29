@@ -24,6 +24,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function OrdersPage() {
   const { user, isAdmin, viewMode } = useAuth();
@@ -107,6 +108,12 @@ export default function OrdersPage() {
         return (
           <Badge variant='default' className='bg-green-600 hover:bg-green-600'>
             <CheckCircle2 className='mr-1 h-3 w-3' /> Verified
+          </Badge>
+        );
+      case 'processing':
+        return (
+          <Badge variant='default' className='bg-blue-600 hover:bg-blue-600'>
+            <Package className='mr-1 h-3 w-3' /> Processing
           </Badge>
         );
       case 'completed':
@@ -210,6 +217,14 @@ export default function OrdersPage() {
                     {order.deliveryFee && order.deliveryFee > 0 && (
                       <p className='text-muted-foreground'>
                         Delivery Fee: ₵{order.deliveryFee.toFixed(2)}
+                      </p>
+                    )}
+                    {order.paymentMethod && (
+                      <p className='text-muted-foreground'>
+                        Payment:{' '}
+                        {order.paymentMethod === 'momo'
+                          ? 'Mobile Money (Momo)'
+                          : 'Cash'}
                       </p>
                     )}
                   </div>
