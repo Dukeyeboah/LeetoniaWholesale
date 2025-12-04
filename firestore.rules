@@ -59,8 +59,10 @@ service cloud.firestore {
         isAdmin()
       );
       
-      // Clients can create orders
-      allow create: if isClient() && request.resource.data.userId == request.auth.uid;
+      // Clients and admins can create orders (admins can create orders when in client view)
+      allow create: if isAuthenticated() && 
+        (isClient() || isAdmin()) && 
+        request.resource.data.userId == request.auth.uid;
       
       // Clients can only update delivery/payment info on pharmacy_confirmed orders (for order confirmation)
       // They cannot change the status - only admins can do that
