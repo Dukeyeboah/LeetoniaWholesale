@@ -22,6 +22,21 @@ service cloud.firestore {
       return isAuthenticated() && getUserData().role == 'client';
     }
 
+    // Helper function to check if user is staff
+    function isStaff() {
+      return isAuthenticated() && getUserData().role == 'staff';
+    }
+
+    // Helper function to get staff permissions
+    function getStaffPermissions() {
+      return getUserData().permissions;
+    }
+
+    // Helper function to check if staff has specific permission
+    function staffHasPermission(permission) {
+      return isAdmin() || (isStaff() && getStaffPermissions() != null && getStaffPermissions()[permission] == true);
+    }
+
     // Users collection
     match /users/{userId} {
       // Users can read their own profile
@@ -32,9 +47,9 @@ service cloud.firestore {
       // Users can create their own profile on first login
       allow create: if isAuthenticated() && request.auth.uid == userId;
       
-      // Users can update their own profile (except role), admins can update any profile
+      // Users can update their own profile (except role and permissions), admins can update any profile
       allow update: if isAuthenticated() && (
-        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) ||
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'permissions'])) ||
         isAdmin()
       );
       
@@ -47,16 +62,17 @@ service cloud.firestore {
       // Anyone can read inventory (including unauthenticated users for browsing)
       allow read: if true;
       
-      // Only admins can create, update, or delete inventory
-      allow create, update, delete: if isAdmin();
+      // Admins and staff with inventory management permission can create, update, or delete
+      allow create, update, delete: if isAdmin() || staffHasPermission('canManageInventory');
     }
 
     // Orders collection
     match /orders/{orderId} {
-      // Users can read their own orders, admins can read all orders
+      // Users can read their own orders, admins and staff with view permission can read all orders
       allow read: if isAuthenticated() && (
         resource.data.userId == request.auth.uid || 
-        isAdmin()
+        isAdmin() ||
+        staffHasPermission('canViewOrders')
       );
       
       // Clients and admins can create orders (admins can create orders when in client view)
@@ -66,6 +82,7 @@ service cloud.firestore {
       
       // Clients can only update delivery/payment info on pharmacy_confirmed orders (for order confirmation)
       // They cannot change the status - only admins can do that
+      // Staff can view orders but cannot update them (read-only)
       // Admins can update any order and any field
       allow update: if isAuthenticated() && (
         // Client updating their own pharmacy_confirmed order

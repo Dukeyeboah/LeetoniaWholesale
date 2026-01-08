@@ -1,11 +1,21 @@
+export interface StaffPermissions {
+  canManageInventory: boolean;
+  canViewOrders: boolean;
+  canUpdateStock: boolean;
+  canViewAnalytics: boolean;
+  canGenerateInvoices: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
-  role: 'admin' | 'client';
+  role: 'admin' | 'client' | 'staff';
   name?: string;
   phone?: string;
   photoURL?: string; // Profile image URL from Google/Gmail
   createdAt: number;
+  // Staff-specific permissions (only for staff role)
+  permissions?: StaffPermissions;
 }
 
 export interface Product {

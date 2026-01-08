@@ -13,18 +13,22 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
-  viewMode: 'admin' | 'client';
-  setViewMode: (mode: 'admin' | 'client') => void;
+  isStaff: boolean;
+  viewMode: 'admin' | 'client' | 'staff';
+  setViewMode: (mode: 'admin' | 'client' | 'staff') => void;
   logout: () => Promise<void>;
+  hasPermission: (permission: keyof import('@/types').StaffPermissions) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   isAdmin: false,
+  isStaff: false,
   viewMode: 'client',
   setViewMode: () => {},
   logout: async () => {},
+  hasPermission: () => false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -32,7 +36,7 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'admin' | 'client'>('client');
+  const [viewMode, setViewMode] = useState<'admin' | 'client' | 'staff'>('client');
   const router = useRouter();
 
   useEffect(() => {
@@ -62,6 +66,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Set view mode based on role
             if (updatedUser.role === 'admin') {
               setViewMode('admin');
+            } else if (updatedUser.role === 'staff') {
+              setViewMode('staff');
             }
           } else {
             // Check if email is in admin whitelist
@@ -89,6 +95,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(newUser);
             if (shouldBeAdmin) {
               setViewMode('admin');
+            } else if (newUser.role === 'staff') {
+              setViewMode('staff');
             }
           }
         } catch (error) {
@@ -127,13 +135,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const hasPermission = (permission: keyof import('@/types').StaffPermissions): boolean => {
+    if (user?.role === 'admin') return true;
+    if (user?.role === 'staff' && user.permissions) {
+      return user.permissions[permission] === true;
+    }
+    return false;
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         loading,
         isAdmin: user?.role === 'admin',
-        viewMode: user?.role === 'admin' ? viewMode : 'client',
+        isStaff: user?.role === 'staff',
+        viewMode: user?.role === 'admin' ? viewMode : user?.role === 'staff' ? 'staff' : 'client',
         setViewMode: (mode) => {
           if (user?.role === 'admin') {
             setViewMode(mode);
@@ -146,6 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         },
         logout,
+        hasPermission,
       }}
     >
       {children}

@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,11 @@ import {
   TrendingUp,
   TrendingDown,
   Users,
+  UserPlus,
+  AlertTriangle,
+  Download,
+  Printer,
+  Calendar,
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -97,6 +103,17 @@ export default function AdminDashboard() {
   const [isOrderEditDialogOpen, setIsOrderEditDialogOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [editedOrderItems, setEditedOrderItems] = useState<CartItem[]>([]);
+
+  // Staff management state
+  const [isStaffDialogOpen, setIsStaffDialogOpen] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<User | null>(null);
+  const [staffPermissions, setStaffPermissions] = useState<import('@/types').StaffPermissions>({
+    canManageInventory: false,
+    canViewOrders: false,
+    canUpdateStock: false,
+    canViewAnalytics: false,
+    canGenerateInvoices: false,
+  });
 
   useEffect(() => {
     if (!db) {
@@ -184,6 +201,138 @@ export default function AdminDashboard() {
         item.id === itemId ? { ...item, quantity: newQuantity } : item
       )
     );
+  };
+
+  const handleSaveStaff = async () => {
+    if (!db || !editingStaff) {
+      // Creating new staff - need email
+      toast.error('Please select a user to make staff');
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, 'users', editingStaff.id), {
+        role: 'staff',
+        permissions: staffPermissions,
+      });
+      toast.success('Staff permissions updated');
+      setIsStaffDialogOpen(false);
+      setEditingStaff(null);
+    } catch (error) {
+      console.error('Error updating staff:', error);
+      toast.error('Failed to update staff permissions');
+    }
+  };
+
+  const generateInvoice = (order: Order) => {
+    const invoiceContent = `
+INVOICE
+Leetonia Wholesale
+
+Invoice #: ${order.id.slice(0, 8)}
+Date: ${format(new Date(order.createdAt), 'MMMM d, yyyy')}
+Customer: ${order.userName || order.userEmail}
+
+Items:
+${order.items.map((item) => 
+  `${item.quantity}x ${item.name} @ ₵${item.price.toFixed(2)} = ₵${(item.quantity * item.price).toFixed(2)}`
+).join('\n')}
+
+Subtotal: ₵${order.total.toFixed(2)}
+${order.deliveryFee ? `Delivery Fee: ₵${order.deliveryFee.toFixed(2)}` : ''}
+Total: ₵${(order.total + (order.deliveryFee || 0)).toFixed(2)}
+
+Payment Method: ${order.paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash'}
+${order.deliveryOption === 'delivery' ? `Delivery Address: ${order.deliveryAddress || 'N/A'}` : 'Pickup: Store Pickup'}
+
+Status: ${order.status.replace('_', ' ').toUpperCase()}
+
+Thank you for your business!
+    `.trim();
+
+    // Create a blob and download
+    const blob = new Blob([invoiceContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${order.id.slice(0, 8)}-${format(new Date(), 'yyyy-MM-dd')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Also open print dialog
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Invoice ${order.id.slice(0, 8)}</title>
+            <style>
+              body { font-family: monospace; padding: 40px; }
+              h1 { text-align: center; }
+              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+              .total { font-weight: bold; font-size: 1.2em; }
+            </style>
+          </head>
+          <body>
+            <h1>INVOICE</h1>
+            <h2>Leetonia Wholesale</h2>
+            <p><strong>Invoice #:</strong> ${order.id.slice(0, 8)}</p>
+            <p><strong>Date:</strong> ${format(new Date(order.createdAt), 'MMMM d, yyyy')}</p>
+            <p><strong>Customer:</strong> ${order.userName || order.userEmail}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${order.items.map((item) => `
+                  <tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>₵${item.price.toFixed(2)}</td>
+                    <td>₵${(item.quantity * item.price).toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3"><strong>Subtotal:</strong></td>
+                  <td><strong>₵${order.total.toFixed(2)}</strong></td>
+                </tr>
+                ${order.deliveryFee ? `
+                <tr>
+                  <td colspan="3">Delivery Fee:</td>
+                  <td>₵${order.deliveryFee.toFixed(2)}</td>
+                </tr>
+                ` : ''}
+                <tr class="total">
+                  <td colspan="3"><strong>Total:</strong></td>
+                  <td><strong>₵${(order.total + (order.deliveryFee || 0)).toFixed(2)}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+            <p><strong>Payment Method:</strong> ${order.paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash'}</p>
+            ${order.deliveryOption === 'delivery' ? `<p><strong>Delivery Address:</strong> ${order.deliveryAddress || 'N/A'}</p>` : '<p><strong>Pickup:</strong> Store Pickup</p>'}
+            <p><strong>Status:</strong> ${order.status.replace('_', ' ').toUpperCase()}</p>
+            <p style="margin-top: 40px; text-align: center;">Thank you for your business!</p>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    }
+
+    toast.success('Invoice generated and download started');
   };
 
   const updateOrderStatus = async (
@@ -576,6 +725,9 @@ export default function AdminDashboard() {
           <TabsTrigger value='inventory' className='h-full px-6'>
             Manage Inventory
           </TabsTrigger>
+          <TabsTrigger value='staff' className='h-full px-6'>
+            Staff Management
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value='orders' className='mt-6 space-y-6'>
@@ -791,6 +943,14 @@ export default function AdminDashboard() {
                             <p>{order.notes}</p>
                           </div>
                         )}
+                        <Button
+                          variant='outline'
+                          className='w-full mt-2'
+                          onClick={() => generateInvoice(order)}
+                        >
+                          <Download className='mr-2 h-4 w-4' />
+                          Generate Invoice
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -904,6 +1064,14 @@ export default function AdminDashboard() {
                       >
                         {order.status.replace('_', ' ')}
                       </Badge>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={() => generateInvoice(order)}
+                      >
+                        <Download className='mr-2 h-4 w-4' />
+                        Invoice
+                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent className='p-6'>
@@ -1000,6 +1168,188 @@ export default function AdminDashboard() {
             </Card>
           </div>
 
+          {/* Expiry Tracking */}
+          <div className='grid gap-6 md:grid-cols-3'>
+            <Card>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <AlertTriangle className='h-5 w-5 text-red-600' />
+                  Expiring in 1 Month
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {products
+                  .filter((p) => {
+                    if (!p.expiryDate) return false;
+                    const expiry = new Date(p.expiryDate);
+                    const oneMonthFromNow = new Date();
+                    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+                    return expiry <= oneMonthFromNow && expiry > new Date();
+                  })
+                  .length === 0 ? (
+                  <p className='text-muted-foreground text-center py-4'>
+                    No products expiring soon
+                  </p>
+                ) : (
+                  <div className='space-y-2'>
+                    {products
+                      .filter((p) => {
+                        if (!p.expiryDate) return false;
+                        const expiry = new Date(p.expiryDate);
+                        const oneMonthFromNow = new Date();
+                        oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+                        return expiry <= oneMonthFromNow && expiry > new Date();
+                      })
+                      .map((product) => (
+                        <div
+                          key={product.id}
+                          className='flex justify-between items-center p-2 border rounded text-sm'
+                        >
+                          <div>
+                            <p className='font-medium'>{product.name}</p>
+                            <p className='text-xs text-muted-foreground'>
+                              {format(new Date(product.expiryDate!), 'MMM d, yyyy')}
+                            </p>
+                          </div>
+                          <Badge variant='destructive' className='text-xs'>
+                            {Math.ceil(
+                              (product.expiryDate! - Date.now()) /
+                                (1000 * 60 * 60 * 24)
+                            )}{' '}
+                            days
+                          </Badge>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <Calendar className='h-5 w-5 text-orange-600' />
+                  Expiring in 3 Months
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {products
+                  .filter((p) => {
+                    if (!p.expiryDate) return false;
+                    const expiry = new Date(p.expiryDate);
+                    const threeMonthsFromNow = new Date();
+                    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+                    return (
+                      expiry <= threeMonthsFromNow &&
+                      expiry > new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                    );
+                  })
+                  .length === 0 ? (
+                  <p className='text-muted-foreground text-center py-4'>
+                    No products expiring in 3 months
+                  </p>
+                ) : (
+                  <div className='space-y-2'>
+                    {products
+                      .filter((p) => {
+                        if (!p.expiryDate) return false;
+                        const expiry = new Date(p.expiryDate);
+                        const threeMonthsFromNow = new Date();
+                        threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+                        return (
+                          expiry <= threeMonthsFromNow &&
+                          expiry > new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                        );
+                      })
+                      .slice(0, 5)
+                      .map((product) => (
+                        <div
+                          key={product.id}
+                          className='flex justify-between items-center p-2 border rounded text-sm'
+                        >
+                          <div>
+                            <p className='font-medium'>{product.name}</p>
+                            <p className='text-xs text-muted-foreground'>
+                              {format(new Date(product.expiryDate!), 'MMM d, yyyy')}
+                            </p>
+                          </div>
+                          <Badge variant='outline' className='text-xs'>
+                            {Math.ceil(
+                              (product.expiryDate! - Date.now()) /
+                                (1000 * 60 * 60 * 24)
+                            )}{' '}
+                            days
+                          </Badge>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <Calendar className='h-5 w-5 text-blue-600' />
+                  Expiring in 6 Months
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {products
+                  .filter((p) => {
+                    if (!p.expiryDate) return false;
+                    const expiry = new Date(p.expiryDate);
+                    const sixMonthsFromNow = new Date();
+                    sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+                    return (
+                      expiry <= sixMonthsFromNow &&
+                      expiry > new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+                    );
+                  })
+                  .length === 0 ? (
+                  <p className='text-muted-foreground text-center py-4'>
+                    No products expiring in 6 months
+                  </p>
+                ) : (
+                  <div className='space-y-2'>
+                    {products
+                      .filter((p) => {
+                        if (!p.expiryDate) return false;
+                        const expiry = new Date(p.expiryDate);
+                        const sixMonthsFromNow = new Date();
+                        sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+                        return (
+                          expiry <= sixMonthsFromNow &&
+                          expiry > new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+                        );
+                      })
+                      .slice(0, 5)
+                      .map((product) => (
+                        <div
+                          key={product.id}
+                          className='flex justify-between items-center p-2 border rounded text-sm'
+                        >
+                          <div>
+                            <p className='font-medium'>{product.name}</p>
+                            <p className='text-xs text-muted-foreground'>
+                              {format(new Date(product.expiryDate!), 'MMM d, yyyy')}
+                            </p>
+                          </div>
+                          <Badge variant='outline' className='text-xs'>
+                            {Math.ceil(
+                              (product.expiryDate! - Date.now()) /
+                                (1000 * 60 * 60 * 24)
+                            )}{' '}
+                            days
+                          </Badge>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
           <div className='grid gap-6 md:grid-cols-2'>
             <Card>
               <CardHeader>
@@ -1073,6 +1423,94 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value='staff' className='mt-6 space-y-6'>
+          <div className='flex justify-between items-center'>
+            <h2 className='text-2xl font-serif font-bold'>Staff Management</h2>
+            <Button onClick={() => {
+              setEditingStaff(null);
+              setStaffPermissions({
+                canManageInventory: false,
+                canViewOrders: false,
+                canUpdateStock: false,
+                canViewAnalytics: false,
+                canGenerateInvoices: false,
+              });
+              setIsStaffDialogOpen(true);
+            }}>
+              <UserPlus className='mr-2 h-4 w-4' />
+              Add Staff Member
+            </Button>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Staff Members</CardTitle>
+              <CardDescription>
+                Manage staff roles and permissions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-4'>
+                {users.filter((u) => u.role === 'staff').length === 0 ? (
+                  <div className='text-center py-8 text-muted-foreground'>
+                    No staff members yet
+                  </div>
+                ) : (
+                  users
+                    .filter((u) => u.role === 'staff')
+                    .map((staff) => (
+                      <Card key={staff.id}>
+                        <CardContent className='p-4'>
+                          <div className='flex items-center justify-between'>
+                            <div className='flex-1'>
+                              <h3 className='font-semibold'>{staff.name || staff.email}</h3>
+                              <p className='text-sm text-muted-foreground'>{staff.email}</p>
+                              <div className='flex flex-wrap gap-2 mt-2'>
+                                {staff.permissions?.canManageInventory && (
+                                  <Badge variant='outline'>Manage Inventory</Badge>
+                                )}
+                                {staff.permissions?.canViewOrders && (
+                                  <Badge variant='outline'>View Orders</Badge>
+                                )}
+                                {staff.permissions?.canUpdateStock && (
+                                  <Badge variant='outline'>Update Stock</Badge>
+                                )}
+                                {staff.permissions?.canViewAnalytics && (
+                                  <Badge variant='outline'>View Analytics</Badge>
+                                )}
+                                {staff.permissions?.canGenerateInvoices && (
+                                  <Badge variant='outline'>Generate Invoices</Badge>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              variant='outline'
+                              size='sm'
+                              onClick={() => {
+                                setEditingStaff(staff);
+                                setStaffPermissions(staff.permissions || {
+                                  canManageInventory: false,
+                                  canViewOrders: false,
+                                  canUpdateStock: false,
+                                  canViewAnalytics: false,
+                                  canGenerateInvoices: false,
+                                });
+                                setIsStaffDialogOpen(true);
+                              }}
+                            >
+                              <Edit className='mr-2 h-4 w-4' />
+                              Edit Permissions
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value='inventory' className='mt-6'>
@@ -1456,6 +1894,162 @@ export default function AdminDashboard() {
               disabled={editedOrderItems.length === 0}
             >
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Staff Management Dialog */}
+      <Dialog open={isStaffDialogOpen} onOpenChange={setIsStaffDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingStaff ? 'Edit Staff Permissions' : 'Add Staff Member'}
+            </DialogTitle>
+            <DialogDescription>
+              {editingStaff
+                ? 'Update permissions for this staff member'
+                : 'Select a user and set their permissions'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-4 py-4'>
+            {editingStaff ? (
+              <div>
+                <Label className='text-sm font-medium'>Staff Member</Label>
+                <p className='text-sm text-muted-foreground'>
+                  {editingStaff.name || editingStaff.email}
+                </p>
+              </div>
+            ) : (
+              <div>
+                <Label htmlFor='staff-user' className='text-sm font-medium'>
+                  Select User
+                </Label>
+                <Select
+                  value={editingStaff?.id || ''}
+                  onValueChange={(userId) => {
+                    const user = users.find((u) => u.id === userId);
+                    if (user) {
+                      setEditingStaff(user);
+                      setStaffPermissions(user.permissions || {
+                        canManageInventory: false,
+                        canViewOrders: false,
+                        canUpdateStock: false,
+                        canViewAnalytics: false,
+                        canGenerateInvoices: false,
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger id='staff-user'>
+                    <SelectValue placeholder='Select a user' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users
+                      .filter((u) => u.role === 'client')
+                      .map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.name || user.email}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className='space-y-3'>
+              <Label className='text-sm font-medium'>Permissions</Label>
+              <div className='space-y-3'>
+                <div className='flex items-center space-x-2'>
+                  <Checkbox
+                    id='canManageInventory'
+                    checked={staffPermissions.canManageInventory}
+                    onCheckedChange={(checked) =>
+                      setStaffPermissions({
+                        ...staffPermissions,
+                        canManageInventory: checked === true,
+                      })
+                    }
+                  />
+                  <Label htmlFor='canManageInventory' className='text-sm font-normal cursor-pointer'>
+                    Manage Inventory
+                  </Label>
+                </div>
+                <div className='flex items-center space-x-2'>
+                  <Checkbox
+                    id='canViewOrders'
+                    checked={staffPermissions.canViewOrders}
+                    onCheckedChange={(checked) =>
+                      setStaffPermissions({
+                        ...staffPermissions,
+                        canViewOrders: checked === true,
+                      })
+                    }
+                  />
+                  <Label htmlFor='canViewOrders' className='text-sm font-normal cursor-pointer'>
+                    View Orders
+                  </Label>
+                </div>
+                <div className='flex items-center space-x-2'>
+                  <Checkbox
+                    id='canUpdateStock'
+                    checked={staffPermissions.canUpdateStock}
+                    onCheckedChange={(checked) =>
+                      setStaffPermissions({
+                        ...staffPermissions,
+                        canUpdateStock: checked === true,
+                      })
+                    }
+                  />
+                  <Label htmlFor='canUpdateStock' className='text-sm font-normal cursor-pointer'>
+                    Update Stock
+                  </Label>
+                </div>
+                <div className='flex items-center space-x-2'>
+                  <Checkbox
+                    id='canViewAnalytics'
+                    checked={staffPermissions.canViewAnalytics}
+                    onCheckedChange={(checked) =>
+                      setStaffPermissions({
+                        ...staffPermissions,
+                        canViewAnalytics: checked === true,
+                      })
+                    }
+                  />
+                  <Label htmlFor='canViewAnalytics' className='text-sm font-normal cursor-pointer'>
+                    View Analytics
+                  </Label>
+                </div>
+                <div className='flex items-center space-x-2'>
+                  <Checkbox
+                    id='canGenerateInvoices'
+                    checked={staffPermissions.canGenerateInvoices}
+                    onCheckedChange={(checked) =>
+                      setStaffPermissions({
+                        ...staffPermissions,
+                        canGenerateInvoices: checked === true,
+                      })
+                    }
+                  />
+                  <Label htmlFor='canGenerateInvoices' className='text-sm font-normal cursor-pointer'>
+                    Generate Invoices
+                  </Label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => {
+                setIsStaffDialogOpen(false);
+                setEditingStaff(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSaveStaff} disabled={!editingStaff}>
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>

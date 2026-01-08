@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Plus, AlertCircle, Minus } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { LoginDialog } from '@/components/login-dialog';
+import { LazyImage } from '@/components/lazy-image';
 
 interface ProductCardProps {
   product: Product;
@@ -25,6 +26,7 @@ interface ProductCardProps {
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [quantity, setQuantity] = useState(1);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const { user, isAdmin, viewMode } = useAuth();
   const showPrice = isAdmin || viewMode === 'admin';
   const isOutOfStock = product.stock <= 0;
@@ -61,13 +63,14 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
   return (
     <Card className='overflow-hidden transition-all hover:shadow-md border-border/60 bg-card flex flex-col h-full'>
-      <div className='aspect-[4/3] relative bg-secondary/20 flex items-center justify-center text-muted-foreground'>
-        {/* Placeholder for image - in real app use Next/Image */}
-        {product.imageUrl ? (
-          <img
-            src={product.imageUrl || '/placeholder.svg'}
+      <div className='aspect-[3/2] relative bg-secondary/20 flex items-center justify-center text-muted-foreground overflow-hidden'>
+        {/* Lazy loading image component */}
+        {product.imageUrl && !imageError ? (
+          <LazyImage
+            src={product.imageUrl}
             alt={product.name}
             className='w-full h-full object-cover'
+            onError={() => setImageError(true)}
           />
         ) : (
           <span className='text-2xl font-serif opacity-30'>

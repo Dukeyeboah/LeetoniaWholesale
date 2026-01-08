@@ -1,0 +1,12 @@
+// ✅ SECURE FIRESTORE RULES (RESTORE AFTER IMPORT)
+// Copy this section and replace the temporary rules after import completes
+
+// Inventory collection
+match /inventory/{productId} {
+  // Anyone can read inventory (including unauthenticated users for browsing)
+  allow read: if true;
+  
+  // Admins and staff with inventory management permission can create, update, or delete
+  allow create, update, delete: if isAdmin() || staffHasPermission('canManageInventory');
+}
+

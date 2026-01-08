@@ -35,14 +35,16 @@ import { Badge } from '@/components/ui/badge';
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { user, logout, isAdmin, viewMode, setViewMode } = useAuth();
+  const { user, logout, isAdmin, isStaff, viewMode, setViewMode, hasPermission } = useAuth();
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { unreadCount } = useNotifications(user?.id);
 
-  // Show client routes when in client view or not admin
-  const showClientRoutes = !isAdmin || viewMode === 'client';
+  // Show client routes when in client view or not admin/staff
+  const showClientRoutes = (!isAdmin && !isStaff) || viewMode === 'client';
   // Show admin routes when admin and in admin view
   const showAdminRoutes = isAdmin && viewMode === 'admin';
+  // Show staff routes when staff
+  const showStaffRoutes = isStaff && viewMode === 'staff';
 
   const routes = [
     {
@@ -68,6 +70,12 @@ export function AppSidebar() {
       path: '/admin',
       icon: LayoutDashboard,
       show: showAdminRoutes,
+    },
+    {
+      name: 'Staff Dashboard',
+      path: '/staff',
+      icon: LayoutDashboard,
+      show: showStaffRoutes,
     },
   ];
 
@@ -247,6 +255,33 @@ export function AppSidebar() {
               </div>
               <p className='text-[10px] text-muted-foreground'>
                 Switch between admin and client interfaces
+              </p>
+            </div>
+          )}
+          {isStaff && !collapsed && (
+            <div className='mb-4 p-3 rounded-lg bg-secondary/50 border border-border/50'>
+              <div className='flex items-center justify-between mb-2'>
+                <Label
+                  htmlFor='staff-view-mode'
+                  className='text-xs font-medium flex items-center gap-2'
+                >
+                  {viewMode === 'staff' ? (
+                    <LayoutDashboard className='h-3 w-3' />
+                  ) : (
+                    <ShoppingCart className='h-3 w-3' />
+                  )}
+                  {viewMode === 'staff' ? 'Staff View' : 'Client View'}
+                </Label>
+                <Switch
+                  id='staff-view-mode'
+                  checked={viewMode === 'staff'}
+                  onCheckedChange={(checked) =>
+                    setViewMode(checked ? 'staff' : 'client')
+                  }
+                />
+              </div>
+              <p className='text-[10px] text-muted-foreground'>
+                Switch between staff and client interfaces
               </p>
             </div>
           )}

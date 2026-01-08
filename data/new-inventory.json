@@ -1,0 +1,883 @@
+[
+ {
+  "Drug": "COX B-200(CELECOXIB) 10'S",
+  "Quantity": 3,
+  "Expiry": "12-Mar-27"
+ },
+ {
+  "Drug": "10D GLUCOSE INF 500ML",
+  "Quantity": 38,
+  "Expiry": "04-Dec-28"
+ },
+ {
+  "Drug": "21ST CENTURY ASHWAGANDHA 60'S",
+  "Quantity": 1,
+  "Expiry": "03-Mar-29"
+ },
+ {
+  "Drug": "2B(BENZYL BENZOATE) 2% LOTION 100ML",
+  "Quantity": 32,
+  "Expiry": "06-Apr-26"
+ },
+ {
+  "Drug": "3FER SYR",
+  "Quantity": 28,
+  "Expiry": "02-Apr-29"
+ },
+ {
+  "Drug": "3P GARLIC MIXTURE",
+  "Quantity": 27,
+  "Expiry": "12-Apr-29"
+ },
+ {
+  "Drug": "5D (DEXTROSE 5%) INFUSION 500ML",
+  "Quantity": 44,
+  "Expiry": "12-Oct-29"
+ },
+ {
+  "Drug": "ABONIKI",
+  "Quantity": 228,
+  "Expiry": "13-Oct-29"
+ },
+ {
+  "Drug": "ACCU-CHECK ACTIVE STRIPS",
+  "Quantity": 6,
+  "Expiry": "14-Oct-29"
+ },
+ {
+  "Drug": "ACCU-CHECK INSTANT KIT",
+  "Quantity": 5,
+  "Expiry": "15-Oct-29"
+ },
+ {
+  "Drug": "ACCU-CHECK INSTANT STRIPS",
+  "Quantity": 2,
+  "Expiry": "16-Oct-29"
+ },
+ {
+  "Drug": "ACETYLCYSTEINE 400MG\/2ML (MUCOMIX) INJ  20'S",
+  "Quantity": 25,
+  "Expiry": "17-Oct-29"
+ },
+ {
+  "Drug": "ACICLOVIR 200MG TABS 25'S UK",
+  "Quantity": 36,
+  "Expiry": "18-Oct-29"
+ },
+ {
+  "Drug": "ACICLOVIR 400MG TABS 56'S UK",
+  "Quantity": 4,
+  "Expiry": "19-Oct-29"
+ },
+ {
+  "Drug": "ACICLOVIR 800MG TABS 35'S UK",
+  "Quantity": 10,
+  "Expiry": "20-Oct-29"
+ },
+ {
+  "Drug": "ACICLOVIR CREAM (LIPSORE)2GM UK",
+  "Quantity": 8,
+  "Expiry": "21-Oct-29"
+ },
+ {
+  "Drug": "ACICLOVIR CREAM-PHARMANOVA",
+  "Quantity": 123,
+  "Expiry": "22-Oct-29"
+ },
+ {
+  "Drug": "ACICLOVIR TABS 200MG 28'S VEGA",
+  "Quantity": 16,
+  "Expiry": "23-Oct-29"
+ },
+ {
+  "Drug": "ACIDOM 40MG(OMEPRAZOLE) INJ",
+  "Quantity": 66,
+  "Expiry": "24-Oct-29"
+ },
+ {
+  "Drug": "ACIGUARD SUSP 200ML",
+  "Quantity": 35,
+  "Expiry": "25-Oct-29"
+ },
+ {
+  "Drug": "ACIGUARD-O SUSP",
+  "Quantity": 36,
+  "Expiry": "26-Oct-29"
+ },
+ {
+  "Drug": "ACNE OVAL FACIAL BAR(CLEAR SOAP)",
+  "Quantity": 7,
+  "Expiry": "27-Oct-29"
+ },
+ {
+  "Drug": "ACTIFED DRY COUGH SYR",
+  "Quantity": 13,
+  "Expiry": "28-Oct-29"
+ },
+ {
+  "Drug": "ACTIFED MULTIACTION TABS 12'S",
+  "Quantity": 20,
+  "Expiry": "29-Oct-29"
+ },
+ {
+  "Drug": "ACTILIFE",
+  "Quantity": 156,
+  "Expiry": "30-Oct-29"
+ },
+ {
+  "Drug": "ACTILIFE WOMENS FLORA TABS",
+  "Quantity": 79,
+  "Expiry": "31-Oct-29"
+ },
+ {
+  "Drug": "ACYVLOVIR DENK 200MG",
+  "Quantity": 70,
+  "Expiry": "01-Nov-29"
+ },
+ {
+  "Drug": "ADALAT LA 30MG TABS",
+  "Quantity": 22,
+  "Expiry": "02-Nov-29"
+ },
+ {
+  "Drug": "ADAPALENE GEL 0.1% 15GM",
+  "Quantity": 46,
+  "Expiry": "03-Nov-29"
+ },
+ {
+  "Drug": "ADDYZOA CAPSULES",
+  "Quantity": 55,
+  "Expiry": "04-Nov-29"
+ },
+ {
+  "Drug": "ADIDAS SHOWER GEL 400ML",
+  "Quantity": 9,
+  "Expiry": "05-Nov-29"
+ },
+ {
+  "Drug": "ADIDAS SPRAY 150ML",
+  "Quantity": 3,
+  "Expiry": "06-Nov-29"
+ },
+ {
+  "Drug": "ADIDAS SPRAY 200ML",
+  "Quantity": 33,
+  "Expiry": "07-Nov-29"
+ },
+ {
+  "Drug": "ADOM NATURAL MAN CAPS",
+  "Quantity": 140,
+  "Expiry": "08-Nov-29"
+ },
+ {
+  "Drug": "ADOM P.AWAY MIXTURE",
+  "Quantity": 4,
+  "Expiry": "09-Nov-29"
+ },
+ {
+  "Drug": "ADOM W&G CAPSULES",
+  "Quantity": 420,
+  "Expiry": "10-Nov-29"
+ },
+ {
+  "Drug": "ADRENALINE INJ 1ML\/1ML 10'S",
+  "Quantity": 27,
+  "Expiry": "11-Nov-29"
+ },
+ {
+  "Drug": "ADUTWUMWAA BITTERS",
+  "Quantity": 17,
+  "Expiry": "12-Nov-29"
+ },
+ {
+  "Drug": "ADUTWUMWAA TONIC",
+  "Quantity": 58,
+  "Expiry": "13-Nov-29"
+ },
+ {
+  "Drug": "ADVANTAN 0.1% KREM",
+  "Quantity": 95,
+  "Expiry": "14-Nov-29"
+ },
+ {
+  "Drug": "ADVIL 200MG 24'S",
+  "Quantity": 9,
+  "Expiry": "15-Nov-29"
+ },
+ {
+  "Drug": "ADVIL 50 X 2",
+  "Quantity": 1,
+  "Expiry": "16-Nov-29"
+ },
+ {
+  "Drug": "ADVIL LIQUIGEL 120'S X2",
+  "Quantity": 3,
+  "Expiry": "17-Nov-29"
+ },
+ {
+  "Drug": "AENEAS 500MG (LEVOFLOXACIN)",
+  "Quantity": 11,
+  "Expiry": "18-Nov-29"
+ },
+ {
+  "Drug": "AJ WELLNESS IPACE CAPS 30'S",
+  "Quantity": 3,
+  "Expiry": "19-Nov-29"
+ },
+ {
+  "Drug": "AJ WELLNESS PREGNA TABS 30'S",
+  "Quantity": 11,
+  "Expiry": "20-Nov-29"
+ },
+ {
+  "Drug": "AJ WELLNESS PROCARE CAPS 30'S",
+  "Quantity": 2,
+  "Expiry": "21-Nov-29"
+ },
+ {
+  "Drug": "AJ WELLNESS SKIN,HAIR & NAILS CAPS 30'S",
+  "Quantity": 9,
+  "Expiry": "22-Nov-29"
+ },
+ {
+  "Drug": "AJ WELLNESS VITAL B PLUS CAPS 30'S",
+  "Quantity": 7,
+  "Expiry": "23-Nov-29"
+ },
+ {
+  "Drug": "AJ WELLNESS VITAL MAN TABS 30'S",
+  "Quantity": 15,
+  "Expiry": "24-Nov-29"
+ },
+ {
+  "Drug": "AJ WELLNESS VITAL SEAS GOLD CAPS 30'S",
+  "Quantity": 6,
+  "Expiry": "25-Nov-29"
+ },
+ {
+  "Drug": "AJ WELLNESS VITAL SEAS SILVER CAPS 30'S",
+  "Quantity": 5,
+  "Expiry": "26-Nov-29"
+ },
+ {
+  "Drug": "ALBENDAZOLE 400MG(OBEND)",
+  "Quantity": 110,
+  "Expiry": "27-Nov-29"
+ },
+ {
+  "Drug": "ALDACTONE 25MG TABS 100'S",
+  "Quantity": 20,
+  "Expiry": "28-Nov-29"
+ },
+ {
+  "Drug": "ALDOMET 250MG TABS 60'S",
+  "Quantity": 42,
+  "Expiry": "29-Nov-29"
+ },
+ {
+  "Drug": "ALENDRONIC ACID 70MG TABS 4'S",
+  "Quantity": 45,
+  "Expiry": "30-Nov-29"
+ },
+ {
+  "Drug": "ALKA-5 SYR 100ML",
+  "Quantity": 49,
+  "Expiry": "01-Dec-29"
+ },
+ {
+  "Drug": "ALLEREX EYE DROP",
+  "Quantity": 9,
+  "Expiry": "02-Dec-29"
+ },
+ {
+  "Drug": "ALLOPURINOL 100MG X 28",
+  "Quantity": 36,
+  "Expiry": "03-Dec-29"
+ },
+ {
+  "Drug": "ALLUPIRINOL 300MG TABS 28'S UK",
+  "Quantity": 24,
+  "Expiry": "04-Dec-29"
+ },
+ {
+  "Drug": "ALMETRO (METRONIDAZOLE) INJECTION",
+  "Quantity": 91,
+  "Expiry": "05-Dec-29"
+ },
+ {
+  "Drug": "ALMOL PARACETAMOL INFUSION 100ML",
+  "Quantity": 1,
+  "Expiry": "06-Dec-29"
+ },
+ {
+  "Drug": "ALPHA GARLIC CAPS 30'S",
+  "Quantity": 55,
+  "Expiry": "07-Dec-29"
+ },
+ {
+  "Drug": "ALPHA GARLIC CAPS 60'S",
+  "Quantity": 28,
+  "Expiry": "08-Dec-29"
+ },
+ {
+  "Drug": "ALPHA LIFE Q-CALCIUM TABS 60'S",
+  "Quantity": 8,
+  "Expiry": "09-Dec-29"
+ },
+ {
+  "Drug": "ALPHA OMEGA 3 CAPS 10X10",
+  "Quantity": 81,
+  "Expiry": "10-Dec-29"
+ },
+ {
+  "Drug": "ALPHA VIT.C ZINC EFF. TABS",
+  "Quantity": 144,
+  "Expiry": "11-Dec-29"
+ },
+ {
+  "Drug": "ALPHA VITAMIN E 400IU 30'S",
+  "Quantity": 3,
+  "Expiry": "12-Dec-29"
+ },
+ {
+  "Drug": "ALPHAGAN EYE DROPS 5ML",
+  "Quantity": 5,
+  "Expiry": "13-Dec-29"
+ },
+ {
+  "Drug": "ALUDROX TABS 100X10 LETAP",
+  "Quantity": 3,
+  "Expiry": "14-Dec-29"
+ },
+ {
+  "Drug": "ALWAYS PANTYLINER NORMAL 20'S",
+  "Quantity": 20,
+  "Expiry": "15-Dec-29"
+ },
+ {
+  "Drug": "AMARYL 2MG 30 TABS",
+  "Quantity": 4,
+  "Expiry": "16-Dec-29"
+ },
+ {
+  "Drug": "AMARYL 4MG 30 TABS",
+  "Quantity": 8,
+  "Expiry": "17-Dec-29"
+ },
+ {
+  "Drug": "AMCICLOX SUSP 100ML",
+  "Quantity": 90,
+  "Expiry": "18-Dec-29"
+ },
+ {
+  "Drug": "AMCOF BABY",
+  "Quantity": 70,
+  "Expiry": "19-Dec-29"
+ },
+ {
+  "Drug": "AMCOF JUNIOR",
+  "Quantity": 102,
+  "Expiry": "20-Dec-29"
+ },
+ {
+  "Drug": "AMICLOX 250MG\/5ML SUSP 100ML",
+  "Quantity": 3,
+  "Expiry": "21-Dec-29"
+ },
+ {
+  "Drug": "AMIKACIN INJECTION",
+  "Quantity": 10,
+  "Expiry": "22-Dec-29"
+ },
+ {
+  "Drug": "AMINOPHYLLINE 250MG INJ 1ML 50'S PER AMP",
+  "Quantity": 43,
+  "Expiry": "23-Dec-29"
+ },
+ {
+  "Drug": "AMIODARONE 200MG TABS 28'S",
+  "Quantity": 13,
+  "Expiry": "24-Dec-29"
+ },
+ {
+  "Drug": "AMITRIPTYLINE 10MG TABS 28'S UK",
+  "Quantity": 47,
+  "Expiry": "25-Dec-29"
+ },
+ {
+  "Drug": "AMITRIPTYLINE 25MG TEVA",
+  "Quantity": 38,
+  "Expiry": "26-Dec-29"
+ },
+ {
+  "Drug": "AMLO DENK 5MG 10X5",
+  "Quantity": 9,
+  "Expiry": "27-Dec-29"
+ },
+ {
+  "Drug": "AMLO-DENK 10MG TABS 10X5",
+  "Quantity": 10,
+  "Expiry": "28-Dec-29"
+ },
+ {
+  "Drug": "AMLODIPINE BES TAB 10MG TEV 28",
+  "Quantity": 228,
+  "Expiry": "29-Dec-29"
+ },
+ {
+  "Drug": "AMLODIPINE BES TAB 5MG TEV 28",
+  "Quantity": 10,
+  "Expiry": "30-Dec-29"
+ },
+ {
+  "Drug": "AMLONOVA 10MG TABS 30'S",
+  "Quantity": 16,
+  "Expiry": "31-Dec-29"
+ },
+ {
+  "Drug": "AMOKSIKLAV 457 SUSP",
+  "Quantity": 63,
+  "Expiry": "01-Jan-30"
+ },
+ {
+  "Drug": "AMOKSIKLAV 625 TAB",
+  "Quantity": 158,
+  "Expiry": "02-Jan-30"
+ },
+ {
+  "Drug": "AMOKXICLAV 625MG TABS VEGA",
+  "Quantity": 3,
+  "Expiry": "03-Jan-30"
+ },
+ {
+  "Drug": "AMOKXINATE 1.2G INJ",
+  "Quantity": 42,
+  "Expiry": "04-Jan-30"
+ },
+ {
+  "Drug": "AMOKXINATE 1G TABS 14'S",
+  "Quantity": 63,
+  "Expiry": "05-Jan-30"
+ },
+ {
+  "Drug": "AMOKXINATE 457MG SUSP",
+  "Quantity": 55,
+  "Expiry": "06-Jan-30"
+ },
+ {
+  "Drug": "AMOKXINATE 625MG TABS",
+  "Quantity": 42,
+  "Expiry": "07-Jan-30"
+ },
+ {
+  "Drug": "AMOVULIN 457",
+  "Quantity": 55,
+  "Expiry": "08-Jan-30"
+ },
+ {
+  "Drug": "AMOVULIN 625",
+  "Quantity": 122,
+  "Expiry": "09-Jan-30"
+ },
+ {
+  "Drug": "AMOXI & CLAV 228MG SUSP 70ML LUEX",
+  "Quantity": 2,
+  "Expiry": "10-Jan-30"
+ },
+ {
+  "Drug": "AMOXI & CLAV 475MG SUSP 70ML LUEX",
+  "Quantity": 53,
+  "Expiry": "11-Jan-30"
+ },
+ {
+  "Drug": "AMOXI + CLAV 1GM  14'S LUEX",
+  "Quantity": 48,
+  "Expiry": "12-Jan-30"
+ },
+ {
+  "Drug": "AMOXI CLAV. 625 TABS 14'S LUEX",
+  "Quantity": 66,
+  "Expiry": "13-Jan-30"
+ },
+ {
+  "Drug": "AMOXICILLIN 125MG\/5ML SUSP 100ML VEGA",
+  "Quantity": 46,
+  "Expiry": "14-Jan-30"
+ },
+ {
+  "Drug": "AMOXICILLIN 250MG CAPS 50X10-LETAP",
+  "Quantity": 9,
+  "Expiry": "15-Jan-30"
+ },
+ {
+  "Drug": "AMOXICILLIN 500MG CAPS 10X10 LETAP",
+  "Quantity": 8,
+  "Expiry": "16-Jan-30"
+ },
+ {
+  "Drug": "AMOXICILLIN SUSP 100ML LETAP",
+  "Quantity": 78,
+  "Expiry": "17-Jan-30"
+ },
+ {
+  "Drug": "AMOXICILLIN SUSP 100ML M&G",
+  "Quantity": 50,
+  "Expiry": "18-Jan-30"
+ },
+ {
+  "Drug": "AMOXYCILLIN CAP EXETER 21'S",
+  "Quantity": 152,
+  "Expiry": "19-Jan-30"
+ },
+ {
+  "Drug": "AMOXYCILLIN CAPS 500MG 21'S UK",
+  "Quantity": 21,
+  "Expiry": "20-Jan-30"
+ },
+ {
+  "Drug": "AMOXYCILLIN SUSP 125MG\/5ML UK",
+  "Quantity": 63,
+  "Expiry": "21-Jan-30"
+ },
+ {
+  "Drug": "AMPICILLIN 250MG CAPS",
+  "Quantity": 3,
+  "Expiry": "22-Jan-30"
+ },
+ {
+  "Drug": "AMUROX 250MG(CEFUROXIME) TABS",
+  "Quantity": 11,
+  "Expiry": "23-Jan-30"
+ },
+ {
+  "Drug": "AMUZU GARLIC MIXTURE",
+  "Quantity": 13,
+  "Expiry": "24-Jan-30"
+ },
+ {
+  "Drug": "ANACONDA BALM 65GM",
+  "Quantity": 34,
+  "Expiry": "25-Jan-30"
+ },
+ {
+  "Drug": "ANAFRANIL 25MG TABS 50'S INDIA",
+  "Quantity": 42,
+  "Expiry": "26-Jan-30"
+ },
+ {
+  "Drug": "ANAFRANIL TAB 25MG 1 X 30",
+  "Quantity": 15,
+  "Expiry": "27-Jan-30"
+ },
+ {
+  "Drug": "ANASTRAZOLE TABS 1MG 28'S",
+  "Quantity": 4,
+  "Expiry": "28-Jan-30"
+ },
+ {
+  "Drug": "ANCIGEL",
+  "Quantity": 20,
+  "Expiry": "29-Jan-30"
+ },
+ {
+  "Drug": "ANKLE BRACE (POLAR)",
+  "Quantity": 15,
+  "Expiry": "30-Jan-30"
+ },
+ {
+  "Drug": "ANTASIL TABLET 50 X 10",
+  "Quantity": 1,
+  "Expiry": "31-Jan-30"
+ },
+ {
+  "Drug": "ANTICID PLUS SUSP 250ML",
+  "Quantity": 1,
+  "Expiry": "01-Feb-30"
+ },
+ {
+  "Drug": "ANTICID PLUS TABS 2X10",
+  "Quantity": 4,
+  "Expiry": "02-Feb-30"
+ },
+ {
+  "Drug": "ANTIPLAR 75MG CLOPIDOGREL 10X10",
+  "Quantity": 15,
+  "Expiry": "03-Feb-30"
+ },
+ {
+  "Drug": "ANUSOL OINTMENT 25GM",
+  "Quantity": 25,
+  "Expiry": "04-Feb-30"
+ },
+ {
+  "Drug": "ANUSOL PLUS HC OINTMENT",
+  "Quantity": 24,
+  "Expiry": "05-Feb-30"
+ },
+ {
+  "Drug": "APETAMIN SYRUP",
+  "Quantity": 9,
+  "Expiry": "06-Feb-30"
+ },
+ {
+  "Drug": "APETATRUST SYR 100ML",
+  "Quantity": 43,
+  "Expiry": "07-Feb-30"
+ },
+ {
+  "Drug": "APETATRUST SYR 200ML",
+  "Quantity": 17,
+  "Expiry": "08-Feb-30"
+ },
+ {
+  "Drug": "APIXABAN TABS 2.5MG 60'S",
+  "Quantity": 9,
+  "Expiry": "09-Feb-30"
+ },
+ {
+  "Drug": "APPLE CIDER VINEGAR GUMMIES",
+  "Quantity": 13,
+  "Expiry": "10-Feb-30"
+ },
+ {
+  "Drug": "APROVEL 150MG",
+  "Quantity": 10,
+  "Expiry": "11-Feb-30"
+ },
+ {
+  "Drug": "APROVEL 300MG TABS 28'S",
+  "Quantity": 15,
+  "Expiry": "12-Feb-30"
+ },
+ {
+  "Drug": "AQUAFRESH MOUTH WASH 500ML",
+  "Quantity": 60,
+  "Expiry": "13-Feb-30"
+ },
+ {
+  "Drug": "AQUAFRESH TOOTHPASTE 100ML",
+  "Quantity": 52,
+  "Expiry": "14-Feb-30"
+ },
+ {
+  "Drug": "AQUEOUS CREAM",
+  "Quantity": 13,
+  "Expiry": "15-Feb-30"
+ },
+ {
+  "Drug": "ARFAN 20\/120MG SUSP",
+  "Quantity": 9,
+  "Expiry": "16-Feb-30"
+ },
+ {
+  "Drug": "ARFAN 20\/120MG TABS 24'S",
+  "Quantity": 95,
+  "Expiry": "17-Feb-30"
+ },
+ {
+  "Drug": "ARGAN OIL CONDITIONER 300ML",
+  "Quantity": 19,
+  "Expiry": "18-Feb-30"
+ },
+ {
+  "Drug": "ARGAN OIL HEAT DEFENCE",
+  "Quantity": 52,
+  "Expiry": "19-Feb-30"
+ },
+ {
+  "Drug": "ARGAN OIL SHAMPOO 300ML",
+  "Quantity": 24,
+  "Expiry": "20-Feb-30"
+ },
+ {
+  "Drug": "ARTENATE 120MG INJ",
+  "Quantity": 7,
+  "Expiry": "21-Feb-30"
+ },
+ {
+  "Drug": "ARTENATE 30MG 1'",
+  "Quantity": 132,
+  "Expiry": "22-Feb-30"
+ },
+ {
+  "Drug": "ARTENATE 60MG INJ",
+  "Quantity": 2,
+  "Expiry": "23-Feb-30"
+ },
+ {
+  "Drug": "ARTHROSAMINE PLUS CAPS 60'S",
+  "Quantity": 16,
+  "Expiry": "24-Feb-30"
+ },
+ {
+  "Drug": "ARTHROTEC 75MG 100'S",
+  "Quantity": 1,
+  "Expiry": "25-Feb-30"
+ },
+ {
+  "Drug": "ARTHROTEC 75MG CAPS 20'S",
+  "Quantity": 15,
+  "Expiry": "26-Feb-30"
+ },
+ {
+  "Drug": "ARZIGLOBIN PLUS SYR",
+  "Quantity": 30,
+  "Expiry": "27-Feb-30"
+ },
+ {
+  "Drug": "ARZIGLOBIN SYR 200ML",
+  "Quantity": 38,
+  "Expiry": "28-Feb-30"
+ },
+ {
+  "Drug": "ASCOVIT CEE TAB",
+  "Quantity": 19,
+  "Expiry": "01-Mar-30"
+ },
+ {
+  "Drug": "ASENA",
+  "Quantity": 8,
+  "Expiry": "02-Mar-30"
+ },
+ {
+  "Drug": "ASEPSO ACNE CARE SOAP",
+  "Quantity": 2,
+  "Expiry": "03-Mar-30"
+ },
+ {
+  "Drug": "ASMADRIN 25X 4'S",
+  "Quantity": 30,
+  "Expiry": "04-Mar-30"
+ },
+ {
+  "Drug": "ASNAC-SR 100MG DICLOFENAC TAB",
+  "Quantity": 93,
+  "Expiry": "05-Mar-30"
+ },
+ {
+  "Drug": "ASNAC-SR 75MG DICLOFENAC TAB",
+  "Quantity": 10,
+  "Expiry": "06-Mar-30"
+ },
+ {
+  "Drug": "ASPA MALARIA TEST KIT",
+  "Quantity": 9,
+  "Expiry": "07-Mar-30"
+ },
+ {
+  "Drug": "ASPA PREGNANCY TEST (MIDSTREAM)",
+  "Quantity": 245,
+  "Expiry": "08-Mar-30"
+ },
+ {
+  "Drug": "ASPANOL PRODUCTIVE SYR 125ML",
+  "Quantity": 97,
+  "Expiry": "09-Mar-30"
+ },
+ {
+  "Drug": "ASPAR DISP ASPIRIN TAB 75MG 100BLISTER",
+  "Quantity": 103,
+  "Expiry": "10-Mar-30"
+ },
+ {
+  "Drug": "ASPIRIN CARDIO",
+  "Quantity": 16,
+  "Expiry": "11-Mar-30"
+ },
+ {
+  "Drug": "ASTHALEX INHALER",
+  "Quantity": 24,
+  "Expiry": "12-Mar-30"
+ },
+ {
+  "Drug": "ASTHALEX SYRUP 100ML",
+  "Quantity": 30,
+  "Expiry": "13-Mar-30"
+ },
+ {
+  "Drug": "ATENOLOL 100MG TABS 28'S UK",
+  "Quantity": 16,
+  "Expiry": "14-Mar-30"
+ },
+ {
+  "Drug": "ATENOLOL 25MG TABS 28'S UK",
+  "Quantity": 1,
+  "Expiry": "15-Mar-30"
+ },
+ {
+  "Drug": "ATENOLOL 50MG X 28 UK",
+  "Quantity": 64,
+  "Expiry": "16-Mar-30"
+ },
+ {
+  "Drug": "ATENOVA 100MG TABS 30'S",
+  "Quantity": 50,
+  "Expiry": "17-Mar-30"
+ },
+ {
+  "Drug": "ATORVASTATIN 40MG UK",
+  "Quantity": 175,
+  "Expiry": "18-Mar-30"
+ },
+ {
+  "Drug": "ATORVASTATIN TAB 20MG TEVA",
+  "Quantity": 8,
+  "Expiry": "19-Mar-30"
+ },
+ {
+  "Drug": "ATWOOD LAXATIVE BITTERS 177ML",
+  "Quantity": 37,
+  "Expiry": "20-Mar-30"
+ },
+ {
+  "Drug": "AUGMENTIN 625",
+  "Quantity": 2,
+  "Expiry": "21-Mar-30"
+ },
+ {
+  "Drug": "AUNTIE MARY GRIPEWATER 150ML",
+  "Quantity": 47,
+  "Expiry": "22-Mar-30"
+ },
+ {
+  "Drug": "AVAMYS NASAL SPRAY",
+  "Quantity": 21,
+  "Expiry": "23-Mar-30"
+ },
+ {
+  "Drug": "AVEENO BABY BATH 532ML",
+  "Quantity": 5,
+  "Expiry": "24-Jun-30"
+ },
+ {
+  "Drug": "AVEENO MOISTURING BODY WASH 300ML",
+  "Quantity": 2,
+  "Expiry": "15-Feb-30"
+ },
+ {
+  "Drug": "AVODART SOFT CAP 30'S",
+  "Quantity": 1,
+  "Expiry": "26-Mar-30"
+ },
+ {
+  "Drug": "AZILEX 250MG 6'S",
+  "Quantity": 68,
+  "Expiry": "27-Mar-30"
+ },
+ {
+  "Drug": "AZIS-500MG AZITHROMYCIN TABS",
+  "Quantity": 25,
+  "Expiry": "28-Mar-30"
+ },
+ {
+  "Drug": "AZITEX 500MG CAPS 3'S",
+  "Quantity": 1,
+  "Expiry": "29-Mar-30"
+ },
+ {
+  "Drug": "AZITHRAA 500MG (AZITHROMYCIN)",
+  "Quantity": 203,
+  "Expiry": "30-Mar-30"
+ }
+]
+

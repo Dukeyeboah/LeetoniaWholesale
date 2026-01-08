@@ -8,7 +8,13 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
-    "seed": "tsx scripts/seed-inventory.ts"
+    "seed": "tsx scripts/seed-inventory.ts",
+    "import-drugs": "tsx scripts/import-drugs-with-images.ts",
+    "fix-image-urls": "tsx scripts/fix-image-urls.ts",
+    "show-filenames": "tsx scripts/show-expected-filenames.ts",
+    "match-images": "tsx scripts/match-storage-files-to-products.ts",
+    "verify-storage": "tsx scripts/verify-storage-files.ts",
+    "replace-inventory": "tsx scripts/replace-inventory.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

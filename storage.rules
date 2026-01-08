@@ -13,13 +13,29 @@ service firebase.storage {
         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    // Helper function to check if user is staff with inventory management permission
+    function staffCanManageInventory() {
+      return isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'staff' &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.permissions.canManageInventory == true;
+    }
+
     // Product images
     match /products/{productId}/{allPaths=**} {
       // Anyone can read product images (authenticated or not) - for browsing
       allow read: if true;
       
-      // Only admins can upload/update/delete product images
-      allow write: if isAdmin();
+      // Admins and staff with inventory management permission can upload/update/delete product images
+      allow write: if isAdmin() || staffCanManageInventory();
+    }
+
+    // Inventory images (drug/product images)
+    match /inventoryImages/{allPaths=**} {
+      // Anyone can read inventory images (authenticated or not) - for browsing
+      allow read: if true;
+      
+      // Admins and staff with inventory management permission can upload/update/delete inventory images
+      allow write: if isAdmin() || staffCanManageInventory();
     }
 
     // User avatars
