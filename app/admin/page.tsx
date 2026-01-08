@@ -59,6 +59,8 @@ import {
   Download,
   Printer,
   Calendar,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -401,10 +403,18 @@ Thank you for your business!
       if (imageFile && storage) {
         setUploadingImage(true);
         try {
-          const imageRef = ref(
-            storage,
-            `products/${editingProduct?.id || Date.now()}_${imageFile.name}`
-          );
+          // Sanitize product name for filename
+          const sanitizedName = (productForm.name || 'product')
+            .replace(/[^a-zA-Z0-9\s]/g, '')
+            .replace(/\s+/g, '_')
+            .toUpperCase()
+            .substring(0, 50);
+          
+          // Use inventoryImages folder and product name-based filename
+          const fileExtension = imageFile.name.split('.').pop() || 'jpg';
+          const fileName = `${sanitizedName}.${fileExtension}`;
+          const imageRef = ref(storage, `inventoryImages/${fileName}`);
+          
           await uploadBytes(imageRef, imageFile);
           imageUrl = await getDownloadURL(imageRef);
           toast.success('Image uploaded successfully');
@@ -460,17 +470,56 @@ Thank you for your business!
     }
   };
 
+  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{
+    open: boolean;
+    productId: string | null;
+    productName: string;
+  }>({ open: false, productId: null, productName: '' });
+
   const handleDeleteProduct = async (id: string) => {
+    const product = products.find((p) => p.id === id);
+    if (product) {
+      setDeleteConfirmDialog({
+        open: true,
+        productId: id,
+        productName: product.name,
+      });
+    }
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!db || !deleteConfirmDialog.productId) {
+      return;
+    }
+    try {
+      await deleteDoc(doc(db, 'inventory', deleteConfirmDialog.productId));
+      toast.success('Product deleted permanently');
+      setDeleteConfirmDialog({ open: false, productId: null, productName: '' });
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product');
+    }
+  };
+
+  const handleToggleProductVisibility = async (product: Product) => {
     if (!db) {
       toast.error('Database not available');
       return;
     }
-    if (!confirm('Are you sure you want to delete this product?')) return;
     try {
-      await deleteDoc(doc(db, 'inventory', id));
-      toast.success('Product deleted');
+      const isHidden = product.isHidden || false;
+      await updateDoc(doc(db, 'inventory', product.id), {
+        isHidden: !isHidden,
+        updatedAt: Date.now(),
+      });
+      toast.success(
+        !isHidden
+          ? 'Product hidden from customers'
+          : 'Product made visible to customers'
+      );
     } catch (error) {
-      toast.error('Failed to delete product');
+      console.error('Error toggling product visibility:', error);
+      toast.error('Failed to update product visibility');
     }
   };
 
@@ -1525,13 +1574,20 @@ Thank you for your business!
             {products.map((product) => (
               <div
                 key={product.id}
-                className='grid grid-cols-12 gap-4 p-4 border-b last:border-0 items-center text-sm hover:bg-muted/5 transition-colors'
+                className={`grid grid-cols-12 gap-4 p-4 border-b last:border-0 items-center text-sm hover:bg-muted/5 transition-colors ${
+                  product.isHidden ? 'opacity-60 bg-muted/20' : ''
+                }`}
               >
                 <div
-                  className='col-span-4 md:col-span-3 font-medium truncate'
+                  className='col-span-4 md:col-span-3 font-medium truncate flex items-center gap-2'
                   title={product.name}
                 >
-                  {product.name}
+                  {product.isHidden && (
+                    <Badge variant='secondary' className='text-xs'>
+                      Hidden
+                    </Badge>
+                  )}
+                  <span>{product.name}</span>
                 </div>
                 <div className='col-span-3 md:col-span-2 truncate'>
                   {product.category}
@@ -1563,14 +1619,29 @@ Thank you for your business!
                     size='icon'
                     className='h-8 w-8'
                     onClick={() => openProductDialog(product)}
+                    title='Edit product'
                   >
                     <Edit className='h-4 w-4' />
                   </Button>
                   <Button
                     variant='ghost'
                     size='icon'
+                    className='h-8 w-8'
+                    onClick={() => handleToggleProductVisibility(product)}
+                    title={product.isHidden ? 'Show product' : 'Hide product'}
+                  >
+                    {product.isHidden ? (
+                      <EyeOff className='h-4 w-4' />
+                    ) : (
+                      <Eye className='h-4 w-4' />
+                    )}
+                  </Button>
+                  <Button
+                    variant='ghost'
+                    size='icon'
                     className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
                     onClick={() => handleDeleteProduct(product.id)}
+                    title='Delete product permanently'
                   >
                     <Trash2 className='h-4 w-4' />
                   </Button>
@@ -2050,6 +2121,54 @@ Thank you for your business!
             </Button>
             <Button onClick={handleSaveStaff} disabled={!editingStaff}>
               Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmDialog.open}
+        onOpenChange={(open) =>
+          setDeleteConfirmDialog({ open, productId: null, productName: '' })
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Product</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to permanently delete this product? This
+              action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='py-4'>
+            <p className='font-medium'>
+              Product: {deleteConfirmDialog.productName}
+            </p>
+            <p className='text-sm text-muted-foreground mt-2'>
+              This will permanently remove the product from your inventory. If
+              you want to hide it from customers instead, use the hide/show
+              button.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() =>
+                setDeleteConfirmDialog({
+                  open: false,
+                  productId: null,
+                  productName: '',
+                })
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant='destructive'
+              onClick={confirmDeleteProduct}
+            >
+              Delete Permanently
             </Button>
           </DialogFooter>
         </DialogContent>

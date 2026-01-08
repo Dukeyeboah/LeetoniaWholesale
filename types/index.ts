@@ -30,6 +30,7 @@ export interface Product {
   imageUrl?: string;
   expiryDate?: number; // Unix timestamp
   code?: string; // Product code
+  isHidden?: boolean; // Hide product from customers (soft delete)
   updatedAt: number;
 }
 

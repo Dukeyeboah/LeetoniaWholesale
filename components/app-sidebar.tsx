@@ -15,7 +15,7 @@ import {
   Bell,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { useAuth } from '@/lib/auth-context';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -326,6 +326,7 @@ export function AppSidebar() {
           </Button>
         </SheetTrigger>
         <SheetContent side='left' className='p-0 w-72'>
+          <SheetTitle className='sr-only'>Navigation Menu</SheetTitle>
           <NavContent />
         </SheetContent>
       </Sheet>

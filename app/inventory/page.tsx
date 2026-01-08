@@ -33,7 +33,8 @@ export default function InventoryPage() {
 
   // Always use products from Firebase/IndexedDB - don't fall back to mock data
   // Mock data is only for development/testing when no data is seeded
-  const displayProducts = products;
+  // Filter out hidden products (only show to customers if not hidden)
+  const displayProducts = products.filter((p) => !p.isHidden);
 
   // Get unique categories from products, merge with predefined categories
   const productCategories = Array.from(

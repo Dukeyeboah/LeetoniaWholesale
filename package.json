@@ -14,7 +14,8 @@
     "show-filenames": "tsx scripts/show-expected-filenames.ts",
     "match-images": "tsx scripts/match-storage-files-to-products.ts",
     "verify-storage": "tsx scripts/verify-storage-files.ts",
-    "replace-inventory": "tsx scripts/replace-inventory.ts"
+    "replace-inventory": "tsx scripts/replace-inventory.ts",
+    "add-inventory": "tsx scripts/add-inventory.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
