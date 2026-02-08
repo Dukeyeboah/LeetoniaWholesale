@@ -5,7 +5,7 @@ import { useInventory } from '@/hooks/use-inventory';
 import { useCart } from '@/hooks/use-cart'; // Import useCart
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, WifiOff } from 'lucide-react';
+import { Search, Filter, WifiOff, ChevronDown } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -19,17 +19,42 @@ import type { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { PRODUCT_CATEGORIES } from '@/lib/categories';
 
+const INITIAL_PAGE_SIZE = 50;
+const LOAD_MORE_SIZE = 50;
+
+const LETTER_OPTIONS = [
+  'all',
+  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+  '0-9',
+] as const;
+type LetterFilter = (typeof LETTER_OPTIONS)[number];
+
+function getFirstCharacterGroup(name: string): string {
+  const first = (name || '').trim()[0];
+  if (!first) return '';
+  if (/\d/.test(first)) return '0-9';
+  const upper = first.toUpperCase();
+  return /[A-Z]/.test(upper) ? upper : '';
+}
+
 export default function InventoryPage() {
   const { products, loading, offline } = useInventory();
   const { addToCart } = useCart(); // Use hook
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [letterFilter, setLetterFilter] = useState<LetterFilter>('all');
   const [isMounted, setIsMounted] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
 
   // Fix hydration errors by only rendering Select after mount
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Reset to first page when search, category, or letter changes
+  useEffect(() => {
+    setVisibleCount(INITIAL_PAGE_SIZE);
+  }, [searchQuery, categoryFilter, letterFilter]);
 
   // Always use products from Firebase/IndexedDB - don't fall back to mock data
   // Mock data is only for development/testing when no data is seeded
@@ -49,8 +74,14 @@ export default function InventoryPage() {
       product.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
       categoryFilter === 'all' || product.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    const matchesLetter =
+      letterFilter === 'all' ||
+      getFirstCharacterGroup(product.name || '') === letterFilter;
+    return matchesSearch && matchesCategory && matchesLetter;
   });
+
+  const productsToShow = filteredProducts.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredProducts.length;
 
   const handleAddToCart = (product: Product, quantity: number) => {
     addToCart(product, quantity);
@@ -121,6 +152,24 @@ export default function InventoryPage() {
         )}
       </div>
 
+      {/* Alphabetical filter */}
+      <div className='flex flex-wrap items-center gap-2'>
+        <span className='text-sm text-muted-foreground shrink-0'>Starts with:</span>
+        <div className='flex flex-wrap gap-1.5'>
+          {LETTER_OPTIONS.map((letter) => (
+            <Button
+              key={letter}
+              variant={letterFilter === letter ? 'default' : 'outline'}
+              size='sm'
+              className='min-w-[2rem] h-8 px-2 font-medium'
+              onClick={() => setLetterFilter(letter)}
+            >
+              {letter === 'all' ? 'All' : letter}
+            </Button>
+          ))}
+        </div>
+      </div>
+
       {loading ? (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -142,20 +191,41 @@ export default function InventoryPage() {
             onClick={() => {
               setSearchQuery('');
               setCategoryFilter('all');
+              setLetterFilter('all');
             }}
           >
             Clear all filters
           </Button>
         </div>
       ) : (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={handleAddToCart}
-            />
-          ))}
+        <div className='space-y-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
+            {productsToShow.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onAddToCart={handleAddToCart}
+              />
+            ))}
+          </div>
+          {filteredProducts.length > INITIAL_PAGE_SIZE && (
+            <div className='flex flex-col items-center gap-3 pt-4'>
+              <p className='text-sm text-muted-foreground'>
+                Showing {productsToShow.length} of {filteredProducts.length} products
+              </p>
+              {hasMore && (
+                <Button
+                  variant='outline'
+                  size='lg'
+                  onClick={() => setVisibleCount((prev) => prev + LOAD_MORE_SIZE)}
+                  className='gap-2'
+                >
+                  <ChevronDown className='h-4 w-4' />
+                  Show more ({Math.min(LOAD_MORE_SIZE, filteredProducts.length - visibleCount)} more)
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

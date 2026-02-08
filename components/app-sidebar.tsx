@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -38,6 +39,11 @@ export function AppSidebar() {
   const { user, logout, isAdmin, isStaff, viewMode, setViewMode, hasPermission } = useAuth();
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { unreadCount } = useNotifications(user?.id);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Show client routes when in client view or not admin/staff
   const showClientRoutes = (!isAdmin && !isStaff) || viewMode === 'client';
@@ -313,23 +319,30 @@ export function AppSidebar() {
         </Button>
       </div>
 
-      {/* Mobile Sheet */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='md:hidden fixed top-4 left-4 z-40 bg-background/80 backdrop-blur border shadow-sm'
-          >
-            <Menu className='h-5 w-5' />
-            <span className='sr-only'>Toggle menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side='left' className='p-0 w-72'>
-          <SheetTitle className='sr-only'>Navigation Menu</SheetTitle>
-          <NavContent />
-        </SheetContent>
-      </Sheet>
+      {/* Mobile Sheet - only render after mount to avoid Radix ID hydration mismatch */}
+      {mounted ? (
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='md:hidden fixed top-4 left-4 z-40 bg-background/80 backdrop-blur border shadow-sm'
+            >
+              <Menu className='h-5 w-5' />
+              <span className='sr-only'>Toggle menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side='left' className='p-0 w-72'>
+            <SheetTitle className='sr-only'>Navigation Menu</SheetTitle>
+            <NavContent />
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <div
+          className='md:hidden fixed top-4 left-4 z-40 h-10 w-10 rounded-md border border-transparent'
+          aria-hidden
+        />
+      )}
     </>
   );
 }

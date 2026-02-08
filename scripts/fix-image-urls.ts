@@ -69,6 +69,13 @@ function fixImageUrl(url: string): string | null {
   return url;
 }
 
+interface InventoryDoc {
+  id: string;
+  name?: string;
+  imageUrl?: string;
+  [key: string]: unknown;
+}
+
 async function fixAllImageUrls() {
   console.log('Starting image URL fix...');
   console.log(`Storage bucket: ${storageBucket}`);
@@ -76,10 +83,10 @@ async function fixAllImageUrls() {
   try {
     // Get all products
     const productsSnapshot = await getDocs(collection(db, 'inventory'));
-    const products = productsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const products = productsSnapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    })) as InventoryDoc[];
 
     console.log(`Found ${products.length} products to check`);
 

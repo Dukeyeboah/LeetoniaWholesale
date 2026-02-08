@@ -30,19 +30,18 @@ try {
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
-  } else {
+  } else if (typeof window !== 'undefined') {
+    // Only warn in the browser when credentials are missing (not during build/SSR where window is undefined)
     console.error(
       'Firebase credentials missing or invalid. Please configure your .env.local file.'
     );
-    if (typeof window !== 'undefined') {
-      console.error('Required environment variables:');
-      console.error('- NEXT_PUBLIC_FIREBASE_API_KEY');
-      console.error('- NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN');
-      console.error('- NEXT_PUBLIC_FIREBASE_PROJECT_ID');
-      console.error('- NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET');
-      console.error('- NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID');
-      console.error('- NEXT_PUBLIC_FIREBASE_APP_ID');
-    }
+    console.error('Required environment variables:');
+    console.error('- NEXT_PUBLIC_FIREBASE_API_KEY');
+    console.error('- NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN');
+    console.error('- NEXT_PUBLIC_FIREBASE_PROJECT_ID');
+    console.error('- NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET');
+    console.error('- NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID');
+    console.error('- NEXT_PUBLIC_FIREBASE_APP_ID');
   }
 } catch (error) {
   console.error('Error initializing Firebase:', error);
