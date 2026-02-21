@@ -133,7 +133,8 @@ export default function AdminDashboard() {
     });
 
     // Listen to Inventory
-    const inventoryQuery = query(collection(db, 'inventory'), orderBy('name'));
+    // const inventoryQuery = query(collection(db, 'inventory'), orderBy('name'));
+    const inventoryQuery = query(collection(db, 'inventory'))
     const unsubInventory = onSnapshot(inventoryQuery, (snapshot) => {
       setProducts(
         snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Product))

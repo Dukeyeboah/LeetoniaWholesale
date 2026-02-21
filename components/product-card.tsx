@@ -125,8 +125,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               isOutOfStock
                 ? 'bg-destructive'
                 : isLowStock
-                ? 'bg-yellow-500'
-                : 'bg-green-500'
+                  ? 'bg-yellow-500'
+                  : 'bg-green-500'
             }`}
           />
           <span
@@ -134,8 +134,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               isOutOfStock
                 ? 'text-destructive font-medium'
                 : isLowStock
-                ? 'text-yellow-600'
-                : 'text-green-600'
+                  ? 'text-yellow-600'
+                  : 'text-green-600'
             }
           >
             {isOutOfStock ? 'Unavailable' : `${product.stock} in stock`}

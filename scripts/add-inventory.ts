@@ -206,6 +206,7 @@ function generateDefaultPrice(category: string, stock: number): number {
  */
 async function getExistingProducts(): Promise<Map<string, string>> {
   console.log('📦 Fetching existing products from Firestore...');
+  console.log("PROJECT ID:", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
   const productsMap = new Map<string, string>();
   
   try {

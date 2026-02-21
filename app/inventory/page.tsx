@@ -18,6 +18,24 @@ import {
 import type { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { PRODUCT_CATEGORIES } from '@/lib/categories';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from '@/lib/firebase';
+
+async function debugCheck() {
+  const snapshot = await getDocs(collection(db, "inventory"));
+  console.log("MY TOTAL DOCS:", snapshot.size);
+  console.log("debugcheck side PROJECT ID:", db.app.options.projectId);
+
+  snapshot.forEach(doc => {
+    console.log("DOC:", doc.id);
+  });
+}
+
+debugCheck();
+
+// useEffect(() => {
+//   debugCheck();
+// }, []);
 
 const INITIAL_PAGE_SIZE = 50;
 const LOAD_MORE_SIZE = 50;
@@ -46,6 +64,12 @@ export default function InventoryPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
 
+
+  
+  console.log("Inventory loading:", loading);
+console.log("Products:", products.length);
+console.log("Offline:", offline);
+
   // Fix hydration errors by only rendering Select after mount
   useEffect(() => {
     setIsMounted(true);
@@ -59,7 +83,13 @@ export default function InventoryPage() {
   // Always use products from Firebase/IndexedDB - don't fall back to mock data
   // Mock data is only for development/testing when no data is seeded
   // Filter out hidden products (only show to customers if not hidden)
-  const displayProducts = products.filter((p) => !p.isHidden);
+   const displayProducts = products.filter((p) => !p.isHidden);
+  //const displayProducts = products.filter((p) => p.isHidden !== true);
+
+  console.log("RAW PRODUCTS:", products.length);
+  console.log("FIRST RAW:", products[0]);
+  console.log("DISPLAY PRODUCTS:", displayProducts.length);
+  
 
   // Get unique categories from products, merge with predefined categories
   const productCategories = Array.from(
