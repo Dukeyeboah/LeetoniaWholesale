@@ -483,6 +483,3581 @@
   "Drug": "BX SYR 100ML",
   "Quantity": 8,
   "Expiry": "10-Jan-30"
+ },
+ {
+  "Drug": "S-FIX CEFIXIME (200MG)",
+  "Quantity": 5,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "S-ROCIN CREAM (MUPIROCIN)",
+  "Quantity": 15,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "S-TINORIN CREAM (TRETINON)",
+  "Quantity": 171,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "SALAMOL CFC INHALER",
+  "Quantity": 86,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "SALBUTALIN SYRUP 200ML",
+  "Quantity": 30,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "SALBUTAMOL TAB",
+  "Quantity": 15,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "SALICYLIC SOAP",
+  "Quantity": 1,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "SALINE NASAL DOPS 10ML-LAVINA",
+  "Quantity": 21,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "SALOCOLD SYR",
+  "Quantity": 9,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "SALOCOLD TAB",
+  "Quantity": 46,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "SALOFULVIN SYR",
+  "Quantity": 98,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "SALOGEL O SYR 200ML",
+  "Quantity": 25,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "SALOGEL SYR 200ML",
+  "Quantity": 21,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "SAMALIN ADULT 5% N/DROWSY COUGH SYR",
+  "Quantity": 17,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "SAMALIN ADULT COUGH SYR",
+  "Quantity": 17,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "SAMALIN JNR 2% NON DROWNSY",
+  "Quantity": 16,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "SAMALIN JUNIOR COUGH SYR",
+  "Quantity": 60,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "SAMALIN LOZENGES 2X10",
+  "Quantity": 15,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "SAMOCID",
+  "Quantity": 40,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "SANA NASAL DROP 10ML",
+  "Quantity": 278,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "SANEX ROLL ON 50ML",
+  "Quantity": 89,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "SAV500 CAPS 30'S",
+  "Quantity": 10,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "SAVLON CREAM 30G",
+  "Quantity": 20,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "SCAR REMOVAL GEL",
+  "Quantity": 56,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "SE'CLEAR EYE DROP",
+  "Quantity": 493,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "SECNIDAZOLE 1GM (T SEC)",
+  "Quantity": 1,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "SECNIDEX 1G TABS 2'S",
+  "Quantity": 94,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "SECURE SANITRY PAD",
+  "Quantity": 17,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "SECURE TABS",
+  "Quantity": 85,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "SENSODYNE GENTLE WHITENING 75ML",
+  "Quantity": 8,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "SEPTILIN SYRUP 100ML",
+  "Quantity": 1,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "SERETIDE 50/250MCG",
+  "Quantity": 18,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "SERTRALINE 100MG TABBS 28'S",
+  "Quantity": 24,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "SERTRALINE 50MG TABS 28'S",
+  "Quantity": 1,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "SHAL'ARTEM SYR 100ML",
+  "Quantity": 100,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "SHAL'TERM FORTE TABS 6'S",
+  "Quantity": 82,
+  "Expiry": "17-Apr-27"
+ },
+ {
+  "Drug": "SHALCIP INF. 0.2% 100ML",
+  "Quantity": 36,
+  "Expiry": "18-Apr-27"
+ },
+ {
+  "Drug": "SHALCIP TABS 500MG",
+  "Quantity": 270,
+  "Expiry": "19-Apr-27"
+ },
+ {
+  "Drug": "SHALCIP TZ TABLETS",
+  "Quantity": 170,
+  "Expiry": "20-Apr-27"
+ },
+ {
+  "Drug": "SHALMET INF 0.5% 100ML",
+  "Quantity": 9,
+  "Expiry": "21-Apr-27"
+ },
+ {
+  "Drug": "SHALTOUX ADULT COUGH SYRUP 100ML",
+  "Quantity": 55,
+  "Expiry": "22-Apr-27"
+ },
+ {
+  "Drug": "SHALTOUX KIDS COUGH SYR 100ML",
+  "Quantity": 36,
+  "Expiry": "23-Apr-27"
+ },
+ {
+  "Drug": "SHALTOUX NATURAL LOZENGES 200'S",
+  "Quantity": 24,
+  "Expiry": "24-Apr-27"
+ },
+ {
+  "Drug": "SILDENAFIL 50MG TABS 4'S EXETER",
+  "Quantity": 28,
+  "Expiry": "25-Apr-27"
+ },
+ {
+  "Drug": "SILDENAFIL 50MG TABS 4'S TEVA",
+  "Quantity": 33,
+  "Expiry": "26-Apr-27"
+ },
+ {
+  "Drug": "SILDIAZINE CREAM 1% 50GM",
+  "Quantity": 20,
+  "Expiry": "27-Apr-27"
+ },
+ {
+  "Drug": "SILVER SULPHADIAZINE CREAM",
+  "Quantity": 77,
+  "Expiry": "28-Apr-27"
+ },
+ {
+  "Drug": "SIMPLE SOAP TWIN CLEANSING BAR 100G",
+  "Quantity": 14,
+  "Expiry": "29-Apr-27"
+ },
+ {
+  "Drug": "SIMVASTATIN 20MG X 28 UK",
+  "Quantity": 30,
+  "Expiry": "30-Apr-27"
+ },
+ {
+  "Drug": "SINIMET 25/100",
+  "Quantity": 9,
+  "Expiry": "1-May-27"
+ },
+ {
+  "Drug": "SINUTAB 15'S",
+  "Quantity": 6,
+  "Expiry": "2-May-27"
+ },
+ {
+  "Drug": "SKIN DOCTOR SUN BLOCK",
+  "Quantity": 10,
+  "Expiry": "3-May-27"
+ },
+ {
+  "Drug": "SKINS CONDOM 4'S",
+  "Quantity": 75,
+  "Expiry": "4-May-27"
+ },
+ {
+  "Drug": "SKYBRU IBUPROFEN 200MG",
+  "Quantity": 36,
+  "Expiry": "5-May-27"
+ },
+ {
+  "Drug": "SKYBRU IBUPROFEN 400MG",
+  "Quantity": 88,
+  "Expiry": "6-May-27"
+ },
+ {
+  "Drug": "SKYCEF INJ 750MG CEFUROXIME WITH WFI",
+  "Quantity": 2,
+  "Expiry": "7-May-27"
+ },
+ {
+  "Drug": "SKYCEF SUSPENSION 125)CEFUROXIME)-60ML",
+  "Quantity": 74,
+  "Expiry": "8-May-27"
+ },
+ {
+  "Drug": "SKYCEF TAB 250MG (CEFUROXIME)-(1X10)",
+  "Quantity": 151,
+  "Expiry": "9-May-27"
+ },
+ {
+  "Drug": "SKYCEF TAB 500MG (CEFUROXIME)-(1X10)",
+  "Quantity": 8,
+  "Expiry": "10-May-27"
+ },
+ {
+  "Drug": "SKYCID 20MG(OMEPRAZOLE) CAPS 10X10",
+  "Quantity": 11,
+  "Expiry": "11-May-27"
+ },
+ {
+  "Drug": "SKYCID(OMEPRAZOLE)40MG INJ",
+  "Quantity": 183,
+  "Expiry": "12-May-27"
+ },
+ {
+  "Drug": "SKYCLAV 1000MG TAB (1X10)",
+  "Quantity": 100,
+  "Expiry": "13-May-27"
+ },
+ {
+  "Drug": "SKYCLAV 228MG SUSPENSION",
+  "Quantity": 88,
+  "Expiry": "14-May-27"
+ },
+ {
+  "Drug": "SKYCLAV 457MG SUSPENSION",
+  "Quantity": 98,
+  "Expiry": "15-May-27"
+ },
+ {
+  "Drug": "SKYCLAV 625MG TAB 625MG(2X7)",
+  "Quantity": 42,
+  "Expiry": "16-May-27"
+ },
+ {
+  "Drug": "SKYCLAV INJECTION 1.2G (AMOKSICLAV)",
+  "Quantity": 107,
+  "Expiry": "17-May-27"
+ },
+ {
+  "Drug": "SKYDOX DOXYCYCLINE 100MG (10X10)",
+  "Quantity": 50,
+  "Expiry": "18-May-27"
+ },
+ {
+  "Drug": "SKYMET INJECTION 80MG (1X6)",
+  "Quantity": 10,
+  "Expiry": "19-May-27"
+ },
+ {
+  "Drug": "SKYPARA 125MG SUPP",
+  "Quantity": 5,
+  "Expiry": "20-May-27"
+ },
+ {
+  "Drug": "SKYPARA SYR 100ML",
+  "Quantity": 59,
+  "Expiry": "21-May-27"
+ },
+ {
+  "Drug": "SKYPETY SYR 200ML",
+  "Quantity": 30,
+  "Expiry": "22-May-27"
+ },
+ {
+  "Drug": "SLIM GREEN COFFEE",
+  "Quantity": 17,
+  "Expiry": "23-May-27"
+ },
+ {
+  "Drug": "SLIM PLUS FAT BURNER",
+  "Quantity": 14,
+  "Expiry": "24-May-27"
+ },
+ {
+  "Drug": "SLIM SMART CAPS 60'S",
+  "Quantity": 10,
+  "Expiry": "25-May-27"
+ },
+ {
+  "Drug": "SLIM SMART POWDER 200GM",
+  "Quantity": 1,
+  "Expiry": "26-May-27"
+ },
+ {
+  "Drug": "SLOW SODIUM(K) TABS 100'S",
+  "Quantity": 32,
+  "Expiry": "27-May-27"
+ },
+ {
+  "Drug": "SODIUM BICARBONATE 500MG CAPS 100'S",
+  "Quantity": 13,
+  "Expiry": "28-May-27"
+ },
+ {
+  "Drug": "SOFT HEALTH VITAMIN E 400IU CAPS 10X10",
+  "Quantity": 20,
+  "Expiry": "29-May-27"
+ },
+ {
+  "Drug": "SOFTHEALTH VIT E 400IU CAPS 30'S",
+  "Quantity": 8,
+  "Expiry": "30-May-27"
+ },
+ {
+  "Drug": "SOLAK MIXTURE",
+  "Quantity": 15,
+  "Expiry": "31-May-27"
+ },
+ {
+  "Drug": "SOS ADVANCE SYR 250ML",
+  "Quantity": 1,
+  "Expiry": "1-Jun-27"
+ },
+ {
+  "Drug": "SPANISH GARLIC MIXTURE",
+  "Quantity": 1,
+  "Expiry": "2-Jun-27"
+ },
+ {
+  "Drug": "SPEEDA ANTI RABBIES 1'S",
+  "Quantity": 1,
+  "Expiry": "3-Jun-27"
+ },
+ {
+  "Drug": "SPEMAN TABLETS 100'S",
+  "Quantity": 1,
+  "Expiry": "4-Jun-27"
+ },
+ {
+  "Drug": "STARCOLD TABS 50X4'S",
+  "Quantity": 8,
+  "Expiry": "5-Jun-27"
+ },
+ {
+  "Drug": "STARWIN MILK OF MAGNESIA 120ML",
+  "Quantity": 144,
+  "Expiry": "6-Jun-27"
+ },
+ {
+  "Drug": "STOMOCAINE SUSP 250ML",
+  "Quantity": 33,
+  "Expiry": "7-Jun-27"
+ },
+ {
+  "Drug": "STOPKOF ADULT SYRUP 100ML",
+  "Quantity": 62,
+  "Expiry": "8-Jun-27"
+ },
+ {
+  "Drug": "STOPKOF CHILDREN SYRUP 100ML",
+  "Quantity": 25,
+  "Expiry": "9-Jun-27"
+ },
+ {
+  "Drug": "STOPKOF COLD & CATARRH SYRUP 100ML",
+  "Quantity": 66,
+  "Expiry": "10-Jun-27"
+ },
+ {
+  "Drug": "STOPKOF COLD & CATARRH TABLETS 12'",
+  "Quantity": 195,
+  "Expiry": "11-Jun-27"
+ },
+ {
+  "Drug": "STOPKOF DRY COUGH SYRUP 100ML S/F",
+  "Quantity": 36,
+  "Expiry": "12-Jun-27"
+ },
+ {
+  "Drug": "STOPKOF EXP (CARBOCISTEINE) 2% JNR SYR 100ML",
+  "Quantity": 30,
+  "Expiry": "13-Jun-27"
+ },
+ {
+  "Drug": "STOPKOF EXP (CARBOCISTEINE) 5% ADULT SYR",
+  "Quantity": 24,
+  "Expiry": "14-Jun-27"
+ },
+ {
+  "Drug": "STOPKOF LOZENGES 100'",
+  "Quantity": 28,
+  "Expiry": "15-Jun-27"
+ },
+ {
+  "Drug": "STREPSILS EXTRA B-CURRENT 16'S",
+  "Quantity": 49,
+  "Expiry": "16-Jun-27"
+ },
+ {
+  "Drug": "STREPSILS HONEY AND LEMON 16'S",
+  "Quantity": 1,
+  "Expiry": "17-Jun-27"
+ },
+ {
+  "Drug": "STREPSILS ORANGE VITAMIN C 12'S",
+  "Quantity": 33,
+  "Expiry": "18-Jun-27"
+ },
+ {
+  "Drug": "STREPSILS ORIGINAL LOZ 16'S",
+  "Quantity": 15,
+  "Expiry": "19-Jun-27"
+ },
+ {
+  "Drug": "STROBIN S/S",
+  "Quantity": 61,
+  "Expiry": "20-Jun-27"
+ },
+ {
+  "Drug": "STUD 100 GENITAL SPRAY",
+  "Quantity": 6,
+  "Expiry": "21-Jun-27"
+ },
+ {
+  "Drug": "STUGERON TABS 25MG 50'",
+  "Quantity": 90,
+  "Expiry": "22-Jun-27"
+ },
+ {
+  "Drug": "SUCRAFIL O GEL 100MG 100ML",
+  "Quantity": 96,
+  "Expiry": "23-Jun-27"
+ },
+ {
+  "Drug": "SUCRAFIL SUSP",
+  "Quantity": 22,
+  "Expiry": "24-Jun-27"
+ },
+ {
+  "Drug": "SUDAFED BLOCKED NOSE SPRAY 15ML",
+  "Quantity": 2,
+  "Expiry": "25-Jun-27"
+ },
+ {
+  "Drug": "SUDAFED DAY & NIGHT CONGESTION TABS  16'S",
+  "Quantity": 23,
+  "Expiry": "26-Jun-27"
+ },
+ {
+  "Drug": "SUDAFED DECONGESTANT TABS 12'S",
+  "Quantity": 5,
+  "Expiry": "27-Jun-27"
+ },
+ {
+  "Drug": "SUDOCREAM 125GM",
+  "Quantity": 2,
+  "Expiry": "28-Jun-27"
+ },
+ {
+  "Drug": "SUDOCREAM 250GM",
+  "Quantity": 17,
+  "Expiry": "29-Jun-27"
+ },
+ {
+  "Drug": "SUDOCREAM 400GM",
+  "Quantity": 16,
+  "Expiry": "30-Jun-27"
+ },
+ {
+  "Drug": "SUDOCREAM 60GM",
+  "Quantity": 26,
+  "Expiry": "1-Jul-27"
+ },
+ {
+  "Drug": "SULPHUR SOAP",
+  "Quantity": 1,
+  "Expiry": "2-Jul-27"
+ },
+ {
+  "Drug": "SUMOACTIVE SYRUP",
+  "Quantity": 2,
+  "Expiry": "3-Jul-27"
+ },
+ {
+  "Drug": "SUPER APETI PLUS SYRUP",
+  "Quantity": 17,
+  "Expiry": "4-Jul-27"
+ },
+ {
+  "Drug": "SUPER APETI PLUS TABS",
+  "Quantity": 200,
+  "Expiry": "5-Jul-27"
+ },
+ {
+  "Drug": "SUPIROCIN OINTMENT-MUPIROCIN 2% 15GM",
+  "Quantity": 77,
+  "Expiry": "6-Jul-27"
+ },
+ {
+  "Drug": "SURE MEN DEO SPRAY 250ML-ALL",
+  "Quantity": 13,
+  "Expiry": "7-Jul-27"
+ },
+ {
+  "Drug": "SURE SPRAY WOMEN 250ML",
+  "Quantity": 21,
+  "Expiry": "8-Jul-27"
+ },
+ {
+  "Drug": "SURFAZ SN",
+  "Quantity": 12,
+  "Expiry": "9-Jul-27"
+ },
+ {
+  "Drug": "SWEETEX 600'S",
+  "Quantity": 46,
+  "Expiry": "10-Jul-27"
+ },
+ {
+  "Drug": "SYMBICORT 160/4.5UG X 120 DOSES",
+  "Quantity": 20,
+  "Expiry": "11-Jul-27"
+ },
+ {
+  "Drug": "SYRINGE & NEEDLE 10ML 100'S",
+  "Quantity": 6,
+  "Expiry": "12-Jul-27"
+ },
+ {
+  "Drug": "SYRINGE AND NEEDLE 2ML 100'S",
+  "Quantity": 9,
+  "Expiry": "13-Jul-27"
+ },
+ {
+  "Drug": "SYRINGE AND NEEDLE 3ML 100'S",
+  "Quantity": 20,
+  "Expiry": "14-Jul-27"
+ },
+ {
+  "Drug": "SYRINGE AND NEEDLE 5ML 100'S",
+  "Quantity": 17,
+  "Expiry": "15-Jul-27"
+ },
+ {
+  "Drug": "SYSTANE ULTRA EYE DROP 10ML",
+  "Quantity": 43,
+  "Expiry": "16-Jul-27"
+ },
+ {
+  "Drug": "TAABEA CAPSULES",
+  "Quantity": 120,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "TAABEA MIXTURE",
+  "Quantity": 26,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "TACIZOL 400MG TABS",
+  "Quantity": 258,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "TADALAFIL 20MG TABS 4'S",
+  "Quantity": 42,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "TADOL CAPS 100MG 30'S",
+  "Quantity": 51,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "TADOL INJECTION 50MG (TRAMADOL) 5'S",
+  "Quantity": 9,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "TAGERA FORTE",
+  "Quantity": 10,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "TALGENTIS 20MG TABS",
+  "Quantity": 268,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "TALGENTIS 5MG(TADALAFIL) 30'S",
+  "Quantity": 89,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "TAMOXIFEN 10MG TABS 30'S",
+  "Quantity": 1,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "TAMSULOSIN400MCG CAPS 28'S EXTER",
+  "Quantity": 5,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "TANZOL SUSP",
+  "Quantity": 1,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "TANZOL TABS 400MG",
+  "Quantity": 1,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "TAVANIC TABLETS 500MG 5'",
+  "Quantity": 6,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "TD BASE 100MG (TRAMADOL CAPS)",
+  "Quantity": 17,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "TEA TREE CONDITIONER 400ML",
+  "Quantity": 31,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "TEA TREE FACIAL SCRUB 250ML",
+  "Quantity": 40,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "TEA TREE FOAMING FACE WASH 200ML",
+  "Quantity": 65,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "TEA TREE OIL 10 ML",
+  "Quantity": 52,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "TEA TREE OIL 30ML",
+  "Quantity": 1,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "TEA TREE SHAMPOO 400 ML",
+  "Quantity": 27,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "TEEDAR SYR 125ML",
+  "Quantity": 84,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "TEETHING MIXTURE 125ML ECL",
+  "Quantity": 40,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "TEGRETOL 100MG/5ML SYRUP 100ML",
+  "Quantity": 10,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "TEGRETOL 200 CR 50'S",
+  "Quantity": 8,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "TEGRETOL CR 400MG 30'S",
+  "Quantity": 17,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "TELMISARTAN TABS 80MG",
+  "Quantity": 9,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "TENOFIVIR FUMERATE TABS 300MG VEGA 30'S",
+  "Quantity": 1,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "TENORMIN 50MG 28'S",
+  "Quantity": 2,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "TENOX 10MG(AMLODIPINE) TABS 30'S",
+  "Quantity": 8,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "TENOX 5MG(AMLODIPINE) TABS",
+  "Quantity": 23,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "TENTEX ROYAL CAPS 30'S",
+  "Quantity": 7,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "TETMOSOL ADULT SOAP",
+  "Quantity": 69,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "TETMOSOL BABY SOAP",
+  "Quantity": 342,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "TETRACYCLINE EYE OINT. 5G",
+  "Quantity": 66,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "TILDIEM 60MG TABS 100'S",
+  "Quantity": 5,
+  "Expiry": "17-Apr-27"
+ },
+ {
+  "Drug": "TIMOLANT EYE DROP",
+  "Quantity": 14,
+  "Expiry": "18-Apr-27"
+ },
+ {
+  "Drug": "TIMOLEX 0.5% EYE DROPS 10ML",
+  "Quantity": 93,
+  "Expiry": "19-Apr-27"
+ },
+ {
+  "Drug": "TIMOLOL EYE DROPS 0.5% 10ML VEGA",
+  "Quantity": 24,
+  "Expiry": "20-Apr-27"
+ },
+ {
+  "Drug": "TIMOLOL EYE DROPS 5ML-CIRON",
+  "Quantity": 46,
+  "Expiry": "21-Apr-27"
+ },
+ {
+  "Drug": "TINY VITE DROPS",
+  "Quantity": 48,
+  "Expiry": "22-Apr-27"
+ },
+ {
+  "Drug": "TIXYLIX CHILDREN COUGH SYR 100ML",
+  "Quantity": 8,
+  "Expiry": "23-Apr-27"
+ },
+ {
+  "Drug": "TOBINS BABY GRIPE WATER",
+  "Quantity": 28,
+  "Expiry": "24-Apr-27"
+ },
+ {
+  "Drug": "TOCOVID 200",
+  "Quantity": 41,
+  "Expiry": "25-Apr-27"
+ },
+ {
+  "Drug": "TONGUE CLEANER",
+  "Quantity": 1,
+  "Expiry": "26-Apr-27"
+ },
+ {
+  "Drug": "TONICA",
+  "Quantity": 23,
+  "Expiry": "27-Apr-27"
+ },
+ {
+  "Drug": "TOP FEVER MIXTURE",
+  "Quantity": 17,
+  "Expiry": "28-Apr-27"
+ },
+ {
+  "Drug": "TOP TONIC MIXTURE",
+  "Quantity": 3,
+  "Expiry": "29-Apr-27"
+ },
+ {
+  "Drug": "TOPAMAX 25MG TABS 60'S",
+  "Quantity": 3,
+  "Expiry": "30-Apr-27"
+ },
+ {
+  "Drug": "TOPAMAX 50MG TABS 60'S",
+  "Quantity": 5,
+  "Expiry": "1-May-27"
+ },
+ {
+  "Drug": "TOTHEMA BOX OF 20 BULBS",
+  "Quantity": 10,
+  "Expiry": "2-May-27"
+ },
+ {
+  "Drug": "TOUCH & GO",
+  "Quantity": 25,
+  "Expiry": "3-May-27"
+ },
+ {
+  "Drug": "TRAJENTA 5MG",
+  "Quantity": 8,
+  "Expiry": "4-May-27"
+ },
+ {
+  "Drug": "TRAMADOL DENK 50MG TABS 10'S",
+  "Quantity": 15,
+  "Expiry": "5-May-27"
+ },
+ {
+  "Drug": "TRANEXAMIC ACID TABS 500MG 60'S",
+  "Quantity": 16,
+  "Expiry": "6-May-27"
+ },
+ {
+  "Drug": "TREMENDOUS CAPS",
+  "Quantity": 21,
+  "Expiry": "7-May-27"
+ },
+ {
+  "Drug": "TRES ORIX FORTE 100ML",
+  "Quantity": 11,
+  "Expiry": "8-May-27"
+ },
+ {
+  "Drug": "TRES ORIX FORTE SYRUP 250ML",
+  "Quantity": 10,
+  "Expiry": "9-May-27"
+ },
+ {
+  "Drug": "TRIPLIXAM 10/2.5MG/10MG TABS 30'S",
+  "Quantity": 7,
+  "Expiry": "10-May-27"
+ },
+ {
+  "Drug": "TRO-AMOXICLAV 1.2G INJECTION 10'",
+  "Quantity": 100,
+  "Expiry": "11-May-27"
+ },
+ {
+  "Drug": "TRO-AMOXICLAV 600MG INJ 10'S",
+  "Quantity": 90,
+  "Expiry": "12-May-27"
+ },
+ {
+  "Drug": "TRO-CEFTRIAX INJ. 1G 50'",
+  "Quantity": 56,
+  "Expiry": "13-May-27"
+ },
+ {
+  "Drug": "TUSK BODY SPRAY 150ML ALL",
+  "Quantity": 32,
+  "Expiry": "14-May-27"
+ },
+ {
+  "Drug": "ULCIRON SUSP 200ML",
+  "Quantity": 18,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "UNICORT CREAM(HYDROCORTISONE ) 15G",
+  "Quantity": 76,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "UNIPRAZOLE 40MG(OMEPRAZOLE) INJ",
+  "Quantity": 50,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "UPERIO 100MG TABS 28'S",
+  "Quantity": 9,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "UPERIO 200MG(SACUBITRIL/VALSARTAN) TABS",
+  "Quantity": 13,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "VAGID CL PESSARIES",
+  "Quantity": 20,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "VAGINAX CREAM",
+  "Quantity": 140,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "VAGINAX VAG TABS 6'S",
+  "Quantity": 145,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK CHEWABLE VITAMIN C 30'S",
+  "Quantity": 2,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK COD LIVER OIL 400MG 30'S",
+  "Quantity": 16,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK FOLIC ACID 400MG 90'S",
+  "Quantity": 25,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK GARLIC 3MGTABS 30'S",
+  "Quantity": 26,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK GLUCOSAMINE & CHONDROITIN 400/100MG",
+  "Quantity": 27,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK HAIR SKIN & NAILS 30'S",
+  "Quantity": 3,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK HAIR SKIN NAILS BLISTER 30'S",
+  "Quantity": 12,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK MAGNESIUM 187.5MG 30'S",
+  "Quantity": 66,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK MULTIVITAMIN & MINERAL28'S",
+  "Quantity": 78,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK MULTIVITAMIN CAPS",
+  "Quantity": 4,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK SELENIUM A,C & E TABS 30'S",
+  "Quantity": 30,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "VALUPAK VIT C CHEWABLE 80MG 60'S",
+  "Quantity": 22,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "VALUPAK VIT D3 500MG TABS 30'S",
+  "Quantity": 1,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "VALUPAK VIT-C 1000MG EFFER. 20'S",
+  "Quantity": 6,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "VALUPAK VITAMIN B COMPLEX 60'S",
+  "Quantity": 22,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "VASELINE JELLY 50ML",
+  "Quantity": 4,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "VASELINE LOTION 200ML ESS.HEALING",
+  "Quantity": 2,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "VASTAREL MR SERVIER 60'S",
+  "Quantity": 11,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "VECURON IUM BROMIDE 10MG (NEOVEC) INJ",
+  "Quantity": 30,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "VEGACID O SUSP VEGA 200ML",
+  "Quantity": 2,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "VEGATEM 20/120 SUSP 60ML VEGA",
+  "Quantity": 1,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "VEGATEM 80/480 TABS 6'S VEGA",
+  "Quantity": 13,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "VENTOLIN (SALBUTAMOL ) NEBULES 5MG",
+  "Quantity": 27,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "VENTOLIN EVOHALER",
+  "Quantity": 3,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "VENTOLIN INHALER",
+  "Quantity": 12,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "VENTOLIN NEBULISER 2.5MG GSK",
+  "Quantity": 9,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "VERMOX SUSP",
+  "Quantity": 17,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "VERMOX TAB",
+  "Quantity": 61,
+  "Expiry": "17-Apr-27"
+ },
+ {
+  "Drug": "VIAGRA 100MG TABS 4'S",
+  "Quantity": 10,
+  "Expiry": "18-Apr-27"
+ },
+ {
+  "Drug": "VIAGRA 50MG TABLETS 4'S",
+  "Quantity": 6,
+  "Expiry": "19-Apr-27"
+ },
+ {
+  "Drug": "VICKS INHALER",
+  "Quantity": 34,
+  "Expiry": "20-Apr-27"
+ },
+ {
+  "Drug": "VICTORY GARLIC MIXTURE",
+  "Quantity": 24,
+  "Expiry": "21-Apr-27"
+ },
+ {
+  "Drug": "VIGOMAX TABS",
+  "Quantity": 12,
+  "Expiry": "22-Apr-27"
+ },
+ {
+  "Drug": "VIGORIX CAPS",
+  "Quantity": 2,
+  "Expiry": "23-Apr-27"
+ },
+ {
+  "Drug": "VIKIL 20",
+  "Quantity": 59,
+  "Expiry": "24-Apr-27"
+ },
+ {
+  "Drug": "VIN C 100MG TABS",
+  "Quantity": 14,
+  "Expiry": "25-Apr-27"
+ },
+ {
+  "Drug": "VIN-C SYRUP 100ML",
+  "Quantity": 38,
+  "Expiry": "26-Apr-27"
+ },
+ {
+  "Drug": "VINMYTHRO (CLARITHROMYCIN) TABS 500MG 14'S",
+  "Quantity": 47,
+  "Expiry": "27-Apr-27"
+ },
+ {
+  "Drug": "VIREST TAB 400MG 25'S",
+  "Quantity": 86,
+  "Expiry": "28-Apr-27"
+ },
+ {
+  "Drug": "VIREST TABS 200MG",
+  "Quantity": 96,
+  "Expiry": "29-Apr-27"
+ },
+ {
+  "Drug": "VIROL BLOOD TONIC 200ML",
+  "Quantity": 38,
+  "Expiry": "30-Apr-27"
+ },
+ {
+  "Drug": "VISCOF SYRUP (PLAIN) 100ML",
+  "Quantity": 2,
+  "Expiry": "1-May-27"
+ },
+ {
+  "Drug": "VISCOF-D SYRUP 100ML",
+  "Quantity": 28,
+  "Expiry": "2-May-27"
+ },
+ {
+  "Drug": "VISCOF-S SYRUP 100ML",
+  "Quantity": 32,
+  "Expiry": "3-May-27"
+ },
+ {
+  "Drug": "VIT B DENK BL 10 X 10",
+  "Quantity": 15,
+  "Expiry": "4-May-27"
+ },
+ {
+  "Drug": "VIT-B FORTE B1,B2,B12 TABS (GOOD HEALTH) 30'S",
+  "Quantity": 30,
+  "Expiry": "5-May-27"
+ },
+ {
+  "Drug": "VITACARE CHEWABLE VIT C 100MG SACHET 20'S",
+  "Quantity": 2,
+  "Expiry": "6-May-27"
+ },
+ {
+  "Drug": "VITACARE PLUS (VIT C+ZINC)",
+  "Quantity": 144,
+  "Expiry": "7-May-27"
+ },
+ {
+  "Drug": "VITACARE VITAMIN C 500MG CHEWABLE 30'S",
+  "Quantity": 32,
+  "Expiry": "8-May-27"
+ },
+ {
+  "Drug": "VITADINE (CYPROHEPTADINE) MULT VIT SYR 200ML",
+  "Quantity": 3,
+  "Expiry": "9-May-27"
+ },
+ {
+  "Drug": "VITADOX VIT C + ZINC 1000MG 20'S",
+  "Quantity": 13,
+  "Expiry": "10-May-27"
+ },
+ {
+  "Drug": "VITADOX VIT C GUMMIES 30'S",
+  "Quantity": 15,
+  "Expiry": "11-May-27"
+ },
+ {
+  "Drug": "VITAFIZZ EFFERVESCENT TABS 20'S",
+  "Quantity": 14,
+  "Expiry": "12-May-27"
+ },
+ {
+  "Drug": "VITAFOL",
+  "Quantity": 21,
+  "Expiry": "13-May-27"
+ },
+ {
+  "Drug": "VITAFORCE SYRUP 250ML",
+  "Quantity": 13,
+  "Expiry": "14-May-27"
+ },
+ {
+  "Drug": "VITAMIN B-GOMPLEX STRONG TAB KRKA",
+  "Quantity": 1,
+  "Expiry": "15-May-27"
+ },
+ {
+  "Drug": "VIVADONA TABS",
+  "Quantity": 33,
+  "Expiry": "16-May-27"
+ },
+ {
+  "Drug": "VOLPE TABS",
+  "Quantity": 21,
+  "Expiry": "17-May-27"
+ },
+ {
+  "Drug": "VOLTAREN SUPP 100MG 5'S",
+  "Quantity": 7,
+  "Expiry": "18-May-27"
+ },
+ {
+  "Drug": "VOLTAREN SUPP 50MG 10'S",
+  "Quantity": 6,
+  "Expiry": "19-May-27"
+ },
+ {
+  "Drug": "VOLTFAST SACHETS 50MG 30'S",
+  "Quantity": 14,
+  "Expiry": "20-May-27"
+ },
+ {
+  "Drug": "WAIST SUPPORT",
+  "Quantity": 6,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "WARFARIN 3MG TABS 28'S",
+  "Quantity": 30,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "WARFARIN TABS 1MG",
+  "Quantity": 27,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "WARTICON SOLUTION 5%IN 3ML",
+  "Quantity": 5,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "WELL SLIP SUBLINQUAL SPRAY",
+  "Quantity": 4,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "WELLMAN 50 + TAB 4 30",
+  "Quantity": 43,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "WELLMAN 70 + TAB 30",
+  "Quantity": 10,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "WELLWOMAN ORIGINAL CAPS 30'",
+  "Quantity": 18,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "WELLWOMAN PLUS CAPS",
+  "Quantity": 8,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "WET N'WILD CONDOM 3'S",
+  "Quantity": 53,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "WHITE UP ACTIVATED CHARCOAL M/W 225ML",
+  "Quantity": 67,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "WHITFIELD SOAP",
+  "Quantity": 38,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "WHITFIELDS OINTMENT 40G",
+  "Quantity": 57,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "WISDOM INTERDENTAL MEDIUM T/B 12'S",
+  "Quantity": 1,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "WOODS ANTITUSSIVE NON-PRODUCTIVE COUGH SYR",
+  "Quantity": 28,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "WOODS EXPECTORANT PRODUCTIVE COUGH SYR",
+  "Quantity": 28,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "WORMBAT 400MG TABLETS",
+  "Quantity": 114,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "WORMBAT SUSPENSION 10ML",
+  "Quantity": 1,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "WORMPLEX TAB",
+  "Quantity": 492,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "WORMZAP TABS 1X25",
+  "Quantity": 18,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "WRIST SUPPORT (POLAR)",
+  "Quantity": 5,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "X'FERON CAPS 30'S",
+  "Quantity": 82,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "X'FLUX (FLUCLOX) SUSP 100ML",
+  "Quantity": 70,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "X'TRIM SUSP(COTRIMOXAZOLE)",
+  "Quantity": 11,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "X'ZOLE F SUSP",
+  "Quantity": 14,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "X'ZOLE SUSP 100ML",
+  "Quantity": 8,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "XARELTO 10MG TABS 14'S",
+  "Quantity": 1,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "XARELTO 15 MG TABLETS 14'",
+  "Quantity": 35,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "XARELTO 20MG TABLETS 14'",
+  "Quantity": 55,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "XATRAL LP 10MG TABS 30'S",
+  "Quantity": 5,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "XBC AQUEOUS CREAM",
+  "Quantity": 13,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "XEDRA(HYDROXYUREA) 500MG 100'S",
+  "Quantity": 1,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "XHC HEMP CONDITIONER 400ML",
+  "Quantity": 3,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "XOC CHARCOAL TOOTHPASTE + T/BRUSH 100ML",
+  "Quantity": 9,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "XYLO ACINO ADULT 0.1%NASAL SPRAY",
+  "Quantity": 51,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "ZAHARA GEE CAPSULES",
+  "Quantity": 35,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "ZAHARA GEE HERBAL MIXTURE",
+  "Quantity": 14,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "ZAHARA MAN CAPSULES",
+  "Quantity": 40,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "ZANZA OMEGA H3 FISH OIL CAPS 30'S",
+  "Quantity": 17,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "ZANZA VIT B-CO STRONG TABS 60'S",
+  "Quantity": 8,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "ZEMCIFER SUSP 150M",
+  "Quantity": 29,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "ZEMCIFER TABS",
+  "Quantity": 58,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "ZENTEL TABLETS",
+  "Quantity": 182,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "ZENTOKID DROPS",
+  "Quantity": 46,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "ZET ALBENDAZOLE SUSPENSION 100MG/5ML 20ML",
+  "Quantity": 1,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "ZET(ALBENDAZOLE) WORM TABS 200MG 2'",
+  "Quantity": 148,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "ZINC OXIDE BAR SOAP",
+  "Quantity": 43,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "ZINC OXIDE OINTMENT 40G",
+  "Quantity": 19,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "ZINCOFER CAPS 30'S",
+  "Quantity": 14,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "ZINCOLAC B CAPS (3X10)",
+  "Quantity": 46,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "ZINCOVIT TABS 30'S",
+  "Quantity": 29,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "ZINNAT TABS 250MG",
+  "Quantity": 41,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "ZINNAT TABS 500MG",
+  "Quantity": 102,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "ZINTAB 10MG TABS 100X10",
+  "Quantity": 19,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "ZINTAB 10MG(10X10) BLISTER",
+  "Quantity": 21,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "ZINTAB 20MG 100X10",
+  "Quantity": 1,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "ZINVITE SYR",
+  "Quantity": 10,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "ZIPMAN CAPSULES",
+  "Quantity": 37,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "ZIRTEK ALLERGY 10MG TABS 21'S",
+  "Quantity": 12,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "ZIRTEK ALLERGY RELIEF TABS 10MG 7'S",
+  "Quantity": 25,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "ZIRTEK SYR 200ML",
+  "Quantity": 19,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "ZITHROMAX CAPS 250MG",
+  "Quantity": 64,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "ZITHROMAX IV 500MG 1'S",
+  "Quantity": 8,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "ZOFLORA DISINFECTANT 500ML",
+  "Quantity": 1,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "ZOLEVOX 500MG(LEVOFLOXACIN 500MG)",
+  "Quantity": 91,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "ZUBES COUGH EXPECTORANT 125ML",
+  "Quantity": 20,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "ZUBES COUGH LOZENGES 50X4",
+  "Quantity": 20,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "ZUBES COUGH MIXTURE (EXTRA STRONG)",
+  "Quantity": 36,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "ZULU 100MG TABS 10'S",
+  "Quantity": 340,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "ZULU PLUS 10s",
+  "Quantity": 153,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "ZULU-MR",
+  "Quantity": 30,
+  "Expiry": "17-Apr-27"
+ },
+ {
+  "Drug": "ZURION CAPS 30'S",
+  "Quantity": 18,
+  "Expiry": "18-Apr-27"
+ },
+ {
+  "Drug": "ZYCARD 16MG TABS 30'S",
+  "Quantity": 15,
+  "Expiry": "19-Apr-27"
+ },
+ {
+  "Drug": "ZYCARD 8MG TABS 30'S",
+  "Quantity": 24,
+  "Expiry": "20-Apr-27"
+ },
+ {
+  "Drug": "ZYFEN 180MG TABS 10'S",
+  "Quantity": 22,
+  "Expiry": "21-Apr-27"
+ },
+ {
+  "Drug": "ZYMAX(AZITHROMYCIN) CAPS 500MG 3'",
+  "Quantity": 123,
+  "Expiry": "22-Apr-27"
+ },
+ {
+  "Drug": "M.M.T 200ML-EXTEM",
+  "Quantity": 19,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "M2 TONE TABLETS",
+  "Quantity": 55,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "MAALOX PLUS SUSPENSION",
+  "Quantity": 19,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "MAALOX SUSP. (SACHETS)",
+  "Quantity": 60,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "MACLEANS FRESHMINTT/P",
+  "Quantity": 1,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "MAGACID 200ML SYR",
+  "Quantity": 1,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "MAGACID PLUS SYR",
+  "Quantity": 24,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "MAGACID TAB",
+  "Quantity": 8,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "MAGNAVIT CAPS",
+  "Quantity": 53,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "MAGNESIUM GLYCINATE 120'S",
+  "Quantity": 12,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "MAJOR LIVERPLEX B 100ML INFANT",
+  "Quantity": 40,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "MAJOR NASAL DROPS",
+  "Quantity": 32,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "MALAFAN TABS",
+  "Quantity": 3,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "MALAR 2 FORTE 2*6",
+  "Quantity": 19,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "MALAR-2 SUSP. 60ML",
+  "Quantity": 55,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "MALIN ADULT",
+  "Quantity": 3,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "MALIN BABY",
+  "Quantity": 84,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "MALIN JNR",
+  "Quantity": 10,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "MAN UP",
+  "Quantity": 23,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "MASADA MIXTURE",
+  "Quantity": 44,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "MASCULAN CONDOMS( ALL)",
+  "Quantity": 25,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "MASCULAN LUBRICANT 75ML",
+  "Quantity": 20,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "MASTERPLAST FREEZE GEL 200ML",
+  "Quantity": 20,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "MASTERPLAST VAPOUR RUB",
+  "Quantity": 1,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "MAXITROL EYE OINT 3.5G",
+  "Quantity": 20,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "MAXMOX BLISTER 250MG (50X10)",
+  "Quantity": 19,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "MAXMOX BLISTER 500(10X15)",
+  "Quantity": 63,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "MAXMOX SUSP",
+  "Quantity": 60,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "MAYFER SYR",
+  "Quantity": 13,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "MEDI GARLIC CAPS",
+  "Quantity": 41,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "MEDIMIX 18 HERBS CAKE SOAP",
+  "Quantity": 74,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "MEDIMIX ANTI-PIMPLE FACE WASH",
+  "Quantity": 9,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "MEDIMIX SANDAL CAKE SOAP",
+  "Quantity": 82,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "MEDIMIX TURMERIC & ARGAN OIL CAKE SOAP",
+  "Quantity": 40,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "MEDIMIX TURMERIC FACE WASH",
+  "Quantity": 6,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "MEDIMIX VETIVER CAKE SOAP",
+  "Quantity": 71,
+  "Expiry": "17-Apr-27"
+ },
+ {
+  "Drug": "MEMANTINE 20MG TABS 28'S",
+  "Quantity": 25,
+  "Expiry": "18-Apr-27"
+ },
+ {
+  "Drug": "MENOPACE 30'S CAPS UK",
+  "Quantity": 12,
+  "Expiry": "19-Apr-27"
+ },
+ {
+  "Drug": "MENOPACE CAPS 30'S INDIA",
+  "Quantity": 14,
+  "Expiry": "20-Apr-27"
+ },
+ {
+  "Drug": "MENSTAK TABS",
+  "Quantity": 14,
+  "Expiry": "21-Apr-27"
+ },
+ {
+  "Drug": "MENTAT SYRUP 100ML",
+  "Quantity": 2,
+  "Expiry": "22-Apr-27"
+ },
+ {
+  "Drug": "MENTHOX ADULT SYR",
+  "Quantity": 28,
+  "Expiry": "23-Apr-27"
+ },
+ {
+  "Drug": "MENTHOX JNR",
+  "Quantity": 108,
+  "Expiry": "24-Apr-27"
+ },
+ {
+  "Drug": "MERONEM IV 500MG",
+  "Quantity": 5,
+  "Expiry": "25-Apr-27"
+ },
+ {
+  "Drug": "METAGYL TABLETS 200MG 500'",
+  "Quantity": 36,
+  "Expiry": "26-Apr-27"
+ },
+ {
+  "Drug": "METAGYL TABLETS 400MG 280'",
+  "Quantity": 40,
+  "Expiry": "27-Apr-27"
+ },
+ {
+  "Drug": "METAGYL(MET'ZOL) SYR 200MG/5ML 100ML",
+  "Quantity": 12,
+  "Expiry": "28-Apr-27"
+ },
+ {
+  "Drug": "METFORMIN 500MG (O-FORMIN)",
+  "Quantity": 144,
+  "Expiry": "29-Apr-27"
+ },
+ {
+  "Drug": "METFORMIN 500MG TABS 28'S TEVA",
+  "Quantity": 6,
+  "Expiry": "30-Apr-27"
+ },
+ {
+  "Drug": "METFORMIN DENK 1000MG30'S",
+  "Quantity": 26,
+  "Expiry": "1-May-27"
+ },
+ {
+  "Drug": "METFORMIN DENK 500MG BL 10 X 10",
+  "Quantity": 41,
+  "Expiry": "2-May-27"
+ },
+ {
+  "Drug": "METHYL SALICYLATE OINT",
+  "Quantity": 144,
+  "Expiry": "3-May-27"
+ },
+ {
+  "Drug": "METHYLATED SPIRIT 125ML ECL",
+  "Quantity": 50,
+  "Expiry": "4-May-27"
+ },
+ {
+  "Drug": "METHYLATED SPIRIT 200ML LOCAL",
+  "Quantity": 43,
+  "Expiry": "5-May-27"
+ },
+ {
+  "Drug": "METHYLDOPA 500MG TABS 30'S",
+  "Quantity": 14,
+  "Expiry": "6-May-27"
+ },
+ {
+  "Drug": "METOCLOPRAMIDE 10MG TABS 28'S EXETER",
+  "Quantity": 27,
+  "Expiry": "7-May-27"
+ },
+ {
+  "Drug": "METOPROLOL TAB 50MG",
+  "Quantity": 6,
+  "Expiry": "8-May-27"
+ },
+ {
+  "Drug": "METRO-Z SUSPENSION 100ML",
+  "Quantity": 40,
+  "Expiry": "9-May-27"
+ },
+ {
+  "Drug": "METRO-Z TABS 20'",
+  "Quantity": 12,
+  "Expiry": "10-May-27"
+ },
+ {
+  "Drug": "METROLEX F SUSPENSION",
+  "Quantity": 27,
+  "Expiry": "11-May-27"
+ },
+ {
+  "Drug": "METROLEX F TABLET",
+  "Quantity": 64,
+  "Expiry": "12-May-27"
+ },
+ {
+  "Drug": "METRONIDAZOLE 200MG M&G 500'S",
+  "Quantity": 1,
+  "Expiry": "13-May-27"
+ },
+ {
+  "Drug": "METRONIDAZOLE 200MG TABS 50'S LETAP",
+  "Quantity": 16,
+  "Expiry": "14-May-27"
+ },
+ {
+  "Drug": "METRONIDAZOLE SUSP 100ML LETAP",
+  "Quantity": 75,
+  "Expiry": "15-May-27"
+ },
+ {
+  "Drug": "METRONIDAZOLE SUSP M&G 100ML",
+  "Quantity": 90,
+  "Expiry": "16-May-27"
+ },
+ {
+  "Drug": "METRONIDAZOLE SUSPENSION 100ML PHYTO-RIKER",
+  "Quantity": 38,
+  "Expiry": "17-May-27"
+ },
+ {
+  "Drug": "METRONIDAZOLE TABLET EXETER 21'S",
+  "Quantity": 105,
+  "Expiry": "18-May-27"
+ },
+ {
+  "Drug": "MICOTRIN 2% CREAM30GM",
+  "Quantity": 16,
+  "Expiry": "19-May-27"
+ },
+ {
+  "Drug": "MIGHTY POWER MIXTURE L/S",
+  "Quantity": 32,
+  "Expiry": "20-May-27"
+ },
+ {
+  "Drug": "MILTON STERILIZING TABS 28'S",
+  "Quantity": 6,
+  "Expiry": "21-May-27"
+ },
+ {
+  "Drug": "MIM DROPS 30ML",
+  "Quantity": 4,
+  "Expiry": "22-May-27"
+ },
+ {
+  "Drug": "MIM ORANGE 200ML",
+  "Quantity": 52,
+  "Expiry": "23-May-27"
+ },
+ {
+  "Drug": "MIMOVITE SYRUP",
+  "Quantity": 40,
+  "Expiry": "24-May-27"
+ },
+ {
+  "Drug": "MIRTAZAPINE45MG TABS 28'S",
+  "Quantity": 5,
+  "Expiry": "25-May-27"
+ },
+ {
+  "Drug": "MIST EXPECT SED 200ML-EXTEM",
+  "Quantity": 10,
+  "Expiry": "26-May-27"
+ },
+ {
+  "Drug": "MIST POT.CIT 200ML-EXTEM",
+  "Quantity": 32,
+  "Expiry": "27-May-27"
+ },
+ {
+  "Drug": "MIST SENNACO 200ML-EXTEM",
+  "Quantity": 12,
+  "Expiry": "28-May-27"
+ },
+ {
+  "Drug": "MONTELUKAST 10MG TABS 28'S",
+  "Quantity": 32,
+  "Expiry": "29-May-27"
+ },
+ {
+  "Drug": "MORGAN SOAP",
+  "Quantity": 4,
+  "Expiry": "30-May-27"
+ },
+ {
+  "Drug": "MORGANS POMADE 100G",
+  "Quantity": 1,
+  "Expiry": "31-May-27"
+ },
+ {
+  "Drug": "MR. Q",
+  "Quantity": 63,
+  "Expiry": "1-Jun-27"
+ },
+ {
+  "Drug": "MSP 30",
+  "Quantity": 30,
+  "Expiry": "2-Jun-27"
+ },
+ {
+  "Drug": "MUCOLEX ADULT SYR 150ML",
+  "Quantity": 69,
+  "Expiry": "3-Jun-27"
+ },
+ {
+  "Drug": "MUCOLEX JUNIOR 150ML",
+  "Quantity": 65,
+  "Expiry": "4-Jun-27"
+ },
+ {
+  "Drug": "MUCOSYL ADULT SYR 100ML",
+  "Quantity": 29,
+  "Expiry": "5-Jun-27"
+ },
+ {
+  "Drug": "MUCOSYL JUNIOR SYR 100ML",
+  "Quantity": 36,
+  "Expiry": "6-Jun-27"
+ },
+ {
+  "Drug": "MUCOTIN 2% SYR",
+  "Quantity": 26,
+  "Expiry": "7-Jun-27"
+ },
+ {
+  "Drug": "MUCOTIN 5% SYR",
+  "Quantity": 11,
+  "Expiry": "8-Jun-27"
+ },
+ {
+  "Drug": "MULTIVITAMIN 125ML SYR AYRTONS",
+  "Quantity": 5,
+  "Expiry": "9-Jun-27"
+ },
+ {
+  "Drug": "MULTIVITAMIN TABS (100 X 10)",
+  "Quantity": 6,
+  "Expiry": "10-Jun-27"
+ },
+ {
+  "Drug": "MUOME NASAL SPRAY (XYLOME.) 0.1% 10ML",
+  "Quantity": 21,
+  "Expiry": "11-Jun-27"
+ },
+ {
+  "Drug": "MUPIROCIN OINTMENT 15GM UK",
+  "Quantity": 4,
+  "Expiry": "12-Jun-27"
+ },
+ {
+  "Drug": "MYCOLEX 3 CREAM",
+  "Quantity": 57,
+  "Expiry": "13-Jun-27"
+ },
+ {
+  "Drug": "MYCOLEX CREAM",
+  "Quantity": 66,
+  "Expiry": "14-Jun-27"
+ },
+ {
+  "Drug": "MYCOLEX POWDER",
+  "Quantity": 29,
+  "Expiry": "15-Jun-27"
+ },
+ {
+  "Drug": "MYCOSTAT 150MG CAPS 1'S",
+  "Quantity": 3,
+  "Expiry": "16-Jun-27"
+ },
+ {
+  "Drug": "MYCOVIN TABLETS 125MG 500'",
+  "Quantity": 6,
+  "Expiry": "17-Jun-27"
+ },
+ {
+  "Drug": "MYCOVIN TABS 500MG 25'S",
+  "Quantity": 7,
+  "Expiry": "18-Jun-27"
+ },
+ {
+  "Drug": "MYFENAX 500MG(MYCOHE.MOFETIL) TABS 50'S",
+  "Quantity": 7,
+  "Expiry": "19-Jun-27"
+ },
+ {
+  "Drug": "NAKLOFEN DUO CAPS 75MG 20'",
+  "Quantity": 62,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "NAPROSYN EC TABS 500MG 100'",
+  "Quantity": 10,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "NATURE CARE HAIR SKIN NAILS GUMMIES 80'S",
+  "Quantity": 4,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "NATURE MADE VIT C 500MG 130'S",
+  "Quantity": 1,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "NATURES BOUNTY COMPLETE PROTEIN & VIT",
+  "Quantity": 1,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "NATURES BOUNTY GINKO BILOBA 200'S",
+  "Quantity": 1,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "NATURES BOUNTY TURMERIC 1000MG 60'S",
+  "Quantity": 2,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "NAZO",
+  "Quantity": 240,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "NAZO BIG SIZE",
+  "Quantity": 17,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "NEBIVOLOL 5MG 28'S",
+  "Quantity": 13,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "NEFLUCON(FLUCONAZOLE) CAP 150MG 1'",
+  "Quantity": 240,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "NEO-HYCOLEX E/E/N DROPS 10ML",
+  "Quantity": 110,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "NEO-HYCOLEX E/E/N DROPS 5ML",
+  "Quantity": 2,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "NEOCELL COLLAGEN 90'S",
+  "Quantity": 3,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "NEOCORT EAR/EYE/NOSE DROP 10ML",
+  "Quantity": 7,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "NEOFERON CAPS 30'S",
+  "Quantity": 56,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "NEOPRESOL",
+  "Quantity": 94,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "NEOVITA",
+  "Quantity": 4,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "NEPAFENAC 0.001 EYE DROPS 5ML",
+  "Quantity": 23,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "NESBEN (ALBENDAZOLE) SUSP 100MG/5ML 20ML",
+  "Quantity": 5,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "NESPRODINE SYR 200ML",
+  "Quantity": 22,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "NESTER RUBBING ALCOHOL PERFUMED 475ML",
+  "Quantity": 58,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "NEUROMIN PLUS CAPS 30'S",
+  "Quantity": 74,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "NEUROMIND ORIGINAL 30'S",
+  "Quantity": 36,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "NEUTROGENA OIL BALANCING FACIA WASH 200ML",
+  "Quantity": 10,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "NEXIUM 10MG SACHET 28'S",
+  "Quantity": 13,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "NEXIUM 40MG IV INFUSION 10'S",
+  "Quantity": 13,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "NEXIUM 40MG X 28",
+  "Quantity": 7,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "NIBIMA",
+  "Quantity": 37,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "NIFECARD XL 30MG 30'S",
+  "Quantity": 50,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "NIFEDI DENK 10 RETARD BL 10X10",
+  "Quantity": 46,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "NIVEA BATH 250ML",
+  "Quantity": 12,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "NIVEA BATH 500ML",
+  "Quantity": 16,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "NIVEA BODY LOTION 400ML",
+  "Quantity": 2,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "NIVEA COCOA BUTTER DRY SKIN CREAM 400ML",
+  "Quantity": 4,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "NIVEA DEO SPRAY WOMEN 250ML",
+  "Quantity": 6,
+  "Expiry": "17-Apr-27"
+ },
+ {
+  "Drug": "NIVEA LOTION 350ML",
+  "Quantity": 18,
+  "Expiry": "18-Apr-27"
+ },
+ {
+  "Drug": "NIVEA MEN ROLL ON DRY IMPACT",
+  "Quantity": 49,
+  "Expiry": "19-Apr-27"
+ },
+ {
+  "Drug": "NIVEA MEN SPRAY 150ML",
+  "Quantity": 30,
+  "Expiry": "20-Apr-27"
+ },
+ {
+  "Drug": "NIVEA PEARL $ BEAUTY ROLL ON 50ML",
+  "Quantity": 51,
+  "Expiry": "21-Apr-27"
+ },
+ {
+  "Drug": "NIZORAL CREAM 15G",
+  "Quantity": 38,
+  "Expiry": "22-Apr-27"
+ },
+ {
+  "Drug": "NIZORAL SHAMPOO 100ML",
+  "Quantity": 1,
+  "Expiry": "23-Apr-27"
+ },
+ {
+  "Drug": "NKAMOL SYRUP (PARACETAMOL SYR)",
+  "Quantity": 16,
+  "Expiry": "24-Apr-27"
+ },
+ {
+  "Drug": "NO SPA 40MG/2ML INJECTION 25'S",
+  "Quantity": 25,
+  "Expiry": "25-Apr-27"
+ },
+ {
+  "Drug": "NODIUM(LOPERAMIDE) 2MG CAPS 100'",
+  "Quantity": 19,
+  "Expiry": "26-Apr-27"
+ },
+ {
+  "Drug": "NORMAL SALINE NASAL DROPS 10ML UK",
+  "Quantity": 1,
+  "Expiry": "27-Apr-27"
+ },
+ {
+  "Drug": "NORVASC 5MG TABS 30'S",
+  "Quantity": 10,
+  "Expiry": "28-Apr-27"
+ },
+ {
+  "Drug": "NOVACEF 250 (1X10)",
+  "Quantity": 145,
+  "Expiry": "29-Apr-27"
+ },
+ {
+  "Drug": "NOVACEF 500(1X10)",
+  "Quantity": 177,
+  "Expiry": "30-Apr-27"
+ },
+ {
+  "Drug": "NOVACEF DS 125MG SUSP CEFUROXIME",
+  "Quantity": 77,
+  "Expiry": "1-May-27"
+ },
+ {
+  "Drug": "NOVAFULVIN SUSP 100ML",
+  "Quantity": 59,
+  "Expiry": "2-May-27"
+ },
+ {
+  "Drug": "NOW FOODS ACTIVATED CHARCOAL 200'S",
+  "Quantity": 4,
+  "Expiry": "3-May-27"
+ },
+ {
+  "Drug": "NOW FOODS C-1000 100'S",
+  "Quantity": 4,
+  "Expiry": "4-May-27"
+ },
+ {
+  "Drug": "NOW FOODS COD LIVER OIL SOOFT GELS 1000MG",
+  "Quantity": 6,
+  "Expiry": "5-May-27"
+ },
+ {
+  "Drug": "NOW FOODS DAILY VITS, MULTI & MINERALS 100'S",
+  "Quantity": 2,
+  "Expiry": "6-May-27"
+ },
+ {
+  "Drug": "NOW FOODS GINKO BILOBA 60MG 60'S",
+  "Quantity": 3,
+  "Expiry": "7-May-27"
+ },
+ {
+  "Drug": "NOW FOODS MELATONIN 10MG 100'S",
+  "Quantity": 2,
+  "Expiry": "8-May-27"
+ },
+ {
+  "Drug": "NOW FOODS MELATONIN 5MG 60'S",
+  "Quantity": 7,
+  "Expiry": "9-May-27"
+ },
+ {
+  "Drug": "NOW FOODS OMEGA 3 FISH OIL 1000MG 180EPA",
+  "Quantity": 2,
+  "Expiry": "10-May-27"
+ },
+ {
+  "Drug": "NOW FOODS OMEGA 3-6-9 1000MG 100'S",
+  "Quantity": 2,
+  "Expiry": "11-May-27"
+ },
+ {
+  "Drug": "NOW FOODS SELENIUM 100MG 250'S",
+  "Quantity": 2,
+  "Expiry": "12-May-27"
+ },
+ {
+  "Drug": "NUGEL SUSP 200ML",
+  "Quantity": 74,
+  "Expiry": "13-May-27"
+ },
+ {
+  "Drug": "NUGEL-O SUSP 200ML",
+  "Quantity": 18,
+  "Expiry": "14-May-27"
+ },
+ {
+  "Drug": "NUTRI-GLOW CAPSULES 30'S",
+  "Quantity": 6,
+  "Expiry": "15-May-27"
+ },
+ {
+  "Drug": "NUTRIMUM CAPS DUAL 30'S",
+  "Quantity": 13,
+  "Expiry": "16-May-27"
+ },
+ {
+  "Drug": "NUTRIMUM PLUS FE",
+  "Quantity": 48,
+  "Expiry": "17-May-27"
+ },
+ {
+  "Drug": "O-LOPERAMIDE 100'S",
+  "Quantity": 36,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "ODOMOS MOSQUITO REPELLENT CREAM 50G",
+  "Quantity": 89,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "ODYMIN CAPS",
+  "Quantity": 164,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "ODYMIN SYR",
+  "Quantity": 26,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "OFLOXACIN TABS 400MG 5'S",
+  "Quantity": 8,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "OILATUM JUNIOR EMOLLIENT BATH ADD 150ML",
+  "Quantity": 5,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "OLANZAPINE 5MG EXETER",
+  "Quantity": 13,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "OLANZIPINE 5MG 10X10 TABS",
+  "Quantity": 33,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "OLIGOCARE TABS 30'S",
+  "Quantity": 32,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "OLIVE OIL EAR DROPS 10ML",
+  "Quantity": 15,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "OLOPATADINE 0.1% EYE DROPS 2.5ML",
+  "Quantity": 7,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "OMEGA H3 CAPS 30'S",
+  "Quantity": 30,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "OMEPRAZOLE 20MG CAPS 28'S TEVA",
+  "Quantity": 26,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "OMEPRAZOLE CAPS 20MG 28'1 VEGA",
+  "Quantity": 43,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "OMESHAL D 1X10 CAPS",
+  "Quantity": 45,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "OMESK 20MG CAPSULES (OMEPRAZOLE) 10*10",
+  "Quantity": 22,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "OMEXET OMEPRAZOLE CAPS 20MG 28'",
+  "Quantity": 48,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "OMZOL TABS (OMEPRAZOLE 20MG) 30'S",
+  "Quantity": 80,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "ONE STEP PREGNANCY TEST KIT 25'S",
+  "Quantity": 59,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "ONE TOUCH SELECT PLUS METER",
+  "Quantity": 8,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "ONE-A-DAY MENS MULT. TABS 60'S",
+  "Quantity": 7,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "OPIZOLE CAPSULE (10X10",
+  "Quantity": 1,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "OPTISOFT LUBRICATING/REWETTING EYE DROPS 0.3%",
+  "Quantity": 14,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "OPTISOFT MOISTURIZING EYE DROP 10ML",
+  "Quantity": 51,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "OPTREX EYE WASH 100ML",
+  "Quantity": 1,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "OPTREX REFRESHING EYE DROP 10ML",
+  "Quantity": 3,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "OPTREX SOOTHING EYE DROPS",
+  "Quantity": 3,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "ORAPLUS+",
+  "Quantity": 59,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "ORDY-10 TADALAFIL TABS 10MG 30'S",
+  "Quantity": 30,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "ORDY-20 TADALAFIL TABS 20MG 30'S",
+  "Quantity": 30,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "ORDY-5 TADALAFIL TABS 5MG 30'S",
+  "Quantity": 30,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "ORELOX 100MG",
+  "Quantity": 27,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "ORELOX 200MG TAB 1X10",
+  "Quantity": 8,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "ORLISTAT 120MG CAPS 84'S",
+  "Quantity": 3,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "ORTACTA 10MG TABS 30'S",
+  "Quantity": 25,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "ORTACTA 15MG TABS 28'S",
+  "Quantity": 13,
+  "Expiry": "17-Apr-27"
+ },
+ {
+  "Drug": "ORTACTA 20MG TABS 28'S",
+  "Quantity": 21,
+  "Expiry": "18-Apr-27"
+ },
+ {
+  "Drug": "ORTHOCARE GEL",
+  "Quantity": 15,
+  "Expiry": "19-Apr-27"
+ },
+ {
+  "Drug": "ORTHOFLEX PLUS",
+  "Quantity": 20,
+  "Expiry": "20-Apr-27"
+ },
+ {
+  "Drug": "OSONS GARLIC PEARLS",
+  "Quantity": 40,
+  "Expiry": "21-Apr-27"
+ },
+ {
+  "Drug": "OSTEOCARE CHEWABLE UK",
+  "Quantity": 31,
+  "Expiry": "22-Apr-27"
+ },
+ {
+  "Drug": "OSTEOCARE SYR UK",
+  "Quantity": 16,
+  "Expiry": "23-Apr-27"
+ },
+ {
+  "Drug": "OSTEOCARE SYRUP INDIA 200ML",
+  "Quantity": 83,
+  "Expiry": "24-Apr-27"
+ },
+ {
+  "Drug": "OSTEOCARE TABS VITABIOTICS",
+  "Quantity": 2,
+  "Expiry": "25-Apr-27"
+ },
+ {
+  "Drug": "OTRIVIN NASAL ADULT ***",
+  "Quantity": 133,
+  "Expiry": "26-Apr-27"
+ },
+ {
+  "Drug": "OTRIVINE CHILDREN NASAL DROPS**",
+  "Quantity": 164,
+  "Expiry": "27-Apr-27"
+ },
+ {
+  "Drug": "OTRIVINE NASAL DROPS 1% ADULTS UK",
+  "Quantity": 1,
+  "Expiry": "28-Apr-27"
+ },
+ {
+  "Drug": "OTRIVINE NASAL DROPS CHILD UK",
+  "Quantity": 7,
+  "Expiry": "29-Apr-27"
+ },
+ {
+  "Drug": "OVARIA PINK 30'S",
+  "Quantity": 1,
+  "Expiry": "30-Apr-27"
+ },
+ {
+  "Drug": "OXAFEN 20MG PIROXICAM",
+  "Quantity": 4,
+  "Expiry": "1-May-27"
+ },
+ {
+  "Drug": "OXYNIC 457MG SUSP",
+  "Quantity": 113,
+  "Expiry": "2-May-27"
+ },
+ {
+  "Drug": "OXYNIC 625 14'S TAB",
+  "Quantity": 3,
+  "Expiry": "3-May-27"
+ },
+ {
+  "Drug": "OXYUREA 500MG TABS",
+  "Quantity": 9,
+  "Expiry": "4-May-27"
+ },
+ {
+  "Drug": "PALMERS FACIAL OIL LUMINOUS HYDRA 30ML",
+  "Quantity": 2,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "PANACIN EXTRA STRONG TABS",
+  "Quantity": 146,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "PANADOL ACTIFAST CAPS 500MG 10'S",
+  "Quantity": 39,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "PANADOL ADVANCE 16'S TABS",
+  "Quantity": 59,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "PANADOL EXTRA ADVANCE 16'S",
+  "Quantity": 88,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "PANADOL EXTRA TABS 10X10",
+  "Quantity": 39,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "PANADOL ORIGINAL 12'S",
+  "Quantity": 36,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "PANADOL PLAIN TAB 10X10",
+  "Quantity": 11,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "PANALEX 125MG SUPP 10'S",
+  "Quantity": 25,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "PANALEX 250MG SUPP 10'S",
+  "Quantity": 61,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "PANALEX 500MG TABS 30'S",
+  "Quantity": 79,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "PANTO DENK 20MG TABS 28'S",
+  "Quantity": 10,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "PANTOPRAZOLE TABS 20MG 28'S",
+  "Quantity": 27,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "PANTOPRAZOLE TABS 40MG 28'S",
+  "Quantity": 10,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "PARA SYRUP (PHYTO-RIKER)",
+  "Quantity": 12,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "PARA SYRUP KAFNAM",
+  "Quantity": 1,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "PARACETAMOL 100'S EXETER",
+  "Quantity": 24,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "PARACETAMOL 125ML ELIXIR (M&G)",
+  "Quantity": 25,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "PARACETAMOL 500MG TABS  DAS",
+  "Quantity": 29,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "PARACETAMOL 500MG TABS 100'S UK",
+  "Quantity": 146,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "PARACETAMOL 500MG TABS 100X10-PHYTO-RIKER",
+  "Quantity": 13,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "PARACETAMOL 500MG TABS 50X10- ESKAY",
+  "Quantity": 36,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "PARACETAMOL CAPLETS 16S",
+  "Quantity": 589,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "PARACETAMOL INF.10MG/ML 100ML TROGE",
+  "Quantity": 190,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "PARACETAMOL SYR 120MG/5ML 100ML EXETER",
+  "Quantity": 70,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "PARACETAMOL SYR PHARMANOVA",
+  "Quantity": 17,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "PARACETAMOL TABS 500MG 30'S EXETER",
+  "Quantity": 88,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "PARACETEMOL SYR 100ML ENTRANCE",
+  "Quantity": 43,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "PARAFENAC EXTRA",
+  "Quantity": 29,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "PARAFENAC TAB 10 X 10",
+  "Quantity": 54,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "PARAMOL 125MG SUPP 10'S",
+  "Quantity": 95,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "PARAMOL 250MG SUPP 100'S",
+  "Quantity": 90,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "PARAMOL 500MG SUPP 10'S",
+  "Quantity": 44,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "PARAMOL SUPPO 1000MGG 10'S",
+  "Quantity": 121,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "PARAMOL SYR 125ML",
+  "Quantity": 15,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "PARATOP",
+  "Quantity": 44,
+  "Expiry": "17-Apr-27"
+ },
+ {
+  "Drug": "PAROXETINE 20MG 30'S",
+  "Quantity": 5,
+  "Expiry": "18-Apr-27"
+ },
+ {
+  "Drug": "PAROXETINE TABS 10MG 30'S",
+  "Quantity": 16,
+  "Expiry": "19-Apr-27"
+ },
+ {
+  "Drug": "PENICILLIN OINT",
+  "Quantity": 241,
+  "Expiry": "20-Apr-27"
+ },
+ {
+  "Drug": "PENICILLIN V 125MG TAB S 100X10",
+  "Quantity": 15,
+  "Expiry": "21-Apr-27"
+ },
+ {
+  "Drug": "PENICILLIN V TABS 250MG X 28",
+  "Quantity": 15,
+  "Expiry": "22-Apr-27"
+ },
+ {
+  "Drug": "PEPTO BISMOL ULTRA 354ML",
+  "Quantity": 7,
+  "Expiry": "23-Apr-27"
+ },
+ {
+  "Drug": "PERFECT DENT LOZENGES MIX",
+  "Quantity": 11,
+  "Expiry": "24-Apr-27"
+ },
+ {
+  "Drug": "PERFECTIL MAX",
+  "Quantity": 3,
+  "Expiry": "25-Apr-27"
+ },
+ {
+  "Drug": "PERFECTIL PLUS SKIN",
+  "Quantity": 6,
+  "Expiry": "26-Apr-27"
+ },
+ {
+  "Drug": "PERFECTIL TABS 30'S",
+  "Quantity": 8,
+  "Expiry": "27-Apr-27"
+ },
+ {
+  "Drug": "PERINDOPRIL TABS 2MG 30'S",
+  "Quantity": 4,
+  "Expiry": "28-Apr-27"
+ },
+ {
+  "Drug": "PERMIN CREAM (PERMETHRIN)",
+  "Quantity": 11,
+  "Expiry": "29-Apr-27"
+ },
+ {
+  "Drug": "PERMITHRIN SOAP",
+  "Quantity": 3,
+  "Expiry": "30-Apr-27"
+ },
+ {
+  "Drug": "PERMOXYL CAPS 250MG 500'",
+  "Quantity": 12,
+  "Expiry": "1-May-27"
+ },
+ {
+  "Drug": "PERMOXYL(AMOX'LIN) SUSP 100ML",
+  "Quantity": 15,
+  "Expiry": "2-May-27"
+ },
+ {
+  "Drug": "PERMOXYL(AMOXYL) CAPS 500MG 500'",
+  "Quantity": 39,
+  "Expiry": "3-May-27"
+ },
+ {
+  "Drug": "PHARMADERM CREAM 75GM",
+  "Quantity": 80,
+  "Expiry": "4-May-27"
+ },
+ {
+  "Drug": "PHARMADERM HAND SANITIZER 60ML",
+  "Quantity": 88,
+  "Expiry": "5-May-27"
+ },
+ {
+  "Drug": "PHARMADERM SOAP (PLAIN) 75GM",
+  "Quantity": 38,
+  "Expiry": "6-May-27"
+ },
+ {
+  "Drug": "PHARMADERM SOAP (SCRUB) 190GM",
+  "Quantity": 22,
+  "Expiry": "7-May-27"
+ },
+ {
+  "Drug": "PHARMADERM SOAP HERBAL 190GM",
+  "Quantity": 34,
+  "Expiry": "8-May-27"
+ },
+ {
+  "Drug": "PHENOBARBITONE 60MG TABS 50'S ECL",
+  "Quantity": 16,
+  "Expiry": "9-May-27"
+ },
+ {
+  "Drug": "PHENOBARBITONE TABS 30MG 500' BLISTER",
+  "Quantity": 16,
+  "Expiry": "10-May-27"
+ },
+ {
+  "Drug": "PHENYTOIN SODIUM 250MG/5ML INJ 5'S",
+  "Quantity": 5,
+  "Expiry": "11-May-27"
+ },
+ {
+  "Drug": "PHILIPS MILK OF MAGNESIA 200ML",
+  "Quantity": 17,
+  "Expiry": "12-May-27"
+ },
+ {
+  "Drug": "PHOPAIN SYRUP 100ML",
+  "Quantity": 14,
+  "Expiry": "13-May-27"
+ },
+ {
+  "Drug": "PIKOVIT SYR 150ML",
+  "Quantity": 28,
+  "Expiry": "14-May-27"
+ },
+ {
+  "Drug": "PILEX OINTMENT 30GM",
+  "Quantity": 1,
+  "Expiry": "15-May-27"
+ },
+ {
+  "Drug": "PILGAT 15MG (PIOGLITAZONE)",
+  "Quantity": 30,
+  "Expiry": "16-May-27"
+ },
+ {
+  "Drug": "PILGAT 30MG (PIOGLITAZONE)",
+  "Quantity": 52,
+  "Expiry": "17-May-27"
+ },
+ {
+  "Drug": "PILIEF OINT'",
+  "Quantity": 100,
+  "Expiry": "18-May-27"
+ },
+ {
+  "Drug": "PILIEF TABLETS",
+  "Quantity": 100,
+  "Expiry": "19-May-27"
+ },
+ {
+  "Drug": "PINEK-20MG(NIFEDIPINE) TABS 100'S",
+  "Quantity": 53,
+  "Expiry": "20-May-27"
+ },
+ {
+  "Drug": "PIOGLITAZONE 30MG EXETER 30'S",
+  "Quantity": 3,
+  "Expiry": "21-May-27"
+ },
+ {
+  "Drug": "PIOGLITAZONE 30MG TABS 28'S UK",
+  "Quantity": 1,
+  "Expiry": "22-May-27"
+ },
+ {
+  "Drug": "PIOGLITAZONE15M EXETER 30'S",
+  "Quantity": 10,
+  "Expiry": "23-May-27"
+ },
+ {
+  "Drug": "PIRITON SYR",
+  "Quantity": 12,
+  "Expiry": "24-May-27"
+ },
+ {
+  "Drug": "PIRITON TABS 30'S",
+  "Quantity": 2,
+  "Expiry": "25-May-27"
+ },
+ {
+  "Drug": "PMF 200G",
+  "Quantity": 32,
+  "Expiry": "26-May-27"
+ },
+ {
+  "Drug": "PODOPHYLIN CREAM",
+  "Quantity": 19,
+  "Expiry": "27-May-27"
+ },
+ {
+  "Drug": "PODOWART PAINT",
+  "Quantity": 31,
+  "Expiry": "28-May-27"
+ },
+ {
+  "Drug": "POFAKOF ADULT",
+  "Quantity": 17,
+  "Expiry": "29-May-27"
+ },
+ {
+  "Drug": "POFAKOF BABY",
+  "Quantity": 19,
+  "Expiry": "30-May-27"
+ },
+ {
+  "Drug": "POFAKOF JUNIOR",
+  "Quantity": 21,
+  "Expiry": "31-May-27"
+ },
+ {
+  "Drug": "POLYFER CAPS",
+  "Quantity": 37,
+  "Expiry": "1-Jun-27"
+ },
+ {
+  "Drug": "POLYFER FORTE 200ML SYR",
+  "Quantity": 17,
+  "Expiry": "2-Jun-27"
+ },
+ {
+  "Drug": "POLYFER SYR 150ML",
+  "Quantity": 58,
+  "Expiry": "3-Jun-27"
+ },
+ {
+  "Drug": "POLYGEL SUSP 200ML",
+  "Quantity": 40,
+  "Expiry": "4-Jun-27"
+ },
+ {
+  "Drug": "POLYGNAX 12'S",
+  "Quantity": 69,
+  "Expiry": "5-Jun-27"
+ },
+ {
+  "Drug": "POLYGNAX 6'S",
+  "Quantity": 19,
+  "Expiry": "6-Jun-27"
+ },
+ {
+  "Drug": "PONSTAN CAPS",
+  "Quantity": 10,
+  "Expiry": "7-Jun-27"
+ },
+ {
+  "Drug": "POSTINOR 2 LOCAL",
+  "Quantity": 30,
+  "Expiry": "8-Jun-27"
+ },
+ {
+  "Drug": "POSTINOR 2 ORIGINAL",
+  "Quantity": 25,
+  "Expiry": "9-Jun-27"
+ },
+ {
+  "Drug": "PREDNISOLONE TAB 5MG 1X28",
+  "Quantity": 14,
+  "Expiry": "10-Jun-27"
+ },
+ {
+  "Drug": "PREEMAL TABLETS",
+  "Quantity": 335,
+  "Expiry": "11-Jun-27"
+ },
+ {
+  "Drug": "PREGABALIN & METHYLCOBALAMIN 75MG/750MCG",
+  "Quantity": 25,
+  "Expiry": "12-Jun-27"
+ },
+ {
+  "Drug": "PREGABALIN CAPS 75MG 30'S VEGA",
+  "Quantity": 68,
+  "Expiry": "13-Jun-27"
+ },
+ {
+  "Drug": "PREGASAFE 75MG CAPS 30'S",
+  "Quantity": 5,
+  "Expiry": "14-Jun-27"
+ },
+ {
+  "Drug": "PREGATAS(PREGABALIN) TAB 75MG 30'S",
+  "Quantity": 26,
+  "Expiry": "15-Jun-27"
+ },
+ {
+  "Drug": "PREGCAD PREGNANCY TEST KIT 50'S",
+  "Quantity": 47,
+  "Expiry": "16-Jun-27"
+ },
+ {
+  "Drug": "PREGNACARE 19'S TABS VITABIOTICS 30'S",
+  "Quantity": 45,
+  "Expiry": "17-Jun-27"
+ },
+ {
+  "Drug": "PREGNACARE HIM/HER CAPS",
+  "Quantity": 2,
+  "Expiry": "18-Jun-27"
+ },
+ {
+  "Drug": "PREGNACARE PLUS",
+  "Quantity": 15,
+  "Expiry": "19-Jun-27"
+ },
+ {
+  "Drug": "PREGNACIN PLUS CAPSULES 60'S",
+  "Quantity": 1,
+  "Expiry": "20-Jun-27"
+ },
+ {
+  "Drug": "PREGNANCY TEST KIT- TWIN PK",
+  "Quantity": 84,
+  "Expiry": "21-Jun-27"
+ },
+ {
+  "Drug": "PREGNANCY TEST KITS(MARIE'S P-TEST) 30'S",
+  "Quantity": 17,
+  "Expiry": "22-Jun-27"
+ },
+ {
+  "Drug": "PRETTY COTTON BALLS COLOURED 100'S",
+  "Quantity": 43,
+  "Expiry": "23-Jun-27"
+ },
+ {
+  "Drug": "PRETTY COTTON ROLL 100G",
+  "Quantity": 1,
+  "Expiry": "24-Jun-27"
+ },
+ {
+  "Drug": "PREVAIL ADULT DIAPERS 14'S",
+  "Quantity": 22,
+  "Expiry": "25-Jun-27"
+ },
+ {
+  "Drug": "PRIMOLUT N TAB 5MG 30'S",
+  "Quantity": 48,
+  "Expiry": "26-Jun-27"
+ },
+ {
+  "Drug": "PROCOMIL TAB",
+  "Quantity": 9,
+  "Expiry": "27-Jun-27"
+ },
+ {
+  "Drug": "PROMAN 30'S CAPS",
+  "Quantity": 4,
+  "Expiry": "28-Jun-27"
+ },
+ {
+  "Drug": "PROMAN 50+",
+  "Quantity": 2,
+  "Expiry": "29-Jun-27"
+ },
+ {
+  "Drug": "PROMECINE SYRUP 125ML",
+  "Quantity": 54,
+  "Expiry": "30-Jun-27"
+ },
+ {
+  "Drug": "PROMETHAZINE INJ 50MG/2ML 100'",
+  "Quantity": 710,
+  "Expiry": "1-Jul-27"
+ },
+ {
+  "Drug": "PROPRANOLOL 10MG TABS UK 28'S",
+  "Quantity": 30,
+  "Expiry": "2-Jul-27"
+ },
+ {
+  "Drug": "PROSTACURE TEA",
+  "Quantity": 13,
+  "Expiry": "3-Jul-27"
+ },
+ {
+  "Drug": "PROSTACURE X",
+  "Quantity": 52,
+  "Expiry": "4-Jul-27"
+ },
+ {
+  "Drug": "PROSTAMAX",
+  "Quantity": 1,
+  "Expiry": "5-Jul-27"
+ },
+ {
+  "Drug": "PROVERA 10MG TABS 30'S",
+  "Quantity": 8,
+  "Expiry": "6-Jul-27"
+ },
+ {
+  "Drug": "PROVERA 5MG TABS 30'S",
+  "Quantity": 17,
+  "Expiry": "7-Jul-27"
+ },
+ {
+  "Drug": "PROWOMAN 50+ CAPSULES 30'",
+  "Quantity": 15,
+  "Expiry": "8-Jul-27"
+ },
+ {
+  "Drug": "PROWOMAN CAPSULES 30'",
+  "Quantity": 27,
+  "Expiry": "9-Jul-27"
+ },
+ {
+  "Drug": "PULMICORT 0.5MG/ML",
+  "Quantity": 4,
+  "Expiry": "10-Jul-27"
+ },
+ {
+  "Drug": "PURE COD LIVER CAPS 30'S",
+  "Quantity": 43,
+  "Expiry": "11-Jul-27"
+ },
+ {
+  "Drug": "Q&Y GEL 25G (LUBRICANT JELLY)",
+  "Quantity": 35,
+  "Expiry": "13-Mar-27"
+ },
+ {
+  "Drug": "Q&Y GEL 25G STRAWBERRY FLAV.",
+  "Quantity": 33,
+  "Expiry": "14-Mar-27"
+ },
+ {
+  "Drug": "Q&Y GEL 50G (LUBRICANT JELLY)",
+  "Quantity": 20,
+  "Expiry": "15-Mar-27"
+ },
+ {
+  "Drug": "Q&Y GEL 50G STRAWBERRY FLAV.",
+  "Quantity": 24,
+  "Expiry": "16-Mar-27"
+ },
+ {
+  "Drug": "QUADRAJEL 15G 1'S",
+  "Quantity": 29,
+  "Expiry": "17-Mar-27"
+ },
+ {
+  "Drug": "QUININE SYRUP FG",
+  "Quantity": 48,
+  "Expiry": "18-Mar-27"
+ },
+ {
+  "Drug": "RADOX BATH HERBAL 500ML",
+  "Quantity": 1,
+  "Expiry": "19-Mar-27"
+ },
+ {
+  "Drug": "RAMIPRIL 10MG 28'S",
+  "Quantity": 28,
+  "Expiry": "20-Mar-27"
+ },
+ {
+  "Drug": "RAMIPRIL 10MG TABS 28'S",
+  "Quantity": 50,
+  "Expiry": "21-Mar-27"
+ },
+ {
+  "Drug": "RAPINOL 25X4'S",
+  "Quantity": 18,
+  "Expiry": "22-Mar-27"
+ },
+ {
+  "Drug": "REACH TOOTHPASTE MIX 150G",
+  "Quantity": 14,
+  "Expiry": "23-Mar-27"
+ },
+ {
+  "Drug": "REDSUN JELLY(ALL FLAVOURS)",
+  "Quantity": 80,
+  "Expiry": "24-Mar-27"
+ },
+ {
+  "Drug": "REDSUN-100MG CAPS 10X1X10",
+  "Quantity": 204,
+  "Expiry": "25-Mar-27"
+ },
+ {
+  "Drug": "REFLEX MOUTH WASH 225ML MINT ALOE VERA",
+  "Quantity": 63,
+  "Expiry": "26-Mar-27"
+ },
+ {
+  "Drug": "REFRESHING FOOT SPRAY 50ML",
+  "Quantity": 4,
+  "Expiry": "27-Mar-27"
+ },
+ {
+  "Drug": "RELESTAT EYE DROPS 5ML",
+  "Quantity": 2,
+  "Expiry": "28-Mar-27"
+ },
+ {
+  "Drug": "RENALKA SYR",
+  "Quantity": 1,
+  "Expiry": "29-Mar-27"
+ },
+ {
+  "Drug": "RENERVE PLUS CAPS 30'S",
+  "Quantity": 23,
+  "Expiry": "30-Mar-27"
+ },
+ {
+  "Drug": "RES-Q SUSP 200ML",
+  "Quantity": 34,
+  "Expiry": "31-Mar-27"
+ },
+ {
+  "Drug": "RHINATHIOL 2% INFANT SYR 125ML",
+  "Quantity": 17,
+  "Expiry": "1-Apr-27"
+ },
+ {
+  "Drug": "RHINATHIOL ADULT 5% SYR 125ML",
+  "Quantity": 37,
+  "Expiry": "2-Apr-27"
+ },
+ {
+  "Drug": "RHIZIN SYR",
+  "Quantity": 59,
+  "Expiry": "3-Apr-27"
+ },
+ {
+  "Drug": "RHIZIN TAB",
+  "Quantity": 126,
+  "Expiry": "4-Apr-27"
+ },
+ {
+  "Drug": "RIDDLES ADULT COUGH SYR",
+  "Quantity": 42,
+  "Expiry": "5-Apr-27"
+ },
+ {
+  "Drug": "RIGHT GUARD DEO SPRAY 250ML ALL",
+  "Quantity": 37,
+  "Expiry": "6-Apr-27"
+ },
+ {
+  "Drug": "RISPERIDONE 1MG TABS 60'S",
+  "Quantity": 2,
+  "Expiry": "7-Apr-27"
+ },
+ {
+  "Drug": "RISPERIDONE 4MG TABS 60'S",
+  "Quantity": 18,
+  "Expiry": "8-Apr-27"
+ },
+ {
+  "Drug": "RIVAROX 10MG TABS",
+  "Quantity": 46,
+  "Expiry": "9-Apr-27"
+ },
+ {
+  "Drug": "RIVAROX 15MG TABS",
+  "Quantity": 24,
+  "Expiry": "10-Apr-27"
+ },
+ {
+  "Drug": "RIVAROX 20MG TABS",
+  "Quantity": 30,
+  "Expiry": "11-Apr-27"
+ },
+ {
+  "Drug": "ROBAXIN TABS 750MG X 100",
+  "Quantity": 4,
+  "Expiry": "12-Apr-27"
+ },
+ {
+  "Drug": "ROBB INHALER 12'S",
+  "Quantity": 44,
+  "Expiry": "13-Apr-27"
+ },
+ {
+  "Drug": "ROBB JAR",
+  "Quantity": 216,
+  "Expiry": "14-Apr-27"
+ },
+ {
+  "Drug": "ROCEPHIN IV 1G 1'S",
+  "Quantity": 70,
+  "Expiry": "15-Apr-27"
+ },
+ {
+  "Drug": "ROCEPHIN VIAL 2G",
+  "Quantity": 7,
+  "Expiry": "16-Apr-27"
+ },
+ {
+  "Drug": "ROCK N ROLL CONDOMS ALL 3'S",
+  "Quantity": 807,
+  "Expiry": "17-Apr-27"
+ },
+ {
+  "Drug": "ROOTER MIXTURE",
+  "Quantity": 24,
+  "Expiry": "18-Apr-27"
+ },
+ {
+  "Drug": "ROOTER TYTONIC",
+  "Quantity": 72,
+  "Expiry": "19-Apr-27"
+ },
+ {
+  "Drug": "ROSUVASTATIN 10MG TABS 28'S TEVA",
+  "Quantity": 13,
+  "Expiry": "20-Apr-27"
+ },
+ {
+  "Drug": "ROUGH RIDER CONDOMS 3'",
+  "Quantity": 142,
+  "Expiry": "21-Apr-27"
+ },
+ {
+  "Drug": "ROXIDOL",
+  "Quantity": 58,
+  "Expiry": "22-Apr-27"
+ },
+ {
+  "Drug": "RUFENAC SUPP. 100MG",
+  "Quantity": 36,
+  "Expiry": "23-Apr-27"
  }
 ]
 
