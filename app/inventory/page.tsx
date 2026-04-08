@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { PRODUCT_CATEGORIES } from '@/lib/categories';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from '@/lib/firebase';
+import { useAuth } from '@/lib/auth-context';
 
 async function debugCheck() {
   const snapshot = await getDocs(collection(db, "inventory"));
@@ -56,6 +57,7 @@ function getFirstCharacterGroup(name: string): string {
 }
 
 export default function InventoryPage() {
+  const { isSuperAdmin } = useAuth();
   const { products, loading, offline } = useInventory();
   const { addToCart } = useCart(); // Use hook
   const [searchQuery, setSearchQuery] = useState('');
@@ -150,11 +152,7 @@ console.log("Offline:", offline);
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        {/*
-          Category filter temporarily hidden.
-          We keep the state + logic so we can re-enable quickly later.
-        */}
-        {/* {isMounted ? (
+        {isSuperAdmin && isMounted ? (
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className='w-full md:w-[280px] bg-background border-border/60 overflow-hidden'>
               <div className='flex items-center gap-2 text-muted-foreground min-w-0 flex-1 overflow-hidden'>
@@ -178,12 +176,12 @@ console.log("Offline:", offline);
               ))}
             </SelectContent>
           </Select>
-        ) : (
+        ) : isSuperAdmin ? (
           <div className='w-full md:w-[280px] h-10 bg-background border border-border/60 rounded-md flex items-center gap-2 px-3 text-muted-foreground'>
             <Filter className='h-4 w-4' />
             <span>Category</span>
           </div>
-        )} */}
+        ) : null}
       </div>
 
       {/* Alphabetical filter */}

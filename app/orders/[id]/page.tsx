@@ -5,14 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { doc, getDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
-import type { Order } from '@/types';
+import type { CartItem, Order } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -24,11 +23,15 @@ import {
   Store,
   CreditCard,
   Wallet,
+  Minus,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createNotification } from '@/lib/notifications';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { formatOrderLabel } from '@/lib/order-display';
+import { notifyAdminsClientFinalizedOrder } from '@/lib/order-workflow';
 
 const DELIVERY_FEE = 50; // GHS 50 delivery fee
 
@@ -39,6 +42,7 @@ export default function OrderVerificationPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editableItems, setEditableItems] = useState<CartItem[]>([]);
   const [deliveryOption, setDeliveryOption] = useState<'pickup' | 'delivery'>(
     'pickup'
   );
@@ -60,7 +64,6 @@ export default function OrderVerificationPage() {
         if (orderDoc.exists()) {
           const orderData = { id: orderDoc.id, ...orderDoc.data() } as Order;
 
-          // Verify this order belongs to the user
           if (orderData.userId !== user.id) {
             toast.error('You do not have access to this order');
             router.push('/orders');
@@ -68,8 +71,10 @@ export default function OrderVerificationPage() {
           }
 
           setOrder(orderData);
+          setEditableItems(
+            (orderData.items || []).map((i) => ({ ...i }))
+          );
 
-          // Pre-fill delivery option if already set
           if (orderData.deliveryOption) {
             setDeliveryOption(orderData.deliveryOption);
           }
@@ -97,6 +102,25 @@ export default function OrderVerificationPage() {
     fetchOrder();
   }, [user, params.id, router]);
 
+  const lineSubtotal = editableItems.reduce(
+    (s, i) => s + i.price * i.quantity,
+    0
+  );
+
+  const bumpQty = (id: string, delta: number) => {
+    setEditableItems((prev) =>
+      prev.map((i) =>
+        i.id === id
+          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
+          : i
+      )
+    );
+  };
+
+  const removeLine = (id: string) => {
+    setEditableItems((prev) => prev.filter((i) => i.id !== id));
+  };
+
   const handleConfirmOrder = async () => {
     if (!order || !db) return;
 
@@ -108,63 +132,94 @@ export default function OrderVerificationPage() {
     setSubmitting(true);
 
     try {
-      // Update order with delivery and payment info (but keep status as pharmacy_confirmed)
-      // The status will be updated to customer_confirmed when admin reads the notification
-      await updateDoc(doc(db, 'orders', order.id), {
-        deliveryOption,
-        deliveryFee: deliveryOption === 'delivery' ? DELIVERY_FEE : 0,
-        paymentMethod,
-        updatedAt: Date.now(),
-        ...(deliveryOption === 'delivery'
-          ? { deliveryAddress }
-          : { deliveryAddress: deleteField() }),
-        ...(notes.trim()
-          ? { notes: notes.trim() }
-          : { notes: deleteField() }),
-      });
+      if (order.status === 'proforma_sent') {
+        if (editableItems.length === 0) {
+          toast.error('Keep at least one line item, or contact the pharmacy.');
+          setSubmitting(false);
+          return;
+        }
 
-      // Create notification for all admin users
-      try {
-        const adminUsersQuery = query(
-          collection(db, 'users'),
-          where('role', 'in', ['admin', 'super_admin'])
+        const subtotal = lineSubtotal;
+        await updateDoc(doc(db, 'orders', order.id), {
+          items: editableItems,
+          total: subtotal,
+          status: 'client_finalized',
+          deliveryOption,
+          deliveryFee: deliveryOption === 'delivery' ? DELIVERY_FEE : 0,
+          paymentMethod,
+          updatedAt: Date.now(),
+          ...(deliveryOption === 'delivery'
+            ? { deliveryAddress }
+            : { deliveryAddress: deleteField() }),
+          ...(notes.trim()
+            ? { notes: notes.trim() }
+            : { notes: deleteField() }),
+        });
+
+        await notifyAdminsClientFinalizedOrder(db, order);
+        toast.success(
+          'Order confirmed. The pharmacy will send your invoice and prepare your order.'
         );
-        const adminSnapshot = await getDocs(adminUsersQuery);
-
-        const paymentMethodText =
-          paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash on Delivery';
-        const deliveryText =
-          deliveryOption === 'delivery'
-            ? `Delivery to: ${deliveryAddress}`
-            : 'Store Pickup';
-
-        // Notify all admin users
-        const notificationPromises = adminSnapshot.docs.map((adminDoc) =>
-          createNotification(
-            adminDoc.id,
-            'order_confirmation',
-            'Customer Order Confirmation',
-            `Order #${formatOrderLabel(order)} from ${
-              order.userName || order.userEmail
-            } has been confirmed.\n\nPayment: ${paymentMethodText}\n${deliveryText}\n\nItems: ${order.items
-              .map((i) => `${i.quantity}x ${i.name}`)
-              .join(', ')}\nTotal: ₵${(
-              order.total + (deliveryOption === 'delivery' ? DELIVERY_FEE : 0)
-            ).toFixed(2)}`,
-            order.id
-          )
-        );
-
-        await Promise.all(notificationPromises);
-      } catch (notifError) {
-        console.error('Error creating admin notifications:', notifError);
-        // Don't fail the order confirmation if notification fails
+        router.push('/orders');
+        return;
       }
 
-      toast.success(
-        'Order confirmed! Pharmacy will review and process your order.'
-      );
-      router.push('/orders');
+      if (order.status === 'pharmacy_confirmed') {
+        await updateDoc(doc(db, 'orders', order.id), {
+          deliveryOption,
+          deliveryFee: deliveryOption === 'delivery' ? DELIVERY_FEE : 0,
+          paymentMethod,
+          updatedAt: Date.now(),
+          ...(deliveryOption === 'delivery'
+            ? { deliveryAddress }
+            : { deliveryAddress: deleteField() }),
+          ...(notes.trim()
+            ? { notes: notes.trim() }
+            : { notes: deleteField() }),
+        });
+
+        try {
+          const adminUsersQuery = query(
+            collection(db, 'users'),
+            where('role', 'in', ['admin', 'super_admin'])
+          );
+          const adminSnapshot = await getDocs(adminUsersQuery);
+
+          const paymentMethodText =
+            paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash on Delivery';
+          const deliveryText =
+            deliveryOption === 'delivery'
+              ? `Delivery to: ${deliveryAddress}`
+              : 'Store Pickup';
+
+          await Promise.all(
+            adminSnapshot.docs.map((adminDoc) =>
+              createNotification(
+                adminDoc.id,
+                'order_confirmation',
+                'Customer Order Confirmation',
+                `Order ${formatOrderLabel(order)} from ${
+                  order.userName || order.userEmail
+                } has been confirmed.\n\nPayment: ${paymentMethodText}\n${deliveryText}\n\nItems: ${order.items
+                  .map((i) => `${i.quantity}x ${i.name}`)
+                  .join(', ')}\nTotal: ₵${(
+                  order.total +
+                  (deliveryOption === 'delivery' ? DELIVERY_FEE : 0)
+                ).toFixed(2)}`,
+                order.id
+              )
+            )
+          );
+        } catch (notifError) {
+          console.error('Error creating admin notifications:', notifError);
+        }
+
+        toast.success(
+          'Details saved. Pharmacy will review and process your order.'
+        );
+        router.push('/orders');
+        return;
+      }
     } catch (error) {
       console.error('Error confirming order:', error);
       toast.error('Failed to confirm order. Please try again.');
@@ -193,33 +248,43 @@ export default function OrderVerificationPage() {
     );
   }
 
-  // Check if order has already been confirmed (has payment/delivery info but status is still pharmacy_confirmed)
-  const isAlreadyConfirmed =
-    order.status === 'pharmacy_confirmed' &&
-    (order.paymentMethod || order.deliveryOption);
+  const isProformaReview = order.status === 'proforma_sent';
+  const isLegacyVerify = order.status === 'pharmacy_confirmed';
 
-  // Show different views based on order status
-  if (order.status !== 'pharmacy_confirmed' && !isAlreadyConfirmed) {
-    return (
-      <div className='space-y-6'>
-        <Button variant='ghost' onClick={() => router.push('/orders')}>
-          <ArrowLeft className='mr-2 h-4 w-4' />
-          Back to Orders
-        </Button>
-        <Card>
-          <CardContent className='pt-6'>
-            <p className='text-center text-muted-foreground'>
-              This order is not ready for verification yet. Current status:{' '}
-              {order.status.replace('_', ' ')}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const legacyAlreadySubmitted =
+    isLegacyVerify && !!(order.paymentMethod || order.deliveryOption);
 
-  // Show "awaiting approval" message if already confirmed
-  if (isAlreadyConfirmed) {
+  const isClientFinalized = order.status === 'client_finalized';
+  const isInvoiceOrLater =
+    order.status === 'invoice_sent' ||
+    order.status === 'customer_confirmed' ||
+    order.status === 'processing' ||
+    order.status === 'completed';
+
+  /** Read-only success / tracking views */
+  if (isClientFinalized || isInvoiceOrLater) {
+    const title =
+      order.status === 'client_finalized'
+        ? 'Confirmation received'
+        : order.status === 'invoice_sent'
+          ? 'Invoice sent'
+          : order.status === 'processing'
+            ? 'Preparing your order'
+            : order.status === 'completed'
+              ? 'Order completed'
+              : 'Order update';
+
+    const blurb =
+      order.status === 'client_finalized'
+        ? 'Thank you. The pharmacy will send your invoice and then pack your order for pickup or delivery.'
+        : order.status === 'invoice_sent'
+          ? 'Your invoice has been recorded. The shop will pack your order shortly.'
+          : order.status === 'processing'
+            ? 'Your order is being packed and will be ready for pickup or delivery as arranged.'
+            : order.status === 'completed'
+              ? 'This order is complete. Thank you for your business.'
+              : 'Your order is being processed.';
+
     return (
       <div className='space-y-8'>
         <div className='flex items-center gap-4'>
@@ -229,11 +294,9 @@ export default function OrderVerificationPage() {
           </Button>
           <div>
             <h1 className='text-3xl font-serif font-bold text-primary'>
-              Order Confirmed
+              {title}
             </h1>
-            <p className='text-muted-foreground mt-1'>
-              Your order confirmation has been received
-            </p>
+            <p className='text-muted-foreground mt-1'>{blurb}</p>
           </div>
         </div>
 
@@ -243,50 +306,39 @@ export default function OrderVerificationPage() {
               <div className='rounded-full bg-green-100 p-3'>
                 <CheckCircle2 className='h-6 w-6 text-green-600' />
               </div>
-              <div className='flex-1'>
-                <h3 className='text-lg font-semibold text-green-900 mb-2'>
-                  Order Confirmed - Awaiting Pharmacy Approval
-                </h3>
-                <p className='text-green-800 mb-4'>
-                  Your order has been confirmed with the following details. The
-                  pharmacy will review your confirmation and begin processing
-                  your order shortly.
-                </p>
-
-                <div className='space-y-3 mt-4 pt-4 border-t border-green-200'>
+              <div className='flex-1 space-y-3'>
+                {order.paymentMethod && (
                   <div className='flex justify-between text-sm'>
-                    <span className='text-muted-foreground'>
-                      Payment Method:
-                    </span>
+                    <span className='text-muted-foreground'>Payment</span>
                     <span className='font-medium'>
                       {order.paymentMethod === 'momo'
                         ? 'Mobile Money (Momo)'
                         : 'Cash'}
                     </span>
                   </div>
+                )}
+                {order.deliveryOption && (
                   <div className='flex justify-between text-sm'>
-                    <span className='text-muted-foreground'>Delivery:</span>
+                    <span className='text-muted-foreground'>Fulfillment</span>
                     <span className='font-medium'>
                       {order.deliveryOption === 'delivery'
-                        ? 'Home Delivery'
-                        : 'Store Pickup'}
+                        ? 'Home delivery'
+                        : 'Store pickup'}
                     </span>
                   </div>
-                  {order.deliveryAddress && (
-                    <div className='text-sm'>
-                      <span className='text-muted-foreground'>Address: </span>
-                      <span className='font-medium'>
-                        {order.deliveryAddress}
-                      </span>
-                    </div>
-                  )}
-                  {order.notes && (
-                    <div className='text-sm'>
-                      <span className='text-muted-foreground'>Notes: </span>
-                      <span className='font-medium'>{order.notes}</span>
-                    </div>
-                  )}
-                </div>
+                )}
+                {order.deliveryAddress && (
+                  <div className='text-sm'>
+                    <span className='text-muted-foreground'>Address: </span>
+                    <span className='font-medium'>{order.deliveryAddress}</span>
+                  </div>
+                )}
+                {order.notes && (
+                  <div className='text-sm'>
+                    <span className='text-muted-foreground'>Notes: </span>
+                    <span className='font-medium'>{order.notes}</span>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -296,7 +348,7 @@ export default function OrderVerificationPage() {
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
               <Package className='h-5 w-5' />
-              Order Items
+              Order items
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-4'>
@@ -329,8 +381,136 @@ export default function OrderVerificationPage() {
     );
   }
 
+  if (legacyAlreadySubmitted) {
+    return (
+      <div className='space-y-8'>
+        <div className='flex items-center gap-4'>
+          <Button variant='ghost' onClick={() => router.push('/orders')}>
+            <ArrowLeft className='mr-2 h-4 w-4' />
+            Back to Orders
+          </Button>
+          <div>
+            <h1 className='text-3xl font-serif font-bold text-primary'>
+              Order confirmed
+            </h1>
+            <p className='text-muted-foreground mt-1'>
+              Your details have been received
+            </p>
+          </div>
+        </div>
+
+        <Card className='border-green-200 bg-green-50/50'>
+          <CardContent className='pt-6'>
+            <div className='flex items-start gap-4'>
+              <div className='rounded-full bg-green-100 p-3'>
+                <CheckCircle2 className='h-6 w-6 text-green-600' />
+              </div>
+              <div className='flex-1'>
+                <h3 className='text-lg font-semibold text-green-900 mb-2'>
+                  Awaiting pharmacy approval
+                </h3>
+                <p className='text-green-800 mb-4'>
+                  The pharmacy will review your confirmation and continue
+                  processing your order.
+                </p>
+                <div className='space-y-3 mt-4 pt-4 border-t border-green-200'>
+                  <div className='flex justify-between text-sm'>
+                    <span className='text-muted-foreground'>Payment</span>
+                    <span className='font-medium'>
+                      {order.paymentMethod === 'momo'
+                        ? 'Mobile Money (Momo)'
+                        : 'Cash'}
+                    </span>
+                  </div>
+                  <div className='flex justify-between text-sm'>
+                    <span className='text-muted-foreground'>Delivery</span>
+                    <span className='font-medium'>
+                      {order.deliveryOption === 'delivery'
+                        ? 'Home delivery'
+                        : 'Store pickup'}
+                    </span>
+                  </div>
+                  {order.deliveryAddress && (
+                    <div className='text-sm'>
+                      <span className='text-muted-foreground'>Address: </span>
+                      <span className='font-medium'>
+                        {order.deliveryAddress}
+                      </span>
+                    </div>
+                  )}
+                  {order.notes && (
+                    <div className='text-sm'>
+                      <span className='text-muted-foreground'>Notes: </span>
+                      <span className='font-medium'>{order.notes}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <Package className='h-5 w-5' />
+              Order items
+            </CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-4'>
+            {order.items.map((item) => (
+              <div
+                key={item.id}
+                className='flex justify-between items-center py-2 border-b last:border-0'
+              >
+                <div>
+                  <p className='font-medium'>{item.name}</p>
+                  <p className='text-sm text-muted-foreground'>
+                    Quantity: {item.quantity} {item.unit}
+                  </p>
+                </div>
+                <p className='font-bold'>
+                  ₵{(item.price * item.quantity).toFixed(2)}
+                </p>
+              </div>
+            ))}
+            <Separator />
+            <div className='flex justify-between font-bold text-lg'>
+              <span>Total</span>
+              <span>
+                ₵{(order.total + (order.deliveryFee || 0)).toFixed(2)}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!isProformaReview && !isLegacyVerify) {
+    return (
+      <div className='space-y-6'>
+        <Button variant='ghost' onClick={() => router.push('/orders')}>
+          <ArrowLeft className='mr-2 h-4 w-4' />
+          Back to Orders
+        </Button>
+        <Card>
+          <CardContent className='pt-6'>
+            <p className='text-center text-muted-foreground'>
+              This order is not ready for this step yet. Current status:{' '}
+              {order.status.replace(/_/g, ' ')}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const displayItems = isProformaReview ? editableItems : order.items;
+  const subtotalForSummary = isProformaReview ? lineSubtotal : order.total;
   const finalTotal =
-    order.total + (deliveryOption === 'delivery' ? DELIVERY_FEE : 0);
+    subtotalForSummary +
+    (deliveryOption === 'delivery' ? DELIVERY_FEE : 0);
 
   return (
     <div className='space-y-8'>
@@ -341,13 +521,24 @@ export default function OrderVerificationPage() {
         </Button>
         <div>
           <h1 className='text-3xl font-serif font-bold text-primary'>
-            Verify Your Order
+            {isProformaReview ? 'Review proforma' : 'Verify your order'}
           </h1>
           <p className='text-muted-foreground mt-1'>
-            Please review your order and confirm delivery details
+            {isProformaReview
+              ? 'Confirm as-is or adjust quantities, then choose pickup or delivery'
+              : 'Confirm delivery and payment details'}
           </p>
         </div>
       </div>
+
+      {isProformaReview && order.proformaNote && (
+        <Card className='border-sky-200 bg-sky-50/60'>
+          <CardContent className='pt-4 pb-4 text-sm text-sky-950'>
+            <p className='font-medium text-sky-900 mb-1'>From the pharmacy</p>
+            <p className='whitespace-pre-wrap'>{order.proformaNote}</p>
+          </CardContent>
+        </Card>
+      )}
 
       <div className='grid gap-6 md:grid-cols-3'>
         <div className='md:col-span-2 space-y-6'>
@@ -355,37 +546,79 @@ export default function OrderVerificationPage() {
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
                 <Package className='h-5 w-5' />
-                Order Items
+                {isProformaReview ? 'Proforma lines' : 'Order items'}
               </CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
-              {order.items.map((item) => (
+              {displayItems.map((item) => (
                 <div
                   key={item.id}
-                  className='flex justify-between items-center py-2 border-b last:border-0'
+                  className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 py-3 border-b last:border-0'
                 >
-                  <div>
+                  <div className='flex-1'>
                     <p className='font-medium'>{item.name}</p>
                     <p className='text-sm text-muted-foreground'>
-                      Quantity: {item.quantity} {item.unit}
+                      ₵{item.price.toFixed(2)} per {item.unit}
                     </p>
                   </div>
-                  <p className='font-bold'>
-                    ₵{(item.price * item.quantity).toFixed(2)}
-                  </p>
+                  {isProformaReview ? (
+                    <div className='flex items-center gap-2'>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='icon'
+                        className='h-8 w-8'
+                        onClick={() => bumpQty(item.id, -1)}
+                        aria-label='Decrease quantity'
+                      >
+                        <Minus className='h-4 w-4' />
+                      </Button>
+                      <span className='w-8 text-center font-medium tabular-nums'>
+                        {item.quantity}
+                      </span>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='icon'
+                        className='h-8 w-8'
+                        onClick={() => bumpQty(item.id, 1)}
+                        aria-label='Increase quantity'
+                      >
+                        <Plus className='h-4 w-4' />
+                      </Button>
+                      <Button
+                        type='button'
+                        variant='ghost'
+                        size='icon'
+                        className='h-8 w-8 text-destructive'
+                        onClick={() => removeLine(item.id)}
+                        disabled={editableItems.length <= 1}
+                        aria-label='Remove line'
+                      >
+                        <Trash2 className='h-4 w-4' />
+                      </Button>
+                      <span className='font-bold sm:min-w-[4.5rem] text-right'>
+                        ₵{(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ) : (
+                    <p className='font-bold'>
+                      ₵{(item.price * item.quantity).toFixed(2)}
+                    </p>
+                  )}
                 </div>
               ))}
               <Separator />
               <div className='flex justify-between font-bold text-lg'>
                 <span>Subtotal</span>
-                <span>₵{order.total.toFixed(2)}</span>
+                <span>₵{subtotalForSummary.toFixed(2)}</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Delivery Options</CardTitle>
+              <CardTitle>Pickup or delivery</CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
               <RadioGroup
@@ -399,10 +632,10 @@ export default function OrderVerificationPage() {
                   <Label htmlFor='pickup' className='flex-1 cursor-pointer'>
                     <div className='flex items-center gap-2'>
                       <Store className='h-4 w-4' />
-                      <span className='font-medium'>Pickup at Store</span>
+                      <span className='font-medium'>Pickup at store</span>
                     </div>
                     <p className='text-sm text-muted-foreground mt-1'>
-                      Collect your order from Leetonia Wholesale location
+                      Collect your order from the pharmacy
                     </p>
                   </Label>
                 </div>
@@ -415,13 +648,13 @@ export default function OrderVerificationPage() {
                   <Label htmlFor='delivery' className='flex-1 cursor-pointer'>
                     <div className='flex items-center gap-2'>
                       <Truck className='h-4 w-4' />
-                      <span className='font-medium'>Home Delivery</span>
+                      <span className='font-medium'>Delivery</span>
                       <Badge variant='secondary' className='ml-2'>
                         +₵{DELIVERY_FEE.toFixed(2)}
                       </Badge>
                     </div>
                     <p className='text-sm text-muted-foreground mt-1'>
-                      We'll deliver to your specified address
+                      We will deliver to your address
                     </p>
                   </Label>
                 </div>
@@ -429,7 +662,7 @@ export default function OrderVerificationPage() {
 
               {deliveryOption === 'delivery' && (
                 <div className='space-y-2'>
-                  <Label htmlFor='address'>Delivery Address</Label>
+                  <Label htmlFor='address'>Delivery address</Label>
                   <Textarea
                     id='address'
                     placeholder='Enter your complete delivery address...'
@@ -441,10 +674,10 @@ export default function OrderVerificationPage() {
               )}
 
               <div className='space-y-2'>
-                <Label htmlFor='notes'>Additional Notes (Optional)</Label>
+                <Label htmlFor='notes'>Additional notes (optional)</Label>
                 <Textarea
                   id='notes'
-                  placeholder='Any special instructions or notes...'
+                  placeholder='Any special instructions...'
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
@@ -455,7 +688,7 @@ export default function OrderVerificationPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Payment Method</CardTitle>
+              <CardTitle>Payment method</CardTitle>
             </CardHeader>
             <CardContent>
               <RadioGroup
@@ -469,10 +702,10 @@ export default function OrderVerificationPage() {
                   <Label htmlFor='cash' className='flex-1 cursor-pointer'>
                     <div className='flex items-center gap-2'>
                       <Wallet className='h-4 w-4' />
-                      <span className='font-medium'>Pay Cash</span>
+                      <span className='font-medium'>Cash</span>
                     </div>
                     <p className='text-sm text-muted-foreground mt-1'>
-                      Pay with cash on delivery or pickup
+                      Pay on pickup or delivery
                     </p>
                   </Label>
                 </div>
@@ -481,10 +714,10 @@ export default function OrderVerificationPage() {
                   <Label htmlFor='momo' className='flex-1 cursor-pointer'>
                     <div className='flex items-center gap-2'>
                       <CreditCard className='h-4 w-4' />
-                      <span className='font-medium'>Mobile Money (Momo)</span>
+                      <span className='font-medium'>Mobile money (Momo)</span>
                     </div>
                     <p className='text-sm text-muted-foreground mt-1'>
-                      Pay via Mobile Money transfer
+                      Pay via Mobile Money
                     </p>
                   </Label>
                 </div>
@@ -496,17 +729,17 @@ export default function OrderVerificationPage() {
         <div className='h-fit'>
           <Card className='sticky top-4'>
             <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
+              <CardTitle>Summary</CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
               <div className='space-y-2 text-sm'>
                 <div className='flex justify-between'>
                   <span className='text-muted-foreground'>Subtotal</span>
-                  <span>₵{order.total.toFixed(2)}</span>
+                  <span>₵{subtotalForSummary.toFixed(2)}</span>
                 </div>
                 {deliveryOption === 'delivery' && (
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>Delivery Fee</span>
+                    <span className='text-muted-foreground'>Delivery fee</span>
                     <span>₵{DELIVERY_FEE.toFixed(2)}</span>
                   </div>
                 )}
@@ -518,7 +751,7 @@ export default function OrderVerificationPage() {
               </div>
 
               <div className='pt-4 space-y-2 text-xs text-muted-foreground'>
-                <p>Order ID: {formatOrderLabel(order)}</p>
+                <p>Order: {formatOrderLabel(order)}</p>
                 <p>Placed: {format(order.createdAt, 'MMM d, yyyy • h:mm a')}</p>
               </div>
 
@@ -532,11 +765,13 @@ export default function OrderVerificationPage() {
                 }
               >
                 {submitting ? (
-                  'Confirming...'
+                  'Submitting...'
                 ) : (
                   <>
                     <CheckCircle2 className='mr-2 h-4 w-4' />
-                    Confirm Order
+                    {isProformaReview
+                      ? 'Confirm finalized order'
+                      : 'Confirm order'}
                   </>
                 )}
               </Button>

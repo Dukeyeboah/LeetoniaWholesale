@@ -1,4 +1,4 @@
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import type { Firestore } from 'firebase/firestore';
 
 /** Default monthly purchase cap (GHS total order value) for new / seeded pharmacies. */
@@ -82,7 +82,8 @@ export function currentMonthKey(): string {
   return `${y}-${m}`;
 }
 
-export function slugifyForCustomPharmacyId(name: string): string {
+/** Stable slug for Firestore pharmacy document ids (e.g. `pharm_added_*`). */
+export function slugifyForPharmacyDocId(name: string): string {
   return name
     .trim()
     .toLowerCase()
@@ -92,14 +93,65 @@ export function slugifyForCustomPharmacyId(name: string): string {
 }
 
 /**
+ * Creates a new pharmacy row when a user adds their workplace at signup.
+ * Id pattern `pharm_added_*` so super admins can review the full list in Firestore.
+ */
+export async function createPharmacyFromSignup(
+  db: Firestore,
+  displayName: string,
+  userId: string
+): Promise<{ pharmacyId: string; pharmacyName: string }> {
+  const trimmed = displayName.trim();
+  if (!trimmed) {
+    throw new Error('Pharmacy name is required');
+  }
+
+  const base = slugifyForPharmacyDocId(trimmed) || 'pharmacy';
+  let candidate = `pharm_added_${base}`;
+  let suffix = 0;
+
+  while (suffix < 200) {
+    const ref = doc(db, 'pharmacies', candidate);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        name: trimmed,
+        monthlyLimitGHS: DEFAULT_MONTHLY_LIMIT_GHS,
+        monthSpendGHS: 0,
+        monthKey: currentMonthKey(),
+        updatedAt: Date.now(),
+        pendingVerification: true,
+        source: 'signup',
+        createdByUserId: userId,
+      });
+      return { pharmacyId: candidate, pharmacyName: trimmed };
+    }
+    suffix += 1;
+    candidate = `pharm_added_${base}_${suffix}`;
+  }
+
+  candidate = `pharm_added_${base}_${randomOrderSuffix(6)}`;
+  await setDoc(doc(db, 'pharmacies', candidate), {
+    name: trimmed,
+    monthlyLimitGHS: DEFAULT_MONTHLY_LIMIT_GHS,
+    monthSpendGHS: 0,
+    monthKey: currentMonthKey(),
+    updatedAt: Date.now(),
+    pendingVerification: true,
+    source: 'signup',
+    createdByUserId: userId,
+  });
+  return { pharmacyId: candidate, pharmacyName: trimmed };
+}
+
+/**
  * Ensures a `pharmacies` document exists with default monthly limit (merge).
  * Call after onboarding or before first checkout.
  */
 export async function ensurePharmacyDocument(
   db: Firestore,
   pharmacyId: string,
-  name: string,
-  options?: { isCustom?: boolean }
+  name: string
 ): Promise<void> {
   const ref = doc(db, 'pharmacies', pharmacyId);
   await setDoc(
@@ -110,7 +162,8 @@ export async function ensurePharmacyDocument(
       monthSpendGHS: 0,
       monthKey: currentMonthKey(),
       updatedAt: Date.now(),
-      ...(options?.isCustom ? { isCustom: true } : {}),
+      source: 'seed',
+      pendingVerification: false,
     },
     { merge: true }
   );

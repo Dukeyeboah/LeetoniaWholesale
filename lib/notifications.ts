@@ -42,11 +42,23 @@ export async function createOrderStatusNotification(
 ): Promise<void> {
   const label = displayOrderId || orderId;
   const statusMessages: Record<string, { title: string; message: string }> = {
+    proforma_sent: {
+      title: 'Proforma sent',
+      message: `Your order #${label}: a proforma is ready. Open the order to review, edit quantities if needed, and confirm pickup or delivery.`,
+    },
     pharmacy_confirmed: {
       title: 'Order Ready for Verification',
       message: `Your order #${label} has been confirmed by the pharmacy. Please review and confirm the items: ${orderItems
         .map((i) => `${i.quantity}x ${i.name}`)
         .join(', ')}`,
+    },
+    client_finalized: {
+      title: 'Order received',
+      message: `Your order #${label} is with the pharmacy. They will send your invoice and prepare your order.`,
+    },
+    invoice_sent: {
+      title: 'Invoice recorded',
+      message: `Your order #${label}: invoice has been recorded. The shop will pack for pickup or delivery.`,
     },
     customer_confirmed: {
       title: 'Order Confirmed',
@@ -54,7 +66,7 @@ export async function createOrderStatusNotification(
     },
     processing: {
       title: 'Order Processing',
-      message: `Your order #${label} is being processed and prepared for fulfillment.`,
+      message: `Your order #${label} is being packed and prepared for pickup or delivery.`,
     },
     completed: {
       title: 'Order Completed',

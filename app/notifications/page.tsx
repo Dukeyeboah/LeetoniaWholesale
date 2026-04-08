@@ -30,6 +30,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import type { Notification } from '@/types';
+import { formatOrderLabel } from '@/lib/order-display';
+import { notifyClientInvoiceSent } from '@/lib/order-workflow';
 
 export default function NotificationsPage() {
   const { user, isAdmin } = useAuth();
@@ -71,28 +73,37 @@ export default function NotificationsPage() {
       );
       if (orderDoc.exists()) {
         const orderData = orderDoc.data();
-        // Only update if order is still in pharmacy_confirmed status
-        if (orderData.status === 'pharmacy_confirmed') {
-          await updateDoc(doc(db, 'orders', pendingNotification.orderId!), {
+        const oid = pendingNotification.orderId!;
+        const label = formatOrderLabel({
+          id: oid,
+          displayOrderId: orderData.displayOrderId,
+        });
+
+        if (orderData.status === 'client_finalized') {
+          await updateDoc(doc(db, 'orders', oid), {
+            status: 'invoice_sent',
+            invoiceSentAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+          await notifyClientInvoiceSent(db, {
+            id: oid,
+            userId: orderData.userId,
+            displayOrderId: orderData.displayOrderId,
+          });
+          toast.success('Recorded invoice sent. Customer notified.');
+        } else if (orderData.status === 'pharmacy_confirmed') {
+          await updateDoc(doc(db, 'orders', oid), {
             status: 'customer_confirmed',
             updatedAt: Date.now(),
           });
-
-          // Send notification to customer
           await createNotification(
             orderData.userId,
             'order_update',
-            'Order Approved',
-            `Your order #${pendingNotification.orderId!.slice(
-              0,
-              8
-            )} has been approved and confirmed by the pharmacy. We'll begin processing it shortly.`,
-            pendingNotification.orderId!
+            'Order approved',
+            `Your order ${label} has been approved. We'll begin processing it shortly.`,
+            oid
           );
-
-          toast.success(
-            'Order approved! Status updated to Customer Confirmed.'
-          );
+          toast.success('Order approved (legacy flow).');
         }
       }
 
@@ -129,6 +140,8 @@ export default function NotificationsPage() {
         return <MessageSquare className='h-4 w-4' />;
       case 'pharmacy_limit':
         return <AlertTriangle className='h-4 w-4 text-amber-600' />;
+      case 'proforma_ready':
+        return <Package className='h-4 w-4 text-sky-600' />;
       default:
         return <Bell className='h-4 w-4' />;
     }
@@ -243,10 +256,11 @@ export default function NotificationsPage() {
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Customer Order Confirmation</DialogTitle>
+            <DialogTitle>Customer finalized order</DialogTitle>
             <DialogDescription>
-              A customer has confirmed their order. Would you like to approve it
-              and move it to the next stage?
+              For new orders: record that you have sent the invoice so packing can
+              begin. Legacy orders in the old &quot;verify&quot; step can still be
+              approved here.
             </DialogDescription>
           </DialogHeader>
           {pendingNotification && (
@@ -267,7 +281,7 @@ export default function NotificationsPage() {
               Review Later
             </Button>
             <Button onClick={handleConfirmOrderApproval}>
-              Approve & Begin Processing
+              Record invoice sent / next step
             </Button>
           </DialogFooter>
         </DialogContent>

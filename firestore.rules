@@ -69,10 +69,22 @@ service cloud.firestore {
         (isClient() || isPrivilegedAdmin()) &&
         request.resource.data.userId == request.auth.uid;
       allow update: if isAuthenticated() && (
+        isPrivilegedAdmin() ||
+        // Client finalizes proforma (may edit items/total) and sets status to client_finalized.
+        (resource.data.userId == request.auth.uid &&
+         resource.data.status == 'proforma_sent' &&
+         request.resource.data.status == 'client_finalized' &&
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+           'userId', 'createdAt', 'userName', 'userEmail', 'pharmacyId',
+           'pharmacyName', 'displayOrderId', 'submittedItems', 'submittedTotal',
+           'accountingStatus', 'paymentReceivedAt', 'proformaSentAt', 'proformaNote', 'invoiceSentAt'
+         ])) ||
+        // Legacy orders: customer adds delivery/payment only (admin advanced status separately).
         (resource.data.userId == request.auth.uid &&
          resource.data.status == 'pharmacy_confirmed' &&
-         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'userId', 'items', 'total', 'createdAt', 'userName', 'userEmail'])) ||
-        isPrivilegedAdmin()
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+           'status', 'userId', 'items', 'total', 'createdAt', 'userName', 'userEmail'
+         ]))
       );
       allow delete: if isPrivilegedAdmin();
     }
@@ -98,12 +110,12 @@ service cloud.firestore {
     match /pharmacies/{pharmacyId} {
       allow read: if isAuthenticated();
 
-      // Client creates are constrained to known seeds or custom_* ids; app sets limits.
+      // Client creates: known seeds or signup-added ids (pharm_added_*).
       allow create: if isAuthenticated() && (
         isPrivilegedAdmin() ||
         (isClient() && (
           isKnownSeedPharmacy(pharmacyId) ||
-          pharmacyId.matches('^custom_.+')
+          pharmacyId.matches('^pharm_added_.+')
         ))
       );
 

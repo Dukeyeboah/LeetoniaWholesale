@@ -28,6 +28,7 @@ import {
   PharmacyLimitError,
   placeOrderWithPharmacyLimit,
 } from '@/lib/pharmacy-limits';
+import { notifyAdminsNewOrderRequest } from '@/lib/order-workflow';
 
 export default function CartPage() {
   const {
@@ -73,11 +74,16 @@ export default function CartPage() {
         0
       );
 
+      const lineItems = cart.map((item) => ({ ...item }));
+
       const newOrder: Omit<Order, 'id'> = {
         userId: user.id,
         userName: user.name || user.email,
         userEmail: user.email,
-        items: cart,
+        items: lineItems,
+        submittedItems: lineItems,
+        submittedTotal: calculatedTotal,
+        accountingStatus: 'credit',
         status: 'pending',
         total: calculatedTotal,
         createdAt: Date.now(),
@@ -91,12 +97,18 @@ export default function CartPage() {
           return;
         }
         try {
-          await placeOrderWithPharmacyLimit({
+          const placed = await placeOrderWithPharmacyLimit({
             db,
             pharmacyId: user.pharmacyId,
             pharmacyDisplayName: user.pharmacyName,
             orderPrefix: toOrderIdPrefix(user.pharmacyName),
             orderPayload: newOrder,
+          });
+          await notifyAdminsNewOrderRequest(db, {
+            id: placed.orderId,
+            displayOrderId: placed.displayOrderId,
+            userName: user.name || user.email,
+            userEmail: user.email,
           });
         } catch (err) {
           if (err instanceof PharmacyLimitError) {
@@ -117,10 +129,16 @@ export default function CartPage() {
           ...newOrder,
           displayOrderId,
         });
+        await notifyAdminsNewOrderRequest(db, {
+          id: orderId,
+          displayOrderId,
+          userName: user.name || user.email,
+          userEmail: user.email,
+        });
       }
 
       toast.success(
-        'Order placed successfully! Pharmacy will review and confirm.'
+        'Order submitted! The pharmacy will send you a proforma to confirm.'
       );
       clearCart();
       router.push('/orders');

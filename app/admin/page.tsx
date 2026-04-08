@@ -78,6 +78,12 @@ import type { User } from '@/types';
 import { PRODUCT_CATEGORIES } from '@/lib/categories';
 import { createOrderStatusNotification } from '@/lib/notifications';
 import { formatOrderLabel } from '@/lib/order-display';
+import { generateInventoryProductCode } from '@/lib/product-code';
+import {
+  DEFAULT_PROFORMA_NOTE,
+  notifyClientProformaReady,
+  notifyClientInvoiceSent,
+} from '@/lib/order-workflow';
 
 export default function AdminDashboard() {
   const { isSuperAdmin } = useAuth();
@@ -134,6 +140,12 @@ export default function AdminDashboard() {
     null
   );
   const [pharmacyLimitInput, setPharmacyLimitInput] = useState('');
+  const [pharmacySearchQuery, setPharmacySearchQuery] = useState('');
+  const [proformaDialogOrder, setProformaDialogOrder] = useState<Order | null>(
+    null
+  );
+  const [proformaNoteDraft, setProformaNoteDraft] = useState('');
+  const [sendingProforma, setSendingProforma] = useState(false);
 
   useEffect(() => {
     if (!db) {
@@ -422,26 +434,85 @@ Thank you for your business!
       await updateDoc(doc(db, 'orders', orderId), {
         status: newStatus,
         updatedAt: Date.now(),
+        ...(newStatus === 'proforma_sent' && order.status !== 'proforma_sent'
+          ? {
+              proformaSentAt: Date.now(),
+              proformaNote: order.proformaNote || DEFAULT_PROFORMA_NOTE,
+            }
+          : {}),
+        ...(newStatus === 'invoice_sent' && order.status !== 'invoice_sent'
+          ? { invoiceSentAt: Date.now() }
+          : {}),
       });
 
-      // Create notification for the user
       if (order.userId) {
-        await createOrderStatusNotification(
-          order.userId,
-          orderId,
-          newStatus,
-          order.items.map((item) => ({
-            name: item.name,
-            quantity: item.quantity,
-          })),
-          order.displayOrderId
-        );
+        if (
+          newStatus === 'proforma_sent' &&
+          order.status !== 'proforma_sent'
+        ) {
+          await notifyClientProformaReady(db, order);
+        } else if (
+          newStatus === 'invoice_sent' &&
+          order.status !== 'invoice_sent'
+        ) {
+          await notifyClientInvoiceSent(db, order);
+        } else if (
+          newStatus !== 'proforma_sent' &&
+          newStatus !== 'invoice_sent'
+        ) {
+          await createOrderStatusNotification(
+            order.userId,
+            orderId,
+            newStatus,
+            order.items.map((item) => ({
+              name: item.name,
+              quantity: item.quantity,
+            })),
+            order.displayOrderId
+          );
+        }
       }
 
-      toast.success(`Order status updated to ${newStatus}`);
+      toast.success(`Order status updated`);
     } catch (error) {
       console.error('Error updating order status:', error);
       toast.error('Failed to update status');
+    }
+  };
+
+  const handleConfirmSendProforma = async () => {
+    if (!db || !proformaDialogOrder) return;
+    setSendingProforma(true);
+    try {
+      await updateDoc(doc(db, 'orders', proformaDialogOrder.id), {
+        status: 'proforma_sent',
+        proformaNote: proformaNoteDraft.trim() || DEFAULT_PROFORMA_NOTE,
+        proformaSentAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      await notifyClientProformaReady(db, proformaDialogOrder);
+      toast.success('Proforma sent to customer');
+      setProformaDialogOrder(null);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to send proforma');
+    } finally {
+      setSendingProforma(false);
+    }
+  };
+
+  const markPaymentReceived = async (order: Order) => {
+    if (!db) return;
+    try {
+      await updateDoc(doc(db, 'orders', order.id), {
+        accountingStatus: 'paid',
+        paymentReceivedAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      toast.success('Payment recorded');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to record payment');
     }
   };
 
@@ -502,6 +573,11 @@ Thank you for your business!
         updatedAt: Date.now(),
       };
 
+      if (!editingProduct) {
+        const trimmedCode = String(productForm.code ?? '').trim();
+        productData.code = trimmedCode || generateInventoryProductCode();
+      }
+
       // Keep legacy `stock` in sync with wholesale stock for customer-facing views
       if (typeof (productData as any).wholesaleStock === 'number') {
         (productData as any).stock = (productData as any).wholesaleStock;
@@ -537,7 +613,7 @@ Thank you for your business!
         description: '',
         imageUrl: '',
         expiryDate: undefined,
-        code: '',
+        code: generateInventoryProductCode(),
       });
       setTransferQty(0);
     } catch (error) {
@@ -622,7 +698,7 @@ Thank you for your business!
         description: '',
         imageUrl: '',
         expiryDate: undefined,
-        code: '',
+        code: generateInventoryProductCode(),
       });
       setImagePreview(null);
       setImageFile(null);
@@ -662,7 +738,9 @@ Thank you for your business!
         (o) =>
           o.status === 'completed' ||
           o.status === 'processing' ||
-          o.status === 'customer_confirmed'
+          o.status === 'customer_confirmed' ||
+          o.status === 'client_finalized' ||
+          o.status === 'invoice_sent'
       )
       .reduce((sum, order) => {
         const item = order.items.find((i) => i.id === product.id);
@@ -673,7 +751,9 @@ Thank you for your business!
         (o) =>
           o.status === 'completed' ||
           o.status === 'processing' ||
-          o.status === 'customer_confirmed'
+          o.status === 'customer_confirmed' ||
+          o.status === 'client_finalized' ||
+          o.status === 'invoice_sent'
       )
       .reduce((sum, order) => {
         const item = order.items.find((i) => i.id === product.id);
@@ -696,7 +776,9 @@ Thank you for your business!
       (o) =>
         o.status === 'completed' ||
         o.status === 'processing' ||
-        o.status === 'customer_confirmed'
+        o.status === 'customer_confirmed' ||
+        o.status === 'client_finalized' ||
+        o.status === 'invoice_sent'
     )
     .reduce((sum, order) => sum + order.total + (order.deliveryFee || 0), 0);
 
@@ -708,6 +790,29 @@ Thank you for your business!
   const getUserName = (userId: string) => {
     const user = users.find((u) => u.id === userId);
     return user?.name || user?.email || 'Unknown User';
+  };
+
+  const filteredPharmacies = pharmacies.filter((p) => {
+    const q = pharmacySearchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)
+    );
+  });
+
+  const handleVerifyPharmacy = async (p: Pharmacy) => {
+    if (!db || !isSuperAdmin) return;
+    try {
+      await updateDoc(doc(db, 'pharmacies', p.id), {
+        pendingVerification: false,
+        verifiedAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      toast.success('Pharmacy marked verified');
+    } catch (error) {
+      console.error('Error verifying pharmacy:', error);
+      toast.error('Failed to update pharmacy');
+    }
   };
 
   return (
@@ -745,36 +850,36 @@ Thank you for your business!
         <Card
           className='cursor-pointer hover:shadow-md transition-shadow'
           onClick={() => {
-            setStatusFilter('pharmacy_confirmed');
+            setStatusFilter('proforma_sent');
             setActiveTab('orders');
           }}
         >
           <CardHeader className='pb-2'>
             <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Awaiting Customer
+              Proforma with customer
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold text-blue-600'>
-              {orders.filter((o) => o.status === 'pharmacy_confirmed').length}
+              {orders.filter((o) => o.status === 'proforma_sent').length}
             </div>
           </CardContent>
         </Card>
         <Card
           className='cursor-pointer hover:shadow-md transition-shadow'
           onClick={() => {
-            setStatusFilter('customer_confirmed');
+            setStatusFilter('client_finalized');
             setActiveTab('orders');
           }}
         >
           <CardHeader className='pb-2'>
             <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Customer Confirmed
+              Awaiting invoice / packing
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold text-green-600'>
-              {orders.filter((o) => o.status === 'customer_confirmed').length}
+              {orders.filter((o) => o.status === 'client_finalized').length}
             </div>
           </CardContent>
         </Card>
@@ -884,12 +989,42 @@ Thank you for your business!
             </Button>
             <Button
               variant={
+                statusFilter === 'proforma_sent' ? 'default' : 'outline'
+              }
+              size='sm'
+              onClick={() => setStatusFilter('proforma_sent')}
+            >
+              Proforma sent (
+              {orders.filter((o) => o.status === 'proforma_sent').length})
+            </Button>
+            <Button
+              variant={
+                statusFilter === 'client_finalized' ? 'default' : 'outline'
+              }
+              size='sm'
+              onClick={() => setStatusFilter('client_finalized')}
+            >
+              Client finalized (
+              {orders.filter((o) => o.status === 'client_finalized').length})
+            </Button>
+            <Button
+              variant={
+                statusFilter === 'invoice_sent' ? 'default' : 'outline'
+              }
+              size='sm'
+              onClick={() => setStatusFilter('invoice_sent')}
+            >
+              Invoice sent (
+              {orders.filter((o) => o.status === 'invoice_sent').length})
+            </Button>
+            <Button
+              variant={
                 statusFilter === 'checking_stock' ? 'default' : 'outline'
               }
               size='sm'
               onClick={() => setStatusFilter('checking_stock')}
             >
-              Checking Stock (
+              Legacy: checking stock (
               {orders.filter((o) => o.status === 'checking_stock').length})
             </Button>
             <Button
@@ -899,7 +1034,7 @@ Thank you for your business!
               size='sm'
               onClick={() => setStatusFilter('pharmacy_confirmed')}
             >
-              Awaiting Customer (
+              Legacy: old verify (
               {orders.filter((o) => o.status === 'pharmacy_confirmed').length})
             </Button>
             <Button
@@ -909,7 +1044,7 @@ Thank you for your business!
               size='sm'
               onClick={() => setStatusFilter('customer_confirmed')}
             >
-              Customer Confirmed (
+              Legacy: old confirmed (
               {orders.filter((o) => o.status === 'customer_confirmed').length})
             </Button>
             <Button
@@ -948,7 +1083,7 @@ Thank you for your business!
             ) : (
               filteredOrders.map((order) => (
                 <Card key={order.id} className='overflow-hidden'>
-                  <CardHeader className='bg-secondary/30 py-4 flex flex-row items-center justify-between'>
+                  <CardHeader className='bg-secondary/30 py-4 flex flex-row flex-wrap items-center justify-between gap-2'>
                     <div>
                       <CardTitle className='text-base font-mono'>
                         Order {formatOrderLabel(order)}
@@ -958,21 +1093,38 @@ Thank you for your business!
                         {format(order.createdAt, 'MMM d, yyyy • h:mm a')}
                       </CardDescription>
                     </div>
-                    <Badge
-                      variant={
-                        order.status === 'completed'
-                          ? 'default'
-                          : order.status === 'processing'
-                          ? 'default'
-                          : order.status === 'customer_confirmed'
-                          ? 'default'
-                          : order.status === 'pharmacy_confirmed'
-                          ? 'default'
-                          : 'secondary'
-                      }
-                    >
-                      {order.status.replace('_', ' ')}
-                    </Badge>
+                    <div className='flex flex-wrap items-center gap-2'>
+                      <Badge
+                        variant={
+                          order.status === 'completed' ||
+                          order.status === 'processing' ||
+                          order.status === 'client_finalized' ||
+                          order.status === 'invoice_sent' ||
+                          order.status === 'customer_confirmed' ||
+                          order.status === 'pharmacy_confirmed'
+                            ? 'default'
+                            : 'secondary'
+                        }
+                      >
+                        {order.status.replace('_', ' ')}
+                      </Badge>
+                      {order.accountingStatus === 'credit' ||
+                      order.accountingStatus === undefined ? (
+                        <Badge
+                          variant='outline'
+                          className='bg-amber-50 text-amber-900'
+                        >
+                          On credit
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant='outline'
+                          className='bg-emerald-50 text-emerald-800'
+                        >
+                          Paid
+                        </Badge>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent className='p-6'>
                     <div className='flex flex-col md:flex-row gap-6 justify-between'>
@@ -1035,19 +1187,32 @@ Thank you for your business!
                       <div className='md:w-64 space-y-3 bg-muted/10 p-4 rounded-lg border'>
                         {order.status === 'pending' ||
                         order.status === 'checking_stock' ? (
-                          <Button
-                            variant='outline'
-                            className='w-full'
-                            onClick={() => openOrderEditDialog(order)}
-                          >
-                            <Edit className='mr-2 h-4 w-4' />
-                            Edit Order
-                          </Button>
+                          <>
+                            <Button
+                              variant='outline'
+                              className='w-full'
+                              onClick={() => openOrderEditDialog(order)}
+                            >
+                              <Edit className='mr-2 h-4 w-4' />
+                              Edit / adjust proforma lines
+                            </Button>
+                            <Button
+                              className='w-full'
+                              onClick={() => {
+                                setProformaDialogOrder(order);
+                                setProformaNoteDraft(
+                                  order.proformaNote || DEFAULT_PROFORMA_NOTE
+                                );
+                              }}
+                            >
+                              Send proforma to client
+                            </Button>
+                          </>
                         ) : null}
-                        <div className='text-sm font-medium'>Update Status</div>
+                        <div className='text-sm font-medium'>Update status</div>
                         <Select
                           value={order.status}
-                          onValueChange={(val: any) =>
+                          onValueChange={(val: Order['status']) =>
                             updateOrderStatus(order.id, val)
                           }
                         >
@@ -1056,25 +1221,42 @@ Thank you for your business!
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value='pending'>Pending</SelectItem>
-                            <SelectItem value='checking_stock'>
-                              Checking Stock
+                            <SelectItem value='proforma_sent'>
+                              Proforma sent
                             </SelectItem>
-                            <SelectItem value='pharmacy_confirmed'>
-                              Pharmacy Confirmed
+                            <SelectItem value='client_finalized'>
+                              Client finalized
                             </SelectItem>
-                            <SelectItem value='customer_confirmed'>
-                              Customer Confirmed
+                            <SelectItem value='invoice_sent'>
+                              Invoice sent
                             </SelectItem>
                             <SelectItem value='processing'>
-                              Processing/Fulfilling
+                              Packing / preparing
                             </SelectItem>
                             <SelectItem value='completed'>Completed</SelectItem>
                             <SelectItem value='cancelled'>Cancelled</SelectItem>
+                            <SelectItem value='checking_stock'>
+                              Legacy: checking stock
+                            </SelectItem>
+                            <SelectItem value='pharmacy_confirmed'>
+                              Legacy: pharmacy confirmed
+                            </SelectItem>
+                            <SelectItem value='customer_confirmed'>
+                              Legacy: customer confirmed
+                            </SelectItem>
                           </SelectContent>
                         </Select>
+                        {order.proformaNote &&
+                          (order.status === 'proforma_sent' ||
+                            order.status === 'client_finalized') && (
+                            <div className='pt-2 text-xs text-muted-foreground border-t'>
+                              <p className='font-medium'>Proforma note:</p>
+                              <p>{order.proformaNote}</p>
+                            </div>
+                          )}
                         {order.notes && (
                           <div className='pt-2 text-xs text-muted-foreground'>
-                            <p className='font-medium'>Notes:</p>
+                            <p className='font-medium'>Customer notes:</p>
                             <p>{order.notes}</p>
                           </div>
                         )}
@@ -1084,8 +1266,18 @@ Thank you for your business!
                           onClick={() => generateInvoice(order)}
                         >
                           <Download className='mr-2 h-4 w-4' />
-                          Generate Invoice
+                          Print / download invoice
                         </Button>
+                        {(order.accountingStatus === 'credit' ||
+                          order.accountingStatus === undefined) && (
+                          <Button
+                            variant='secondary'
+                            className='w-full'
+                            onClick={() => markPaymentReceived(order)}
+                          >
+                            Record payment received
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -1116,18 +1308,19 @@ Thank you for your business!
               <SelectContent>
                 <SelectItem value='all'>All Statuses</SelectItem>
                 <SelectItem value='pending'>Pending</SelectItem>
-                <SelectItem value='checking_stock'>Checking Stock</SelectItem>
-                <SelectItem value='pharmacy_confirmed'>
-                  Pharmacy Confirmed
-                </SelectItem>
-                <SelectItem value='customer_confirmed'>
-                  Customer Confirmed
-                </SelectItem>
-                <SelectItem value='processing'>
-                  Processing/Fulfilling
-                </SelectItem>
+                <SelectItem value='proforma_sent'>Proforma sent</SelectItem>
+                <SelectItem value='client_finalized'>Client finalized</SelectItem>
+                <SelectItem value='invoice_sent'>Invoice sent</SelectItem>
+                <SelectItem value='processing'>Packing / preparing</SelectItem>
                 <SelectItem value='completed'>Completed</SelectItem>
                 <SelectItem value='cancelled'>Cancelled</SelectItem>
+                <SelectItem value='checking_stock'>Legacy: checking stock</SelectItem>
+                <SelectItem value='pharmacy_confirmed'>
+                  Legacy: pharmacy confirmed
+                </SelectItem>
+                <SelectItem value='customer_confirmed'>
+                  Legacy: customer confirmed
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -1186,13 +1379,12 @@ Thank you for your business!
                       </span>
                       <Badge
                         variant={
-                          order.status === 'completed'
-                            ? 'default'
-                            : order.status === 'processing'
-                            ? 'default'
-                            : order.status === 'customer_confirmed'
-                            ? 'default'
-                            : order.status === 'pharmacy_confirmed'
+                          order.status === 'completed' ||
+                          order.status === 'processing' ||
+                          order.status === 'client_finalized' ||
+                          order.status === 'invoice_sent' ||
+                          order.status === 'customer_confirmed' ||
+                          order.status === 'pharmacy_confirmed'
                             ? 'default'
                             : 'secondary'
                         }
@@ -1653,7 +1845,8 @@ Thank you for your business!
             <h2 className='text-2xl font-serif font-bold'>Pharmacy limits</h2>
             <p className='text-sm text-muted-foreground mt-1'>
               Monthly caps apply to total order value per pharmacy (rolling calendar
-              month). Admins can view usage; only super admins can change limits.
+              month). Admins can view usage; only super admins can change limits or
+              mark sign-up pharmacies as verified.
             </p>
           </div>
           <Card>
@@ -1664,32 +1857,51 @@ Thank you for your business!
                 when the first order is placed.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className='space-y-4'>
+              <div className='relative max-w-md'>
+                <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                <Input
+                  placeholder='Search pharmacies by name or id…'
+                  className='pl-9'
+                  value={pharmacySearchQuery}
+                  onChange={(e) => setPharmacySearchQuery(e.target.value)}
+                />
+              </div>
               <div className='rounded-md border overflow-x-auto'>
                 <table className='w-full text-sm'>
                   <thead>
                     <tr className='border-b bg-muted/40 text-left'>
                       <th className='p-3 font-medium'>Pharmacy</th>
+                      <th className='p-3 font-medium'>Status</th>
                       <th className='p-3 font-medium'>Month tracked</th>
                       <th className='p-3 font-medium text-right'>Spent (₵)</th>
                       <th className='p-3 font-medium text-right'>Limit (₵)</th>
                       <th className='p-3 font-medium text-right'>Remaining</th>
-                      <th className='p-3 font-medium w-28'></th>
+                      <th className='p-3 font-medium min-w-[9rem]'></th>
                     </tr>
                   </thead>
                   <tbody>
                     {pharmacies.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={6}
+                          colSpan={7}
                           className='p-8 text-center text-muted-foreground'
                         >
                           No pharmacy records yet. Open this tab again after
                           clients complete onboarding, or wait for sync.
                         </td>
                       </tr>
+                    ) : filteredPharmacies.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          className='p-8 text-center text-muted-foreground'
+                        >
+                          No pharmacies match your search.
+                        </td>
+                      </tr>
                     ) : (
-                      pharmacies.map((p) => {
+                      filteredPharmacies.map((p) => {
                         const mk = currentMonthKey();
                         const spend =
                           p.monthKey === mk ? p.monthSpendGHS ?? 0 : 0;
@@ -1702,6 +1914,18 @@ Thank you for your business!
                               <p className='text-xs text-muted-foreground font-mono'>
                                 {p.id}
                               </p>
+                            </td>
+                            <td className='p-3'>
+                              {p.pendingVerification === true ? (
+                                <Badge variant='secondary'>Pending review</Badge>
+                              ) : (
+                                <Badge
+                                  variant='outline'
+                                  className='bg-emerald-50 text-emerald-800 border-emerald-200'
+                                >
+                                  Verified
+                                </Badge>
+                              )}
                             </td>
                             <td className='p-3 text-muted-foreground'>
                               {p.monthKey || '—'}
@@ -1724,11 +1948,22 @@ Thank you for your business!
                                 maximumFractionDigits: 2,
                               })}
                             </td>
-                            <td className='p-3 text-right'>
+                            <td className='p-3 text-right space-y-1'>
+                              {isSuperAdmin && p.pendingVerification === true && (
+                                <Button
+                                  variant='secondary'
+                                  size='sm'
+                                  className='w-full'
+                                  onClick={() => handleVerifyPharmacy(p)}
+                                >
+                                  Mark verified
+                                </Button>
+                              )}
                               {isSuperAdmin ? (
                                 <Button
                                   variant='outline'
                                   size='sm'
+                                  className='w-full'
                                   onClick={() => {
                                     setPharmacyLimitDialog(p);
                                     setPharmacyLimitInput(
@@ -1739,7 +1974,7 @@ Thank you for your business!
                                   Edit limit
                                 </Button>
                               ) : (
-                                <span className='text-xs text-muted-foreground'>
+                                <span className='text-xs text-muted-foreground block text-center'>
                                   View only
                                 </span>
                               )}
@@ -1856,7 +2091,7 @@ Thank you for your business!
       </Tabs>
 
       <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
-        <DialogContent>
+        <DialogContent className='max-h-[90vh] overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>
               {editingProduct ? 'Edit Product' : 'Add New Product'}
@@ -2066,19 +2301,26 @@ Thank you for your business!
                 className='col-span-3'
               />
             </div>
-            <div className='grid grid-cols-4 items-center gap-4'>
-              <Label htmlFor='code' className='text-right'>
+            <div className='grid grid-cols-4 items-start gap-4'>
+              <Label htmlFor='code' className='text-right pt-2'>
                 Product Code
               </Label>
-              <Input
-                id='code'
-                placeholder='e.g. 4571'
-                value={productForm.code || ''}
-                onChange={(e) =>
-                  setProductForm({ ...productForm, code: e.target.value })
-                }
-                className='col-span-3'
-              />
+              <div className='col-span-3 space-y-1'>
+                <Input
+                  id='code'
+                  placeholder='e.g. LW-…'
+                  value={productForm.code || ''}
+                  onChange={(e) =>
+                    setProductForm({ ...productForm, code: e.target.value })
+                  }
+                />
+                {!editingProduct && (
+                  <p className='text-xs text-muted-foreground'>
+                    A code is generated for new products; you can edit it before
+                    saving.
+                  </p>
+                )}
+              </div>
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
               <Label htmlFor='image' className='text-right'>
@@ -2448,6 +2690,48 @@ Thank you for your business!
               Cancel
             </Button>
             <Button onClick={handleSavePharmacyLimit}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!proformaDialogOrder}
+        onOpenChange={(open) => {
+          if (!open) setProformaDialogOrder(null);
+        }}
+      >
+        <DialogContent className='max-w-lg'>
+          <DialogHeader>
+            <DialogTitle>Send proforma to client</DialogTitle>
+            <DialogDescription>
+              The customer will get a notification to review this order, confirm or
+              edit line items, and choose pickup or delivery. Adjust line items
+              first with &quot;Edit / adjust proforma lines&quot; if needed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-2 py-2'>
+            <Label htmlFor='proforma-note'>Note for customer</Label>
+            <Textarea
+              id='proforma-note'
+              rows={5}
+              value={proformaNoteDraft}
+              onChange={(e) => setProformaNoteDraft(e.target.value)}
+              placeholder={DEFAULT_PROFORMA_NOTE}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => setProformaDialogOrder(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmSendProforma}
+              disabled={sendingProforma}
+            >
+              {sendingProforma ? 'Sending…' : 'Send proforma'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

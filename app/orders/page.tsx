@@ -99,6 +99,30 @@ export default function OrdersPage() {
             Checking Stock
           </Badge>
         );
+      case 'proforma_sent':
+        return (
+          <Badge
+            variant='secondary'
+            className='bg-sky-100 text-sky-900 hover:bg-sky-100'
+          >
+            Proforma ready
+          </Badge>
+        );
+      case 'client_finalized':
+        return (
+          <Badge
+            variant='default'
+            className='bg-violet-600 hover:bg-violet-600'
+          >
+            <CheckCircle2 className='mr-1 h-3 w-3' /> Awaiting invoice
+          </Badge>
+        );
+      case 'invoice_sent':
+        return (
+          <Badge variant='default' className='bg-indigo-600 hover:bg-indigo-600'>
+            <Package className='mr-1 h-3 w-3' /> Packing
+          </Badge>
+        );
       case 'pharmacy_confirmed':
         return (
           <Badge variant='default' className='bg-primary hover:bg-primary'>
@@ -240,10 +264,18 @@ export default function OrdersPage() {
                   </div>
                 )}
 
+                {order.status === 'proforma_sent' && (
+                  <Link href={`/orders/${order.id}`}>
+                    <Button className='w-full mt-4'>
+                      Review proforma & confirm
+                      <ArrowRight className='ml-2 h-4 w-4' />
+                    </Button>
+                  </Link>
+                )}
                 {order.status === 'pharmacy_confirmed' && (
                   <Link href={`/orders/${order.id}`}>
                     <Button className='w-full mt-4'>
-                      Verify & Confirm Order
+                      Verify & confirm order
                       <ArrowRight className='ml-2 h-4 w-4' />
                     </Button>
                   </Link>

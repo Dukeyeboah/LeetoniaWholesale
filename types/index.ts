@@ -16,9 +16,9 @@ export interface User {
   createdAt: number;
   /** Workplace title for pharmacy reps (e.g. Pharmacist, Owner). */
   jobRole?: string;
-  /** Firestore `pharmacies` document id (or `custom_*` for user-added). */
+  /** Firestore `pharmacies` document id (seeds or `pharm_added_*` from signup). */
   pharmacyId?: string;
-  /** Display name of the pharmacy (seed label or custom). */
+  /** Display name of the pharmacy. */
   pharmacyName?: string;
   /** Set after post-auth onboarding (name, job role, pharmacy). */
   pharmacyProfileComplete?: boolean;
@@ -34,6 +34,12 @@ export interface Pharmacy {
   monthSpendGHS: number;
   /** Calendar month key `YYYY-MM` for which `monthSpendGHS` applies. */
   monthKey: string;
+  /** Set when a user adds a pharmacy at signup; super admin can clear after review. */
+  pendingVerification?: boolean;
+  source?: 'seed' | 'signup';
+  createdByUserId?: string;
+  verifiedAt?: number;
+  /** @deprecated prefer pendingVerification */
   isCustom?: boolean;
   updatedAt?: number;
 }
@@ -62,6 +68,19 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
+export type OrderStatus =
+  | 'pending'
+  | 'proforma_sent'
+  | 'client_finalized'
+  | 'invoice_sent'
+  | 'processing'
+  | 'completed'
+  | 'cancelled'
+  /** @deprecated legacy */
+  | 'checking_stock'
+  | 'pharmacy_confirmed'
+  | 'customer_confirmed';
+
 export interface Order {
   id: string;
   userId: string;
@@ -72,14 +91,17 @@ export interface Order {
   /** Human-readable id, e.g. `Dayben_#kibXANmj` (Firestore doc id stays URL-safe). */
   displayOrderId?: string;
   items: CartItem[];
-  status:
-    | 'pending'
-    | 'checking_stock'
-    | 'pharmacy_confirmed'
-    | 'customer_confirmed'
-    | 'processing'
-    | 'completed'
-    | 'cancelled';
+  status: OrderStatus;
+  /** Snapshot of the customer's original cart when they first submitted (optional on older orders). */
+  submittedItems?: CartItem[];
+  submittedTotal?: number;
+  /** Shown to the client with the proforma; encourages quick confirmation. */
+  proformaNote?: string;
+  proformaSentAt?: number;
+  invoiceSentAt?: number;
+  /** Sale on account until payment is received. */
+  accountingStatus?: 'credit' | 'paid';
+  paymentReceivedAt?: number;
   total: number;
   deliveryOption?: 'pickup' | 'delivery';
   deliveryAddress?: string;
@@ -104,6 +126,7 @@ export interface Notification {
   type:
     | 'order_update'
     | 'order_confirmation'
+    | 'proforma_ready'
     | 'admin_message'
     | 'system'
     | 'pharmacy_limit';

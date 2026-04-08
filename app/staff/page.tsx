@@ -180,6 +180,9 @@ export default function StaffDashboard() {
     > = {
       pending: { label: 'Pending', variant: 'outline' },
       checking_stock: { label: 'Checking Stock', variant: 'secondary' },
+      proforma_sent: { label: 'Proforma sent', variant: 'secondary' },
+      client_finalized: { label: 'Client finalized', variant: 'default' },
+      invoice_sent: { label: 'Invoice sent', variant: 'default' },
       pharmacy_confirmed: { label: 'Pharmacy Confirmed', variant: 'default' },
       customer_confirmed: { label: 'Customer Confirmed', variant: 'default' },
       processing: { label: 'Processing', variant: 'default' },
@@ -246,6 +249,11 @@ export default function StaffDashboard() {
                       <SelectItem value='all'>All Statuses</SelectItem>
                       <SelectItem value='pending'>Pending</SelectItem>
                       <SelectItem value='checking_stock'>Checking Stock</SelectItem>
+                      <SelectItem value='proforma_sent'>Proforma sent</SelectItem>
+                      <SelectItem value='client_finalized'>
+                        Client finalized
+                      </SelectItem>
+                      <SelectItem value='invoice_sent'>Invoice sent</SelectItem>
                       <SelectItem value='pharmacy_confirmed'>
                         Pharmacy Confirmed
                       </SelectItem>
