@@ -150,7 +150,11 @@ console.log("Offline:", offline);
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        {isMounted ? (
+        {/*
+          Category filter temporarily hidden.
+          We keep the state + logic so we can re-enable quickly later.
+        */}
+        {/* {isMounted ? (
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className='w-full md:w-[280px] bg-background border-border/60 overflow-hidden'>
               <div className='flex items-center gap-2 text-muted-foreground min-w-0 flex-1 overflow-hidden'>
@@ -179,7 +183,7 @@ console.log("Offline:", offline);
             <Filter className='h-4 w-4' />
             <span>Category</span>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Alphabetical filter */}

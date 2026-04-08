@@ -11,6 +11,8 @@ import {
   updateDoc,
   addDoc,
   deleteDoc,
+  collection,
+  getDocs,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order, Product, CartItem } from '@/types';
@@ -61,18 +63,28 @@ import {
   Calendar,
   Eye,
   EyeOff,
+  Building2,
 } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
+import { useAuth } from '@/lib/auth-context';
+import type { Pharmacy } from '@/types';
+import {
+  SEED_PHARMACIES,
+  ensurePharmacyDocument,
+  currentMonthKey,
+} from '@/lib/pharmacies';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import type { User } from '@/types';
 import { PRODUCT_CATEGORIES } from '@/lib/categories';
 import { createOrderStatusNotification } from '@/lib/notifications';
+import { formatOrderLabel } from '@/lib/order-display';
 
 export default function AdminDashboard() {
+  const { isSuperAdmin } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filter states
@@ -100,6 +112,7 @@ export default function AdminDashboard() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [transferQty, setTransferQty] = useState<number>(0);
 
   // Order editing state
   const [isOrderEditDialogOpen, setIsOrderEditDialogOpen] = useState(false);
@@ -116,6 +129,11 @@ export default function AdminDashboard() {
     canViewAnalytics: false,
     canGenerateInvoices: false,
   });
+
+  const [pharmacyLimitDialog, setPharmacyLimitDialog] = useState<Pharmacy | null>(
+    null
+  );
+  const [pharmacyLimitInput, setPharmacyLimitInput] = useState('');
 
   useEffect(() => {
     if (!db) {
@@ -156,11 +174,37 @@ export default function AdminDashboard() {
     };
     fetchUsers();
 
+    const unsubPharmacies = onSnapshot(
+      collection(db, 'pharmacies'),
+      (snapshot) => {
+        setPharmacies(
+          snapshot.docs.map(
+            (d) => ({ id: d.id, ...d.data() } as Pharmacy)
+          )
+        );
+      },
+      (err) => console.error('pharmacies snapshot', err)
+    );
+
     return () => {
       unsubOrders();
       unsubInventory();
+      unsubPharmacies();
     };
   }, []);
+
+  useEffect(() => {
+    if (!db || activeTab !== 'pharmacies') return;
+    (async () => {
+      for (const p of SEED_PHARMACIES) {
+        try {
+          await ensurePharmacyDocument(db, p.id, p.name);
+        } catch (e) {
+          console.error('seed pharmacy', p.id, e);
+        }
+      }
+    })();
+  }, [activeTab]);
 
   const openOrderEditDialog = (order: Order) => {
     setEditingOrder(order);
@@ -227,12 +271,34 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSavePharmacyLimit = async () => {
+    if (!db || !pharmacyLimitDialog || !isSuperAdmin) return;
+    const n = parseFloat(pharmacyLimitInput.replace(/,/g, ''));
+    if (Number.isNaN(n) || n < 0) {
+      toast.error('Enter a valid limit in Ghana cedis.');
+      return;
+    }
+    try {
+      await updateDoc(doc(db, 'pharmacies', pharmacyLimitDialog.id), {
+        monthlyLimitGHS: n,
+        updatedAt: Date.now(),
+      });
+      toast.success('Monthly limit updated.');
+      setPharmacyLimitDialog(null);
+    } catch (error) {
+      console.error('Error updating pharmacy limit:', error);
+      toast.error('Failed to update limit.');
+    }
+  };
+
   const generateInvoice = (order: Order) => {
+    const ordLabel = formatOrderLabel(order);
+    const fileSlug = ordLabel.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 48);
     const invoiceContent = `
 INVOICE
 Leetonia Wholesale
 
-Invoice #: ${order.id.slice(0, 8)}
+Invoice #: ${ordLabel}
 Date: ${format(new Date(order.createdAt), 'MMMM d, yyyy')}
 Customer: ${order.userName || order.userEmail}
 
@@ -258,7 +324,7 @@ Thank you for your business!
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `invoice-${order.id.slice(0, 8)}-${format(new Date(), 'yyyy-MM-dd')}.txt`;
+    a.download = `invoice-${fileSlug}-${format(new Date(), 'yyyy-MM-dd')}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -270,7 +336,7 @@ Thank you for your business!
       printWindow.document.write(`
         <html>
           <head>
-            <title>Invoice ${order.id.slice(0, 8)}</title>
+            <title>Invoice ${ordLabel}</title>
             <style>
               body { font-family: monospace; padding: 40px; }
               h1 { text-align: center; }
@@ -282,7 +348,7 @@ Thank you for your business!
           <body>
             <h1>INVOICE</h1>
             <h2>Leetonia Wholesale</h2>
-            <p><strong>Invoice #:</strong> ${order.id.slice(0, 8)}</p>
+            <p><strong>Invoice #:</strong> ${ordLabel}</p>
             <p><strong>Date:</strong> ${format(new Date(order.createdAt), 'MMMM d, yyyy')}</p>
             <p><strong>Customer:</strong> ${order.userName || order.userEmail}</p>
             <table>
@@ -367,7 +433,8 @@ Thank you for your business!
           order.items.map((item) => ({
             name: item.name,
             quantity: item.quantity,
-          }))
+          })),
+          order.displayOrderId
         );
       }
 
@@ -435,6 +502,11 @@ Thank you for your business!
         updatedAt: Date.now(),
       };
 
+      // Keep legacy `stock` in sync with wholesale stock for customer-facing views
+      if (typeof (productData as any).wholesaleStock === 'number') {
+        (productData as any).stock = (productData as any).wholesaleStock;
+      }
+
       // Remove undefined fields
       Object.keys(productData).forEach((key) => {
         if (productData[key as keyof typeof productData] === undefined) {
@@ -459,12 +531,15 @@ Thank you for your business!
         subCategory: undefined,
         price: 0,
         stock: 0,
+        wholesaleStock: 0,
+        storeroomStock: 0,
         unit: '',
         description: '',
         imageUrl: '',
         expiryDate: undefined,
         code: '',
       });
+      setTransferQty(0);
     } catch (error) {
       console.error('Error saving product:', error);
       toast.error('Failed to save product');
@@ -527,9 +602,12 @@ Thank you for your business!
   const openProductDialog = (product?: Product) => {
     if (product) {
       setEditingProduct(product);
-      setProductForm(product);
+      const wholesaleStock = product.wholesaleStock ?? product.stock ?? 0;
+      const storeroomStock = product.storeroomStock ?? 0;
+      setProductForm({ ...product, wholesaleStock, storeroomStock, stock: wholesaleStock });
       setImagePreview(product.imageUrl || null);
       setImageFile(null);
+      setTransferQty(0);
     } else {
       setEditingProduct(null);
       setProductForm({
@@ -538,6 +616,8 @@ Thank you for your business!
         subCategory: undefined,
         price: 0,
         stock: 0,
+        wholesaleStock: 0,
+        storeroomStock: 0,
         unit: '',
         description: '',
         imageUrl: '',
@@ -546,6 +626,7 @@ Thank you for your business!
       });
       setImagePreview(null);
       setImageFile(null);
+      setTransferQty(0);
     }
     setIsProductDialogOpen(true);
   };
@@ -778,6 +859,10 @@ Thank you for your business!
           <TabsTrigger value='staff' className='h-full px-6'>
             Staff Management
           </TabsTrigger>
+          <TabsTrigger value='pharmacies' className='h-full px-6'>
+            <Building2 className='inline h-4 w-4 mr-1.5 align-text-bottom' />
+            Pharmacies
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value='orders' className='mt-6 space-y-6'>
@@ -866,7 +951,7 @@ Thank you for your business!
                   <CardHeader className='bg-secondary/30 py-4 flex flex-row items-center justify-between'>
                     <div>
                       <CardTitle className='text-base font-mono'>
-                        Order #{order.id.slice(0, 8)}
+                        Order {formatOrderLabel(order)}
                       </CardTitle>
                       <CardDescription>
                         {getUserName(order.userId)} •{' '}
@@ -1088,7 +1173,7 @@ Thank you for your business!
                   <CardHeader className='bg-secondary/30 py-4 flex flex-row items-center justify-between'>
                     <div>
                       <CardTitle className='text-base font-mono'>
-                        Order #{order.id.slice(0, 8)}
+                        Order {formatOrderLabel(order)}
                       </CardTitle>
                       <CardDescription>
                         {getUserName(order.userId)} •{' '}
@@ -1563,22 +1648,135 @@ Thank you for your business!
           </Card>
         </TabsContent>
 
+        <TabsContent value='pharmacies' className='mt-6 space-y-6'>
+          <div>
+            <h2 className='text-2xl font-serif font-bold'>Pharmacy limits</h2>
+            <p className='text-sm text-muted-foreground mt-1'>
+              Monthly caps apply to total order value per pharmacy (rolling calendar
+              month). Admins can view usage; only super admins can change limits.
+            </p>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Monthly purchase limits</CardTitle>
+              <CardDescription>
+                Current month: {currentMonthKey()} · Spend resets each calendar month
+                when the first order is placed.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='rounded-md border overflow-x-auto'>
+                <table className='w-full text-sm'>
+                  <thead>
+                    <tr className='border-b bg-muted/40 text-left'>
+                      <th className='p-3 font-medium'>Pharmacy</th>
+                      <th className='p-3 font-medium'>Month tracked</th>
+                      <th className='p-3 font-medium text-right'>Spent (₵)</th>
+                      <th className='p-3 font-medium text-right'>Limit (₵)</th>
+                      <th className='p-3 font-medium text-right'>Remaining</th>
+                      <th className='p-3 font-medium w-28'></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pharmacies.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className='p-8 text-center text-muted-foreground'
+                        >
+                          No pharmacy records yet. Open this tab again after
+                          clients complete onboarding, or wait for sync.
+                        </td>
+                      </tr>
+                    ) : (
+                      pharmacies.map((p) => {
+                        const mk = currentMonthKey();
+                        const spend =
+                          p.monthKey === mk ? p.monthSpendGHS ?? 0 : 0;
+                        const limit = p.monthlyLimitGHS ?? 50_000;
+                        const remaining = Math.max(0, limit - spend);
+                        return (
+                          <tr key={p.id} className='border-b last:border-0'>
+                            <td className='p-3'>
+                              <span className='font-medium'>{p.name}</span>
+                              <p className='text-xs text-muted-foreground font-mono'>
+                                {p.id}
+                              </p>
+                            </td>
+                            <td className='p-3 text-muted-foreground'>
+                              {p.monthKey || '—'}
+                            </td>
+                            <td className='p-3 text-right tabular-nums'>
+                              {spend.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </td>
+                            <td className='p-3 text-right tabular-nums'>
+                              {limit.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </td>
+                            <td className='p-3 text-right tabular-nums'>
+                              {remaining.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </td>
+                            <td className='p-3 text-right'>
+                              {isSuperAdmin ? (
+                                <Button
+                                  variant='outline'
+                                  size='sm'
+                                  onClick={() => {
+                                    setPharmacyLimitDialog(p);
+                                    setPharmacyLimitInput(
+                                      String(p.monthlyLimitGHS ?? 50_000)
+                                    );
+                                  }}
+                                >
+                                  Edit limit
+                                </Button>
+                              ) : (
+                                <span className='text-xs text-muted-foreground'>
+                                  View only
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value='inventory' className='mt-6'>
           <div className='rounded-md border bg-card'>
             <div className='grid grid-cols-12 gap-4 p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
               <div className='col-span-4 md:col-span-3'>Name</div>
               <div className='col-span-3 md:col-span-2'>Category</div>
               <div className='col-span-2 md:col-span-2 text-right'>Price</div>
-              <div className='col-span-2 md:col-span-2 text-center'>Stock</div>
+              <div className='col-span-2 md:col-span-2 text-center'>Wholesale</div>
+              <div className='hidden md:block md:col-span-1 text-center'>Storeroom</div>
               <div className='col-span-1 md:col-span-3 text-right'>Actions</div>
             </div>
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className={`grid grid-cols-12 gap-4 p-4 border-b last:border-0 items-center text-sm hover:bg-muted/5 transition-colors ${
-                  product.isHidden ? 'opacity-60 bg-muted/20' : ''
-                }`}
-              >
+            {products.map((product) => {
+              const wholesaleStock = product.wholesaleStock ?? product.stock ?? 0;
+              const storeroomStock = product.storeroomStock ?? 0;
+              const totalStock = wholesaleStock + storeroomStock;
+              const isLow = totalStock > 0 && totalStock < 10;
+              return (
+                <div
+                  key={product.id}
+                  className={`grid grid-cols-12 gap-4 p-4 border-b last:border-0 items-center text-sm hover:bg-muted/5 transition-colors ${
+                    product.isHidden ? 'opacity-60 bg-muted/20' : ''
+                  }`}
+                >
                 <div
                   className='col-span-4 md:col-span-3 font-medium truncate flex items-center gap-2'
                   title={product.name}
@@ -1599,20 +1797,23 @@ Thank you for your business!
                 <div className='col-span-2 md:col-span-2 text-center'>
                   <Badge
                     variant={
-                      product.stock === 0
+                      totalStock === 0
                         ? 'destructive'
-                        : product.stock < 10
+                        : isLow
                         ? 'secondary'
                         : 'outline'
                     }
                     className={
-                      product.stock < 10
+                      isLow
                         ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
                         : ''
                     }
                   >
-                    {product.stock}
+                    {wholesaleStock}
                   </Badge>
+                </div>
+                <div className='hidden md:flex md:col-span-1 justify-center'>
+                  <Badge variant='outline'>{storeroomStock}</Badge>
                 </div>
                 <div className='col-span-1 md:col-span-3 flex justify-end gap-2'>
                   <Button
@@ -1648,7 +1849,8 @@ Thank you for your business!
                   </Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </TabsContent>
       </Tabs>
@@ -1734,22 +1936,106 @@ Thank you for your business!
               />
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
-              <Label htmlFor='stock' className='text-right'>
-                Stock
+              <Label htmlFor='wholesaleStock' className='text-right'>
+                Wholesale
               </Label>
               <Input
-                id='stock'
+                id='wholesaleStock'
                 type='number'
-                value={productForm.stock}
-                onChange={(e) =>
-                  setProductForm({
-                    ...productForm,
-                    stock: Number.parseInt(e.target.value),
-                  })
-                }
+                value={productForm.wholesaleStock ?? productForm.stock ?? 0}
+                onChange={(e) => {
+                  const val = Number.parseInt(e.target.value || '0', 10);
+                  setProductForm({ ...productForm, wholesaleStock: val, stock: val });
+                }}
                 className='col-span-3'
               />
             </div>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='storeroomStock' className='text-right'>
+                Storeroom
+              </Label>
+              <Input
+                id='storeroomStock'
+                type='number'
+                value={productForm.storeroomStock ?? 0}
+                onChange={(e) => {
+                  const val = Number.parseInt(e.target.value || '0', 10);
+                  setProductForm({ ...productForm, storeroomStock: val });
+                }}
+                className='col-span-3'
+              />
+            </div>
+            {editingProduct && (
+              <div className='grid grid-cols-4 items-center gap-4'>
+                <Label htmlFor='transferQty' className='text-right'>
+                  Transfer
+                </Label>
+                <div className='col-span-3 flex flex-col gap-2'>
+                  <div className='flex gap-2'>
+                    <Input
+                      id='transferQty'
+                      type='number'
+                      value={transferQty}
+                      onChange={(e) =>
+                        setTransferQty(Number.parseInt(e.target.value || '0', 10))
+                      }
+                      className='flex-1'
+                      min={0}
+                    />
+                    <Button
+                      type='button'
+                      variant='outline'
+                      onClick={() => {
+                        const qty = Math.max(0, transferQty || 0);
+                        const from = productForm.storeroomStock ?? 0;
+                        const move = Math.min(qty, from);
+                        if (move <= 0) return;
+                        const newStoreroom = from - move;
+                        const newWholesale =
+                          (productForm.wholesaleStock ?? productForm.stock ?? 0) + move;
+                        setProductForm({
+                          ...productForm,
+                          storeroomStock: newStoreroom,
+                          wholesaleStock: newWholesale,
+                          stock: newWholesale,
+                        });
+                        setTransferQty(0);
+                      }}
+                    >
+                      Storeroom → Wholesale
+                    </Button>
+                  </div>
+                  <div className='flex items-center justify-between gap-2'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      onClick={() => {
+                        const qty = Math.max(0, transferQty || 0);
+                        const from = productForm.wholesaleStock ?? productForm.stock ?? 0;
+                        const move = Math.min(qty, from);
+                        if (move <= 0) return;
+                        const newWholesale = from - move;
+                        const newStoreroom = (productForm.storeroomStock ?? 0) + move;
+                        setProductForm({
+                          ...productForm,
+                          storeroomStock: newStoreroom,
+                          wholesaleStock: newWholesale,
+                          stock: newWholesale,
+                        });
+                        setTransferQty(0);
+                      }}
+                    >
+                      Wholesale → Storeroom
+                    </Button>
+                    <div className='text-xs text-muted-foreground'>
+                      Total:{' '}
+                      {(productForm.wholesaleStock ?? productForm.stock ?? 0) +
+                        (productForm.storeroomStock ?? 0)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className='grid grid-cols-4 items-center gap-4'>
               <Label htmlFor='unit' className='text-right'>
                 Unit
@@ -1864,7 +2150,8 @@ Thank you for your business!
         <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>
-              Edit Order #{editingOrder?.id.slice(0, 8)}
+              Edit Order #
+              {editingOrder ? formatOrderLabel(editingOrder) : ''}
             </DialogTitle>
             <DialogDescription>
               Modify items, quantities, or remove items from this order.
@@ -1998,7 +2285,7 @@ Thank you for your business!
                   Select User
                 </Label>
                 <Select
-                  value={editingStaff?.id || ''}
+                  value=''
                   onValueChange={(userId) => {
                     const user = users.find((u) => u.id === userId);
                     if (user) {
@@ -2123,6 +2410,44 @@ Thank you for your business!
             <Button onClick={handleSaveStaff} disabled={!editingStaff}>
               Save
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!pharmacyLimitDialog}
+        onOpenChange={(open) => {
+          if (!open) setPharmacyLimitDialog(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Monthly purchase limit</DialogTitle>
+            <DialogDescription>
+              {pharmacyLimitDialog
+                ? `Set the total order value cap for ${pharmacyLimitDialog.name} (calendar month, Ghana cedis).`
+                : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-2 py-2'>
+            <Label htmlFor='pharm-limit'>Limit (₵)</Label>
+            <Input
+              id='pharm-limit'
+              type='number'
+              min={0}
+              step={100}
+              value={pharmacyLimitInput}
+              onChange={(e) => setPharmacyLimitInput(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => setPharmacyLimitDialog(null)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSavePharmacyLimit}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

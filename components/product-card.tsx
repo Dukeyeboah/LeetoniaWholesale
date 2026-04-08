@@ -28,10 +28,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [imageError, setImageError] = useState(false);
   const { user, isAdmin, viewMode } = useAuth();
-  const showPrice = isAdmin || viewMode === 'admin';
-  const isOutOfStock = product.stock <= 0;
-  const isLowStock = product.stock > 0 && product.stock < 10;
-  const maxQuantity = Math.min(product.stock, 999);
+  const showPrice = true;
+  const wholesaleQty = product.wholesaleStock ?? product.stock;
+  const isOutOfStock = wholesaleQty <= 0;
+  const isLowStock = wholesaleQty > 0 && wholesaleQty < 10;
+  const maxQuantity = Math.min(wholesaleQty, 999);
 
   const handleQuantityChange = (value: number) => {
     const newQuantity = Math.max(1, Math.min(value, maxQuantity));
@@ -53,7 +54,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       setShowLoginDialog(true);
       return;
     }
-    if (!isOutOfStock && quantity > 0 && quantity <= product.stock) {
+    if (!isOutOfStock && quantity > 0 && quantity <= wholesaleQty) {
       onAddToCart(product, quantity);
       setQuantity(1); // Reset to 1 after adding
     }
@@ -86,34 +87,18 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       </div>
       <CardHeader className='p-3 pb-0 flex-shrink-0'>
         <div className='flex justify-between items-start gap-2'>
-          <div className='flex-1 min-w-0 space-y-1'>
-            <Badge
-              variant='outline'
-              className='text-[10px] text-muted-foreground tracking-wider uppercase bg-transparent border-muted-foreground/30'
-            >
-              {product.category}
-            </Badge>
-            <CardTitle className='font-serif text-base leading-tight line-clamp-2'>
-              {product.name}
-            </CardTitle>
+          <div className='flex-1 min-w-0'>
+            <div className='flex items-start justify-between gap-3'>
+              <CardTitle className='font-serif text-base leading-tight line-clamp-2'>
+                {product.name}
+              </CardTitle>
+              {showPrice && (
+                <span className='font-bold text-primary text-base flex-shrink-0'>
+                  ₵{product.price.toFixed(2)}
+                </span>
+              )}
+            </div>
           </div>
-          {showPrice && (
-            <div className='text-right flex-shrink-0'>
-              <span className='block font-bold text-primary text-base'>
-                ₵{product.price.toFixed(2)}
-              </span>
-              <span className='text-xs text-muted-foreground'>
-                per {product.unit}
-              </span>
-            </div>
-          )}
-          {!showPrice && (
-            <div className='text-right flex-shrink-0'>
-              <span className='text-xs text-muted-foreground'>
-                {product.unit}
-              </span>
-            </div>
-          )}
         </div>
       </CardHeader>
       <CardContent className='p-3 pt-0 flex-shrink-0'>
@@ -136,7 +121,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                   : 'text-green-600'
             }
           >
-            {isOutOfStock ? 'Unavailable' : `${product.stock} in stock`}
+            {isOutOfStock ? 'Unavailable' : `${wholesaleQty} in stock`}
           </span>
         </div>
       </CardContent>

@@ -9,7 +9,13 @@ import { createNotification } from '@/lib/notifications';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { Bell, Package, CheckCircle2, MessageSquare } from 'lucide-react';
+import {
+  Bell,
+  Package,
+  CheckCircle2,
+  MessageSquare,
+  AlertTriangle,
+} from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -121,6 +127,8 @@ export default function NotificationsPage() {
         return <CheckCircle2 className='h-4 w-4' />;
       case 'admin_message':
         return <MessageSquare className='h-4 w-4' />;
+      case 'pharmacy_limit':
+        return <AlertTriangle className='h-4 w-4 text-amber-600' />;
       default:
         return <Bell className='h-4 w-4' />;
     }

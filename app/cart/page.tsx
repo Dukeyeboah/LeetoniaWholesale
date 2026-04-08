@@ -14,10 +14,20 @@ import {
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ArrowRight, Trash2, ShoppingBag } from 'lucide-react';
-import { addDoc, collection } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import type { Order } from '@/types';
+import {
+  buildDisplayOrderId,
+  buildFirestoreOrderId,
+  randomOrderSuffix,
+  toOrderIdPrefix,
+} from '@/lib/pharmacies';
+import {
+  PharmacyLimitError,
+  placeOrderWithPharmacyLimit,
+} from '@/lib/pharmacy-limits';
 
 export default function CartPage() {
   const {
@@ -28,7 +38,7 @@ export default function CartPage() {
     total,
     isInitialized,
   } = useCart();
-  const { user, isAdmin, viewMode } = useAuth();
+  const { user, isAdmin, viewMode, needsClientPharmacyProfile } = useAuth();
   const showPrice = isAdmin || viewMode === 'admin';
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,6 +47,11 @@ export default function CartPage() {
     if (!user) {
       toast.error('You must be logged in to place an order');
       router.push('/login');
+      return;
+    }
+
+    if (needsClientPharmacyProfile) {
+      toast.error('Complete your pharmacy profile before placing an order.');
       return;
     }
 
@@ -69,7 +84,40 @@ export default function CartPage() {
         updatedAt: Date.now(),
       };
 
-      await addDoc(collection(db, 'orders'), newOrder);
+      if (user.role === 'client') {
+        if (!user.pharmacyId || !user.pharmacyName) {
+          toast.error('Your profile is missing pharmacy details. Please sign in again or contact support.');
+          setIsSubmitting(false);
+          return;
+        }
+        try {
+          await placeOrderWithPharmacyLimit({
+            db,
+            pharmacyId: user.pharmacyId,
+            pharmacyDisplayName: user.pharmacyName,
+            orderPrefix: toOrderIdPrefix(user.pharmacyName),
+            orderPayload: newOrder,
+          });
+        } catch (err) {
+          if (err instanceof PharmacyLimitError) {
+            toast.error(
+              'This order would exceed your pharmacy’s monthly purchase limit. A super admin has been notified and can raise the cap under Pharmacies.'
+            );
+            setIsSubmitting(false);
+            return;
+          }
+          throw err;
+        }
+      } else {
+        const suffix = randomOrderSuffix(8);
+        const orderPrefix = 'Leetonia';
+        const displayOrderId = buildDisplayOrderId(orderPrefix, suffix);
+        const orderId = buildFirestoreOrderId(orderPrefix, suffix);
+        await setDoc(doc(db, 'orders', orderId), {
+          ...newOrder,
+          displayOrderId,
+        });
+      }
 
       toast.success(
         'Order placed successfully! Pharmacy will review and confirm.'

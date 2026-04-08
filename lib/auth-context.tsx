@@ -4,6 +4,7 @@ import type React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import type { User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import type { User } from '@/types';
 import { useRouter } from 'next/navigation';
@@ -13,7 +14,11 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   isStaff: boolean;
+  /** Client (or staff) must complete pharmacy onboarding before shopping. */
+  needsClientPharmacyProfile: boolean;
+  refreshUser: () => Promise<void>;
   viewMode: 'admin' | 'client' | 'staff';
   setViewMode: (mode: 'admin' | 'client' | 'staff') => void;
   logout: () => Promise<void>;
@@ -24,7 +29,10 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   isAdmin: false,
+  isSuperAdmin: false,
   isStaff: false,
+  needsClientPharmacyProfile: false,
+  refreshUser: async () => {},
   viewMode: 'client',
   setViewMode: () => {},
   logout: async () => {},
@@ -39,6 +47,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [viewMode, setViewMode] = useState<'admin' | 'client' | 'staff'>('client');
   const router = useRouter();
 
+  const refreshUser = async () => {
+    if (!db || !auth?.currentUser) return;
+    try {
+      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data() as User;
+        setUser({
+          ...userData,
+          photoURL: auth.currentUser.photoURL || userData.photoURL,
+        });
+      }
+    } catch (e) {
+      console.error('refreshUser', e);
+    }
+  };
+
+  const needsClientPharmacyProfile = Boolean(
+    user &&
+      user.role === 'client' &&
+      user.pharmacyProfileComplete !== true
+  );
+
   useEffect(() => {
     if (!auth || !db) {
       console.error(
@@ -47,6 +77,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
       return;
     }
+
+    const applyFirebaseUser = (
+      firebaseUser: FirebaseUser,
+      userData: User
+    ) => {
+      const updatedUser = {
+        ...userData,
+        photoURL: firebaseUser.photoURL || userData.photoURL,
+      };
+      setUser(updatedUser);
+      if (updatedUser.role === 'admin' || updatedUser.role === 'super_admin') {
+        setViewMode('admin');
+      } else if (updatedUser.role === 'staff') {
+        setViewMode('staff');
+      }
+    };
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -57,18 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (userDoc.exists()) {
             const userData = userDoc.data() as User;
-            // Update photoURL from Firebase Auth if available
-            const updatedUser = {
-              ...userData,
-              photoURL: firebaseUser.photoURL || userData.photoURL,
-            };
-            setUser(updatedUser);
-            // Set view mode based on role
-            if (updatedUser.role === 'admin') {
-              setViewMode('admin');
-            } else if (updatedUser.role === 'staff') {
-              setViewMode('staff');
-            }
+            applyFirebaseUser(firebaseUser, userData);
           } else {
             // Check if email is in admin whitelist
             const email = firebaseUser.email || '';
@@ -136,7 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const hasPermission = (permission: keyof import('@/types').StaffPermissions): boolean => {
-    if (user?.role === 'admin') return true;
+    if (user?.role === 'admin' || user?.role === 'super_admin') return true;
     if (user?.role === 'staff' && user.permissions) {
       return user.permissions[permission] === true;
     }
@@ -148,11 +183,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         loading,
-        isAdmin: user?.role === 'admin',
+        isAdmin: user?.role === 'admin' || user?.role === 'super_admin',
+        isSuperAdmin: user?.role === 'super_admin',
         isStaff: user?.role === 'staff',
-        viewMode: user?.role === 'admin' ? viewMode : user?.role === 'staff' ? 'staff' : 'client',
+        needsClientPharmacyProfile,
+        refreshUser,
+        viewMode:
+          user?.role === 'admin' || user?.role === 'super_admin'
+            ? viewMode
+            : user?.role === 'staff'
+              ? 'staff'
+              : 'client',
         setViewMode: (mode) => {
-          if (user?.role === 'admin') {
+          if (user?.role === 'admin' || user?.role === 'super_admin') {
             setViewMode(mode);
             // Navigate to appropriate page when switching views
             if (mode === 'admin') {

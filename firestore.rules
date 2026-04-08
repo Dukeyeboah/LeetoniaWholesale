@@ -2,133 +2,116 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Helper function to get user data
     function getUserData() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // Helper function to check if user is admin
-    function isAdmin() {
-      return isAuthenticated() && getUserData().role == 'admin';
+    function userRole() {
+      return getUserData().role;
     }
 
-    // Helper function to check if user is client
+    // Admin or super_admin (dashboard, inventory, orders)
+    function isPrivilegedAdmin() {
+      return isAuthenticated() && (userRole() == 'admin' || userRole() == 'super_admin');
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && userRole() == 'super_admin';
+    }
+
     function isClient() {
-      return isAuthenticated() && getUserData().role == 'client';
+      return isAuthenticated() && userRole() == 'client';
     }
 
-    // Helper function to check if user is staff
     function isStaff() {
-      return isAuthenticated() && getUserData().role == 'staff';
+      return isAuthenticated() && userRole() == 'staff';
     }
 
-    // Helper function to get staff permissions
     function getStaffPermissions() {
       return getUserData().permissions;
     }
 
-    // Helper function to check if staff has specific permission
     function staffHasPermission(permission) {
-      return isAdmin() || (isStaff() && getStaffPermissions() != null && getStaffPermissions()[permission] == true);
+      return isPrivilegedAdmin() || (isStaff() && getStaffPermissions() != null && getStaffPermissions()[permission] == true);
+    }
+
+    function isKnownSeedPharmacy(id) {
+      return id in ['amanfrom', 'avalon', 'caads', 'carehub', 'dayben', 'diagnopharma', 'dixxons', 'empat', 'grit', 'interpharma'];
     }
 
     // Users collection
     match /users/{userId} {
-      // Users can read their own profile
-      // Authenticated users can read other users' profiles (needed for querying admin users for notifications)
-      // Admins can read any profile
       allow read: if isAuthenticated();
-      
-      // Users can create their own profile on first login
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      
-      // Users can update their own profile (except role and permissions), admins can update any profile
       allow update: if isAuthenticated() && (
         (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'permissions'])) ||
-        isAdmin()
+        isPrivilegedAdmin()
       );
-      
-      // Only admins can delete users
-      allow delete: if isAdmin();
+      allow delete: if isPrivilegedAdmin();
     }
 
-    // Inventory collection
     match /inventory/{productId} {
-      // Anyone can read inventory (including unauthenticated users for browsing)
       allow read: if true;
-      
-      // Admins and staff with inventory management permission can create, update, or delete
-      allow create, update, delete: if isAdmin() || staffHasPermission('canManageInventory');
+      allow create, update, delete: if isPrivilegedAdmin() || staffHasPermission('canManageInventory');
     }
 
-    // Orders collection
     match /orders/{orderId} {
-      // Users can read their own orders, admins and staff with view permission can read all orders
       allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || 
-        isAdmin() ||
+        resource.data.userId == request.auth.uid ||
+        isPrivilegedAdmin() ||
         staffHasPermission('canViewOrders')
       );
-      
-      // Clients and admins can create orders (admins can create orders when in client view)
-      allow create: if isAuthenticated() && 
-        (isClient() || isAdmin()) && 
+      allow create: if isAuthenticated() &&
+        (isClient() || isPrivilegedAdmin()) &&
         request.resource.data.userId == request.auth.uid;
-      
-      // Clients can only update delivery/payment info on pharmacy_confirmed orders (for order confirmation)
-      // They cannot change the status - only admins can do that
-      // Staff can view orders but cannot update them (read-only)
-      // Admins can update any order and any field
       allow update: if isAuthenticated() && (
-        // Client updating their own pharmacy_confirmed order
-        (resource.data.userId == request.auth.uid && 
+        (resource.data.userId == request.auth.uid &&
          resource.data.status == 'pharmacy_confirmed' &&
-         // Only allow updating specific fields (not status)
          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'userId', 'items', 'total', 'createdAt', 'userName', 'userEmail'])) ||
-        // Admin can update any order
-        isAdmin()
+        isPrivilegedAdmin()
       );
-      
-      // Only admins can delete orders
-      allow delete: if isAdmin();
+      allow delete: if isPrivilegedAdmin();
     }
 
-    // Logs collection (activity logs)
     match /logs/{logId} {
-      // Only admins can read logs
-      allow read: if isAdmin();
-      
-      // System can create logs (via admin functions)
-      allow create: if isAdmin();
-      
-      // Only admins can update or delete logs
-      allow update, delete: if isAdmin();
+      allow read: if isPrivilegedAdmin();
+      allow create: if isPrivilegedAdmin();
+      allow update, delete: if isPrivilegedAdmin();
     }
 
-    // Carts collection (user shopping carts)
     match /carts/{userId} {
-      // Users can read and write their own cart
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Notifications collection
     match /notifications/{notificationId} {
-      // Users can read their own notifications
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      
-      // Users can update their own notifications (to mark as read)
-      allow update: if isAuthenticated() && 
+      allow update: if isAuthenticated() &&
         resource.data.userId == request.auth.uid &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
-      
-      // System/admins can create notifications
       allow create: if isAuthenticated();
+    }
+
+    match /pharmacies/{pharmacyId} {
+      allow read: if isAuthenticated();
+
+      // Client creates are constrained to known seeds or custom_* ids; app sets limits.
+      allow create: if isAuthenticated() && (
+        isPrivilegedAdmin() ||
+        (isClient() && (
+          isKnownSeedPharmacy(pharmacyId) ||
+          pharmacyId.matches('^custom_.+')
+        ))
+      );
+
+      allow update: if isSuperAdmin() || (
+        isClient() &&
+        request.resource.data.monthlyLimitGHS == resource.data.monthlyLimitGHS &&
+        request.resource.data.name == resource.data.name
+      );
     }
   }
 }
-

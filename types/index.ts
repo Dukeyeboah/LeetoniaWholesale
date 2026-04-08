@@ -9,13 +9,33 @@ export interface StaffPermissions {
 export interface User {
   id: string;
   email: string;
-  role: 'admin' | 'client' | 'staff';
+  role: 'super_admin' | 'admin' | 'client' | 'staff';
   name?: string;
   phone?: string;
   photoURL?: string; // Profile image URL from Google/Gmail
   createdAt: number;
+  /** Workplace title for pharmacy reps (e.g. Pharmacist, Owner). */
+  jobRole?: string;
+  /** Firestore `pharmacies` document id (or `custom_*` for user-added). */
+  pharmacyId?: string;
+  /** Display name of the pharmacy (seed label or custom). */
+  pharmacyName?: string;
+  /** Set after post-auth onboarding (name, job role, pharmacy). */
+  pharmacyProfileComplete?: boolean;
   // Staff-specific permissions (only for staff role)
   permissions?: StaffPermissions;
+}
+
+/** Monthly wholesale spend tracking per pharmacy (Firestore `pharmacies`). */
+export interface Pharmacy {
+  id: string;
+  name: string;
+  monthlyLimitGHS: number;
+  monthSpendGHS: number;
+  /** Calendar month key `YYYY-MM` for which `monthSpendGHS` applies. */
+  monthKey: string;
+  isCustom?: boolean;
+  updatedAt?: number;
 }
 
 export interface Product {
@@ -25,6 +45,10 @@ export interface Product {
   subCategory?: string; // Optional subcategory for future filtering
   price: number;
   stock: number;
+  /** Shop/front-of-house stock (subset of total). */
+  wholesaleStock?: number;
+  /** Backroom/warehouse stock (not directly sold). */
+  storeroomStock?: number;
   unit: string;
   description?: string;
   imageUrl?: string;
@@ -43,6 +67,10 @@ export interface Order {
   userId: string;
   userName?: string;
   userEmail?: string;
+  pharmacyId?: string;
+  pharmacyName?: string;
+  /** Human-readable id, e.g. `Dayben_#kibXANmj` (Firestore doc id stays URL-safe). */
+  displayOrderId?: string;
   items: CartItem[];
   status:
     | 'pending'
@@ -73,7 +101,12 @@ export interface Log {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'order_update' | 'order_confirmation' | 'admin_message' | 'system';
+  type:
+    | 'order_update'
+    | 'order_confirmation'
+    | 'admin_message'
+    | 'system'
+    | 'pharmacy_limit';
   title: string;
   message: string;
   orderId?: string;

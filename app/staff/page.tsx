@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order, Product } from '@/types';
+import { formatOrderLabel } from '@/lib/order-display';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -271,7 +272,7 @@ export default function StaffDashboard() {
                             <div className='flex-1'>
                               <div className='flex items-center gap-2 mb-2'>
                                 <span className='font-semibold'>
-                                  Order #{order.id.slice(0, 8)}
+                                  Order {formatOrderLabel(order)}
                                 </span>
                                 {getStatusBadge(order.status)}
                               </div>

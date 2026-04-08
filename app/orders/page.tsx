@@ -25,6 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { formatOrderLabel } from '@/lib/order-display';
 
 export default function OrdersPage() {
   const { user, isAdmin, viewMode } = useAuth();
@@ -173,7 +174,7 @@ export default function OrdersPage() {
             <CardHeader className='bg-secondary/30 flex flex-row items-center justify-between py-4'>
               <div className='space-y-1'>
                 <CardTitle className='text-base font-mono'>
-                  #{order.id.slice(0, 8)}
+                  {formatOrderLabel(order)}
                 </CardTitle>
                 <p className='text-xs text-muted-foreground'>
                   {format(order.createdAt, 'MMM d, yyyy • h:mm a')}

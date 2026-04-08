@@ -37,42 +37,32 @@ export async function createOrderStatusNotification(
   userId: string,
   orderId: string,
   status: string,
-  orderItems: Array<{ name: string; quantity: number }>
+  orderItems: Array<{ name: string; quantity: number }>,
+  displayOrderId?: string
 ): Promise<void> {
+  const label = displayOrderId || orderId;
   const statusMessages: Record<string, { title: string; message: string }> = {
     pharmacy_confirmed: {
       title: 'Order Ready for Verification',
-      message: `Your order #${orderId.slice(
-        0,
-        8
-      )} has been confirmed by the pharmacy. Please review and confirm the items: ${orderItems
+      message: `Your order #${label} has been confirmed by the pharmacy. Please review and confirm the items: ${orderItems
         .map((i) => `${i.quantity}x ${i.name}`)
         .join(', ')}`,
     },
     customer_confirmed: {
       title: 'Order Confirmed',
-      message: `Your order #${orderId.slice(
-        0,
-        8
-      )} has been confirmed and is being prepared.`,
+      message: `Your order #${label} has been confirmed and is being prepared.`,
     },
     processing: {
       title: 'Order Processing',
-      message: `Your order #${orderId.slice(
-        0,
-        8
-      )} is being processed and prepared for fulfillment.`,
+      message: `Your order #${label} is being processed and prepared for fulfillment.`,
     },
     completed: {
       title: 'Order Completed',
-      message: `Your order #${orderId.slice(
-        0,
-        8
-      )} has been completed and is ready for pickup/delivery.`,
+      message: `Your order #${label} has been completed and is ready for pickup/delivery.`,
     },
     cancelled: {
       title: 'Order Cancelled',
-      message: `Your order #${orderId.slice(0, 8)} has been cancelled.`,
+      message: `Your order #${label} has been cancelled.`,
     },
   };
 

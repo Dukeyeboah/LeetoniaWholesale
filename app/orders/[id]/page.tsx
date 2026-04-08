@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 import type { Order } from '@/types';
@@ -28,6 +28,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { createNotification } from '@/lib/notifications';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { formatOrderLabel } from '@/lib/order-display';
 
 const DELIVERY_FEE = 50; // GHS 50 delivery fee
 
@@ -109,43 +110,24 @@ export default function OrderVerificationPage() {
     try {
       // Update order with delivery and payment info (but keep status as pharmacy_confirmed)
       // The status will be updated to customer_confirmed when admin reads the notification
-      const updateData: Partial<Order> = {
+      await updateDoc(doc(db, 'orders', order.id), {
         deliveryOption,
         deliveryFee: deliveryOption === 'delivery' ? DELIVERY_FEE : 0,
         paymentMethod,
         updatedAt: Date.now(),
-      };
-
-      // Only include deliveryAddress if delivery option is selected
-      if (deliveryOption === 'delivery') {
-        updateData.deliveryAddress = deliveryAddress;
-      } else {
-        // Remove deliveryAddress field if switching to pickup
-        updateData.deliveryAddress = null;
-      }
-
-      // Only include notes if they exist
-      if (notes.trim()) {
-        updateData.notes = notes.trim();
-      } else {
-        // Remove notes field if empty
-        updateData.notes = null;
-      }
-
-      // Remove undefined values before updating
-      Object.keys(updateData).forEach((key) => {
-        if (updateData[key as keyof typeof updateData] === undefined) {
-          delete updateData[key as keyof typeof updateData];
-        }
+        ...(deliveryOption === 'delivery'
+          ? { deliveryAddress }
+          : { deliveryAddress: deleteField() }),
+        ...(notes.trim()
+          ? { notes: notes.trim() }
+          : { notes: deleteField() }),
       });
-
-      await updateDoc(doc(db, 'orders', order.id), updateData);
 
       // Create notification for all admin users
       try {
         const adminUsersQuery = query(
           collection(db, 'users'),
-          where('role', '==', 'admin')
+          where('role', 'in', ['admin', 'super_admin'])
         );
         const adminSnapshot = await getDocs(adminUsersQuery);
 
@@ -162,7 +144,7 @@ export default function OrderVerificationPage() {
             adminDoc.id,
             'order_confirmation',
             'Customer Order Confirmation',
-            `Order #${order.id.slice(0, 8)} from ${
+            `Order #${formatOrderLabel(order)} from ${
               order.userName || order.userEmail
             } has been confirmed.\n\nPayment: ${paymentMethodText}\n${deliveryText}\n\nItems: ${order.items
               .map((i) => `${i.quantity}x ${i.name}`)
@@ -536,7 +518,7 @@ export default function OrderVerificationPage() {
               </div>
 
               <div className='pt-4 space-y-2 text-xs text-muted-foreground'>
-                <p>Order ID: #{order.id.slice(0, 8)}</p>
+                <p>Order ID: {formatOrderLabel(order)}</p>
                 <p>Placed: {format(order.createdAt, 'MMM d, yyyy • h:mm a')}</p>
               </div>
 

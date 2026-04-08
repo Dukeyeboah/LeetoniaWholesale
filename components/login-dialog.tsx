@@ -354,8 +354,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       {showAdminPasskeyDialog && pendingUser && (
         <AdminPasskeyDialog
           open={showAdminPasskeyDialog}
-          onOpenChange={setShowAdminPasskeyDialog}
-          firebaseUser={pendingUser}
+          onCancel={() => setShowAdminPasskeyDialog(false)}
           onSuccess={() => {
             setShowAdminPasskeyDialog(false);
             onOpenChange(false);

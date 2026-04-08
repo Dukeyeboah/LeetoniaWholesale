@@ -216,6 +216,12 @@ export function AppSidebar() {
                   <p className='truncate text-xs text-muted-foreground'>
                     {user.email}
                   </p>
+                  {user.role === 'client' && user.pharmacyName && (
+                    <p className='truncate text-xs text-primary/90 mt-0.5'>
+                      {user.pharmacyName}
+                      {user.jobRole ? ` · ${user.jobRole}` : ''}
+                    </p>
+                  )}
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

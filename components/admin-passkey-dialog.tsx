@@ -59,8 +59,9 @@ export function AdminPasskeyDialog({
     try {
       if (db) {
         const adminConfig = getAdminConfig(user.email);
+        const roleToSet = adminConfig?.role || 'admin';
         await updateDoc(doc(db, 'users', user.id), {
-          role: 'admin',
+          role: roleToSet,
           name: adminConfig?.name || user.name,
         });
         toast.success('Admin access granted!');
