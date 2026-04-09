@@ -56,7 +56,11 @@ service cloud.firestore {
 
     match /inventory/{productId} {
       allow read: if true;
-      allow create, update, delete: if isPrivilegedAdmin() || staffHasPermission('canManageInventory');
+      allow create, delete: if isPrivilegedAdmin() || staffHasPermission('canManageInventory');
+      // Stock counts: admins/staff; clients may only touch reservedQty (checkout / finalize).
+      allow update: if isPrivilegedAdmin() || staffHasPermission('canManageInventory') ||
+        (isClient() &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reservedQty', 'updatedAt']));
     }
 
     match /orders/{orderId} {
@@ -77,7 +81,8 @@ service cloud.firestore {
          !request.resource.data.diff(resource.data).affectedKeys().hasAny([
            'userId', 'createdAt', 'userName', 'userEmail', 'pharmacyId',
            'pharmacyName', 'displayOrderId', 'submittedItems', 'submittedTotal',
-           'accountingStatus', 'paymentReceivedAt', 'proformaSentAt', 'proformaNote', 'invoiceSentAt'
+           'accountingStatus', 'paymentReceivedAt', 'amountPaidGHS', 'stockReserved',
+           'proformaSentAt', 'proformaNote', 'invoiceSentAt'
          ])) ||
         // Legacy orders: customer adds delivery/payment only (admin advanced status separately).
         (resource.data.userId == request.auth.uid &&
@@ -119,11 +124,16 @@ service cloud.firestore {
         ))
       );
 
-      allow update: if isSuperAdmin() || (
+      // Admins merge seed rows; clients cannot change monthly cap or name alone.
+      allow update: if isPrivilegedAdmin() || (
         isClient() &&
         request.resource.data.monthlyLimitGHS == resource.data.monthlyLimitGHS &&
         request.resource.data.name == resource.data.name
       );
+    }
+
+    match /returns/{returnId} {
+      allow read, create, update, delete: if isPrivilegedAdmin();
     }
   }
 }

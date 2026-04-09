@@ -2,7 +2,7 @@
 
 import { DialogDescription } from '@/components/ui/dialog';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   query,
   orderBy,
@@ -13,9 +13,14 @@ import {
   deleteDoc,
   collection,
   getDocs,
+  getDoc,
+  increment,
+  writeBatch,
+  type DocumentData,
+  type UpdateData,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Order, Product, CartItem } from '@/types';
+import type { Order, Product, CartItem, ProductReturn } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -64,6 +69,8 @@ import {
   Eye,
   EyeOff,
   Building2,
+  PackageMinus,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import type { Pharmacy } from '@/types';
@@ -77,6 +84,11 @@ import { storage } from '@/lib/firebase';
 import type { User } from '@/types';
 import { PRODUCT_CATEGORIES } from '@/lib/categories';
 import { createOrderStatusNotification } from '@/lib/notifications';
+import { printOrderInvoice } from '@/lib/print-invoice';
+import {
+  INVENTORY_LETTER_OPTIONS,
+  getFirstCharacterGroup,
+} from '@/lib/inventory-filters';
 import { formatOrderLabel } from '@/lib/order-display';
 import { generateInventoryProductCode } from '@/lib/product-code';
 import {
@@ -84,6 +96,18 @@ import {
   notifyClientProformaReady,
   notifyClientInvoiceSent,
 } from '@/lib/order-workflow';
+import {
+  appendReservedDeltaToWriteBatch,
+  fulfillReservedForOrder,
+  maxOrderLineQty,
+  releaseReservedForOrder,
+  validateItemChangeAgainstStock,
+} from '@/lib/stock-reservation';
+import {
+  availableToSell,
+  reservedForOrders,
+  wholesaleOnHand,
+} from '@/lib/inventory-availability';
 
 export default function AdminDashboard() {
   const { isSuperAdmin } = useAuth();
@@ -147,6 +171,57 @@ export default function AdminDashboard() {
   const [proformaNoteDraft, setProformaNoteDraft] = useState('');
   const [sendingProforma, setSendingProforma] = useState(false);
 
+  const [returnsList, setReturnsList] = useState<ProductReturn[]>([]);
+  const [inventorySubTab, setInventorySubTab] = useState<
+    'products' | 'returns' | 'payments'
+  >('products');
+  const [inventoryLetterFilter, setInventoryLetterFilter] = useState<
+    (typeof INVENTORY_LETTER_OPTIONS)[number]
+  >('all');
+  const [inventorySortMode, setInventorySortMode] = useState<
+    'default' | 'az' | 'code'
+  >('default');
+  const [paymentDialogOrder, setPaymentDialogOrder] = useState<Order | null>(
+    null
+  );
+  const [paymentAmountInput, setPaymentAmountInput] = useState('');
+  const [directPaymentOrder, setDirectPaymentOrder] = useState<Order | null>(
+    null
+  );
+  const [directPaidInput, setDirectPaidInput] = useState('');
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false);
+  const [returnForm, setReturnForm] = useState({
+    productId: '',
+    quantity: 1,
+    reason: '',
+    orderId: '',
+    notes: '',
+  });
+
+  const sortedInventoryProducts = useMemo(() => {
+    const list = [...products];
+    if (inventorySortMode === 'az') {
+      list.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    } else if (inventorySortMode === 'code') {
+      list.sort((a, b) =>
+        (a.code || '').localeCompare(b.code || '', undefined, { numeric: true })
+      );
+    }
+    return list;
+  }, [products, inventorySortMode]);
+
+  const inventoryProductsFiltered = useMemo(() => {
+    if (inventoryLetterFilter === 'all') return sortedInventoryProducts;
+    return sortedInventoryProducts.filter(
+      (p) => getFirstCharacterGroup(p.name || '') === inventoryLetterFilter
+    );
+  }, [sortedInventoryProducts, inventoryLetterFilter]);
+
+  const ordersForPaymentsTab = useMemo(
+    () => [...orders].sort((a, b) => b.createdAt - a.createdAt),
+    [orders]
+  );
+
   useEffect(() => {
     if (!db) {
       setLoading(false);
@@ -198,10 +273,23 @@ export default function AdminDashboard() {
       (err) => console.error('pharmacies snapshot', err)
     );
 
+    const unsubReturns = onSnapshot(
+      collection(db, 'returns'),
+      (snapshot) => {
+        setReturnsList(
+          snapshot.docs.map(
+            (d) => ({ id: d.id, ...d.data() } as ProductReturn)
+          )
+        );
+      },
+      (err) => console.error('returns snapshot', err)
+    );
+
     return () => {
       unsubOrders();
       unsubInventory();
       unsubPharmacies();
+      unsubReturns();
     };
   }, []);
 
@@ -228,17 +316,39 @@ export default function AdminDashboard() {
     if (!db || !editingOrder) return;
 
     try {
-      // Recalculate total
       const newTotal = editedOrderItems.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
       );
 
-      await updateDoc(doc(db, 'orders', editingOrder.id), {
+      const productMap = new Map(products.map((p) => [p.id, p]));
+      if (editingOrder.stockReserved) {
+        const check = validateItemChangeAgainstStock(
+          productMap,
+          editingOrder.items,
+          editedOrderItems
+        );
+        if (!check.ok) {
+          toast.error(check.message);
+          return;
+        }
+      }
+
+      const batch = writeBatch(db);
+      batch.update(doc(db, 'orders', editingOrder.id), {
         items: editedOrderItems,
         total: newTotal,
         updatedAt: Date.now(),
       });
+      if (editingOrder.stockReserved) {
+        appendReservedDeltaToWriteBatch(
+          batch,
+          db,
+          editingOrder.items,
+          editedOrderItems
+        );
+      }
+      await batch.commit();
 
       toast.success('Order updated successfully');
       setIsOrderEditDialogOpen(false);
@@ -256,9 +366,15 @@ export default function AdminDashboard() {
   const updateItemQuantity = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
     setEditedOrderItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      )
+      prev.map((item) => {
+        if (item.id !== itemId) return item;
+        const p = products.find((x) => x.id === item.id);
+        const cap = p
+          ? maxOrderLineQty(p, item.quantity)
+          : Math.max(newQuantity, item.quantity);
+        const q = Math.min(newQuantity, Math.max(cap, 1));
+        return { ...item, quantity: q };
+      })
     );
   };
 
@@ -304,116 +420,57 @@ export default function AdminDashboard() {
   };
 
   const generateInvoice = (order: Order) => {
-    const ordLabel = formatOrderLabel(order);
-    const fileSlug = ordLabel.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 48);
-    const invoiceContent = `
-INVOICE
-Leetonia Wholesale
-
-Invoice #: ${ordLabel}
-Date: ${format(new Date(order.createdAt), 'MMMM d, yyyy')}
-Customer: ${order.userName || order.userEmail}
-
-Items:
-${order.items.map((item) => 
-  `${item.quantity}x ${item.name} @ ₵${item.price.toFixed(2)} = ₵${(item.quantity * item.price).toFixed(2)}`
-).join('\n')}
-
-Subtotal: ₵${order.total.toFixed(2)}
-${order.deliveryFee ? `Delivery Fee: ₵${order.deliveryFee.toFixed(2)}` : ''}
-Total: ₵${(order.total + (order.deliveryFee || 0)).toFixed(2)}
-
-Payment Method: ${order.paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash'}
-${order.deliveryOption === 'delivery' ? `Delivery Address: ${order.deliveryAddress || 'N/A'}` : 'Pickup: Store Pickup'}
-
-Status: ${order.status.replace('_', ' ').toUpperCase()}
-
-Thank you for your business!
-    `.trim();
-
-    // Create a blob and download
-    const blob = new Blob([invoiceContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `invoice-${fileSlug}-${format(new Date(), 'yyyy-MM-dd')}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    // Also open print dialog
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Invoice ${ordLabel}</title>
-            <style>
-              body { font-family: monospace; padding: 40px; }
-              h1 { text-align: center; }
-              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-              th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-              .total { font-weight: bold; font-size: 1.2em; }
-            </style>
-          </head>
-          <body>
-            <h1>INVOICE</h1>
-            <h2>Leetonia Wholesale</h2>
-            <p><strong>Invoice #:</strong> ${ordLabel}</p>
-            <p><strong>Date:</strong> ${format(new Date(order.createdAt), 'MMMM d, yyyy')}</p>
-            <p><strong>Customer:</strong> ${order.userName || order.userEmail}</p>
-            <table>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${order.items.map((item) => `
-                  <tr>
-                    <td>${item.name}</td>
-                    <td>${item.quantity}</td>
-                    <td>₵${item.price.toFixed(2)}</td>
-                    <td>₵${(item.quantity * item.price).toFixed(2)}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="3"><strong>Subtotal:</strong></td>
-                  <td><strong>₵${order.total.toFixed(2)}</strong></td>
-                </tr>
-                ${order.deliveryFee ? `
-                <tr>
-                  <td colspan="3">Delivery Fee:</td>
-                  <td>₵${order.deliveryFee.toFixed(2)}</td>
-                </tr>
-                ` : ''}
-                <tr class="total">
-                  <td colspan="3"><strong>Total:</strong></td>
-                  <td><strong>₵${(order.total + (order.deliveryFee || 0)).toFixed(2)}</strong></td>
-                </tr>
-              </tfoot>
-            </table>
-            <p><strong>Payment Method:</strong> ${order.paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash'}</p>
-            ${order.deliveryOption === 'delivery' ? `<p><strong>Delivery Address:</strong> ${order.deliveryAddress || 'N/A'}</p>` : '<p><strong>Pickup:</strong> Store Pickup</p>'}
-            <p><strong>Status:</strong> ${order.status.replace('_', ' ').toUpperCase()}</p>
-            <p style="margin-top: 40px; text-align: center;">Thank you for your business!</p>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-      }, 250);
-    }
-
+    printOrderInvoice(order);
     toast.success('Invoice generated and download started');
+  };
+
+  const saveDirectPaidAmount = async () => {
+    if (!db || !directPaymentOrder) return;
+    const grand =
+      directPaymentOrder.total + (directPaymentOrder.deliveryFee || 0);
+    const paid = parseFloat(directPaidInput.replace(/,/g, ''));
+    if (Number.isNaN(paid) || paid < 0) {
+      toast.error('Enter a valid amount');
+      return;
+    }
+    const clamped = Math.min(grand, paid);
+    const fullyPaid = clamped >= grand - 0.0001;
+    try {
+      await updateDoc(doc(db, 'orders', directPaymentOrder.id), {
+        amountPaidGHS: clamped,
+        accountingStatus: fullyPaid ? 'paid' : 'credit',
+        ...(fullyPaid ? { paymentReceivedAt: Date.now() } : {}),
+        updatedAt: Date.now(),
+      });
+      toast.success('Payment amounts updated');
+      setDirectPaymentOrder(null);
+      setDirectPaidInput('');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to save');
+    }
+  };
+
+  const openDirectPaymentAdjust = (order: Order) => {
+    const grand = order.total + (order.deliveryFee || 0);
+    const paid =
+      order.accountingStatus === 'paid' &&
+      (order.amountPaidGHS == null || order.amountPaidGHS === undefined)
+        ? grand
+        : (order.amountPaidGHS ?? 0);
+    setDirectPaymentOrder(order);
+    setDirectPaidInput(paid.toFixed(2));
+  };
+
+  const promptCancelOrder = (order: Order) => {
+    if (
+      !window.confirm(
+        `Cancel order ${formatOrderLabel(order)}? Reserved stock will be released if applicable.`
+      )
+    ) {
+      return;
+    }
+    void updateOrderStatus(order.id, 'cancelled');
   };
 
   const updateOrderStatus = async (
@@ -445,6 +502,24 @@ Thank you for your business!
           : {}),
       });
 
+      if (order.stockReserved) {
+        try {
+          if (newStatus === 'cancelled' && order.status !== 'cancelled') {
+            await releaseReservedForOrder(db, order.items);
+          } else if (
+            newStatus === 'completed' &&
+            order.status !== 'completed'
+          ) {
+            await fulfillReservedForOrder(db, order.items);
+          }
+        } catch (stockErr) {
+          console.error(stockErr);
+          toast.error(
+            'Status saved, but inventory did not sync — check stock and reservations in Inventory.'
+          );
+        }
+      }
+
       if (order.userId) {
         if (
           newStatus === 'proforma_sent' &&
@@ -468,7 +543,8 @@ Thank you for your business!
               name: item.name,
               quantity: item.quantity,
             })),
-            order.displayOrderId
+            order.displayOrderId,
+            order.deliveryOption
           );
         }
       }
@@ -501,18 +577,115 @@ Thank you for your business!
     }
   };
 
-  const markPaymentReceived = async (order: Order) => {
-    if (!db) return;
+  const submitPaymentRecording = async () => {
+    if (!db || !paymentDialogOrder) return;
+    const grand =
+      paymentDialogOrder.total + (paymentDialogOrder.deliveryFee || 0);
+    const paidSoFar =
+      paymentDialogOrder.accountingStatus === 'paid' &&
+      (paymentDialogOrder.amountPaidGHS == null ||
+        paymentDialogOrder.amountPaidGHS === undefined)
+        ? grand
+        : (paymentDialogOrder.amountPaidGHS ?? 0);
+    const add = parseFloat(paymentAmountInput.replace(/,/g, ''));
+    if (Number.isNaN(add) || add <= 0) {
+      toast.error('Enter a valid payment amount');
+      return;
+    }
+    const newPaid = Math.min(grand, paidSoFar + add);
+    const fullyPaid = newPaid >= grand - 0.0001;
     try {
-      await updateDoc(doc(db, 'orders', order.id), {
-        accountingStatus: 'paid',
-        paymentReceivedAt: Date.now(),
+      await updateDoc(doc(db, 'orders', paymentDialogOrder.id), {
+        amountPaidGHS: newPaid,
+        accountingStatus: fullyPaid ? 'paid' : 'credit',
+        ...(fullyPaid ? { paymentReceivedAt: Date.now() } : {}),
         updatedAt: Date.now(),
       });
-      toast.success('Payment recorded');
+      toast.success(
+        fullyPaid ? 'Order marked fully paid' : 'Partial payment recorded'
+      );
+      setPaymentDialogOrder(null);
+      setPaymentAmountInput('');
     } catch (e) {
       console.error(e);
       toast.error('Failed to record payment');
+    }
+  };
+
+  const logProductReturn = async () => {
+    if (!db) return;
+    const p = products.find((x) => x.id === returnForm.productId);
+    if (!p || returnForm.quantity < 1) {
+      toast.error('Select a product and quantity');
+      return;
+    }
+    try {
+      await addDoc(collection(db, 'returns'), {
+        productId: p.id,
+        productName: p.name,
+        quantity: returnForm.quantity,
+        reason: returnForm.reason.trim() || undefined,
+        orderId: returnForm.orderId.trim() || undefined,
+        notes: returnForm.notes.trim() || undefined,
+        status: 'pending',
+        createdAt: Date.now(),
+      });
+      toast.success('Return logged');
+      setReturnDialogOpen(false);
+      setReturnForm({
+        productId: '',
+        quantity: 1,
+        reason: '',
+        orderId: '',
+        notes: '',
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to log return');
+    }
+  };
+
+  const restockReturn = async (r: ProductReturn) => {
+    if (!db || r.status !== 'pending') return;
+    try {
+      const pref = doc(db, 'inventory', r.productId);
+      const ps = await getDoc(pref);
+      if (!ps.exists()) {
+        toast.error('Product not found');
+        return;
+      }
+      const d = ps.data()!;
+      const patch: Record<string, unknown> = { updatedAt: Date.now() };
+      if (d.wholesaleStock !== undefined && d.wholesaleStock !== null) {
+        patch.wholesaleStock = increment(r.quantity);
+      } else {
+        patch.stock = increment(r.quantity);
+      }
+      const batch = writeBatch(db);
+      batch.update(pref, patch as UpdateData<DocumentData>);
+      batch.update(doc(db, 'returns', r.id), {
+        status: 'restocked',
+        updatedAt: Date.now(),
+      });
+      await batch.commit();
+      toast.success('Return added back to wholesale stock');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to restock');
+    }
+  };
+
+  const disposeReturn = async (r: ProductReturn) => {
+    if (!db || r.status !== 'pending') return;
+    try {
+      await updateDoc(doc(db, 'returns', r.id), {
+        status: 'disposed',
+        updatedAt: Date.now(),
+      });
+      toast.success('Return marked disposed');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to update return');
     }
   };
 
@@ -731,30 +904,19 @@ Thank you for your business!
     return matchesStatus && matchesUser && matchesProduct && matchesSearch;
   });
 
+  /** Revenue & units sold: recognized when orders are completed (aligns with stock out). */
+  const analyticsOrderIncluded = (o: Order) => o.status === 'completed';
+
   // Analytics calculations
   const productSales = products.map((product) => {
     const soldQuantity = orders
-      .filter(
-        (o) =>
-          o.status === 'completed' ||
-          o.status === 'processing' ||
-          o.status === 'customer_confirmed' ||
-          o.status === 'client_finalized' ||
-          o.status === 'invoice_sent'
-      )
+      .filter(analyticsOrderIncluded)
       .reduce((sum, order) => {
         const item = order.items.find((i) => i.id === product.id);
         return sum + (item ? item.quantity : 0);
       }, 0);
     const revenue = orders
-      .filter(
-        (o) =>
-          o.status === 'completed' ||
-          o.status === 'processing' ||
-          o.status === 'customer_confirmed' ||
-          o.status === 'client_finalized' ||
-          o.status === 'invoice_sent'
-      )
+      .filter(analyticsOrderIncluded)
       .reduce((sum, order) => {
         const item = order.items.find((i) => i.id === product.id);
         return sum + (item ? item.price * item.quantity : 0);
@@ -772,14 +934,7 @@ Thank you for your business!
     .slice(0, 10);
 
   const totalRevenue = orders
-    .filter(
-      (o) =>
-        o.status === 'completed' ||
-        o.status === 'processing' ||
-        o.status === 'customer_confirmed' ||
-        o.status === 'client_finalized' ||
-        o.status === 'invoice_sent'
-    )
+    .filter(analyticsOrderIncluded)
     .reduce((sum, order) => sum + order.total + (order.deliveryFee || 0), 0);
 
   const pendingOrders = orders.filter(
@@ -961,9 +1116,11 @@ Thank you for your business!
           <TabsTrigger value='inventory' className='h-full px-6'>
             Manage Inventory
           </TabsTrigger>
-          <TabsTrigger value='staff' className='h-full px-6'>
-            Staff Management
-          </TabsTrigger>
+          {isSuperAdmin && (
+            <TabsTrigger value='staff' className='h-full px-6'>
+              Staff Management
+            </TabsTrigger>
+          )}
           <TabsTrigger value='pharmacies' className='h-full px-6'>
             <Building2 className='inline h-4 w-4 mr-1.5 align-text-bottom' />
             Pharmacies
@@ -1182,6 +1339,29 @@ Thank you for your business!
                             )}
                           </span>
                         </div>
+                        {(() => {
+                          const grand =
+                            order.total + (order.deliveryFee || 0);
+                          const paid =
+                            order.accountingStatus === 'paid' &&
+                            (order.amountPaidGHS == null ||
+                              order.amountPaidGHS === undefined)
+                              ? grand
+                              : (order.amountPaidGHS ?? 0);
+                          const bal = Math.max(0, grand - paid);
+                          return (
+                            <div className='pt-3 space-y-1 text-sm border-t'>
+                              <div className='flex justify-between text-emerald-700 font-medium'>
+                                <span>Paid (debit)</span>
+                                <span>₵{paid.toFixed(2)}</span>
+                              </div>
+                              <div className='flex justify-between text-amber-800 font-medium'>
+                                <span>Balance (credit)</span>
+                                <span>₵{bal.toFixed(2)}</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       <div className='md:w-64 space-y-3 bg-muted/10 p-4 rounded-lg border'>
@@ -1209,43 +1389,91 @@ Thank you for your business!
                             </Button>
                           </>
                         ) : null}
-                        <div className='text-sm font-medium'>Update status</div>
-                        <Select
-                          value={order.status}
-                          onValueChange={(val: Order['status']) =>
-                            updateOrderStatus(order.id, val)
-                          }
+                        <div className='text-sm font-medium text-muted-foreground'>
+                          Status
+                        </div>
+                        <Badge
+                          variant='secondary'
+                          className='w-full justify-center py-1.5 capitalize'
                         >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='pending'>Pending</SelectItem>
-                            <SelectItem value='proforma_sent'>
-                              Proforma sent
-                            </SelectItem>
-                            <SelectItem value='client_finalized'>
-                              Client finalized
-                            </SelectItem>
-                            <SelectItem value='invoice_sent'>
-                              Invoice sent
-                            </SelectItem>
-                            <SelectItem value='processing'>
-                              Packing / preparing
-                            </SelectItem>
-                            <SelectItem value='completed'>Completed</SelectItem>
-                            <SelectItem value='cancelled'>Cancelled</SelectItem>
-                            <SelectItem value='checking_stock'>
-                              Legacy: checking stock
-                            </SelectItem>
-                            <SelectItem value='pharmacy_confirmed'>
-                              Legacy: pharmacy confirmed
-                            </SelectItem>
-                            <SelectItem value='customer_confirmed'>
-                              Legacy: customer confirmed
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                          {order.status.replace(/_/g, ' ')}
+                        </Badge>
+                        {order.status === 'proforma_sent' && (
+                          <p className='text-xs text-muted-foreground'>
+                            Waiting for the customer to confirm the proforma.
+                          </p>
+                        )}
+                        {order.status === 'client_finalized' && (
+                          <Button
+                            className='w-full'
+                            variant='secondary'
+                            onClick={() =>
+                              updateOrderStatus(order.id, 'invoice_sent')
+                            }
+                          >
+                            Record invoice sent
+                          </Button>
+                        )}
+                        {order.status === 'invoice_sent' && (
+                          <Button
+                            className='w-full font-semibold bg-primary text-primary-foreground shadow-lg shadow-primary/40 ring-2 ring-primary/40 hover:ring-primary/60 animate-pulse'
+                            onClick={() =>
+                              updateOrderStatus(order.id, 'processing')
+                            }
+                          >
+                            <Sparkles className='mr-2 h-4 w-4' />
+                            Start preparing / packaging
+                          </Button>
+                        )}
+                        {order.status === 'processing' && (
+                          <Button
+                            className='w-full'
+                            onClick={() =>
+                              updateOrderStatus(order.id, 'completed')
+                            }
+                          >
+                            Mark order complete
+                          </Button>
+                        )}
+                        {order.status === 'customer_confirmed' && (
+                          <Button
+                            className='w-full'
+                            variant='secondary'
+                            onClick={() =>
+                              updateOrderStatus(order.id, 'processing')
+                            }
+                          >
+                            Start preparing / packaging
+                          </Button>
+                        )}
+                        {order.status === 'pharmacy_confirmed' && (
+                          <p className='text-xs text-muted-foreground'>
+                            Legacy: customer is completing verification on their
+                            side.
+                          </p>
+                        )}
+                        {order.status === 'checking_stock' && (
+                          <Button
+                            className='w-full'
+                            variant='outline'
+                            size='sm'
+                            onClick={() =>
+                              updateOrderStatus(order.id, 'pending')
+                            }
+                          >
+                            Move to pending (new flow)
+                          </Button>
+                        )}
+                        {!['completed', 'cancelled'].includes(order.status) && (
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='w-full text-destructive hover:text-destructive'
+                            onClick={() => promptCancelOrder(order)}
+                          >
+                            Cancel order
+                          </Button>
+                        )}
                         {order.proformaNote &&
                           (order.status === 'proforma_sent' ||
                             order.status === 'client_finalized') && (
@@ -1263,21 +1491,58 @@ Thank you for your business!
                         <Button
                           variant='outline'
                           className='w-full mt-2'
+                          disabled={
+                            order.status === 'pending' ||
+                            order.status === 'proforma_sent' ||
+                            order.status === 'checking_stock'
+                          }
+                          title={
+                            order.status === 'pending' ||
+                            order.status === 'proforma_sent' ||
+                            order.status === 'checking_stock'
+                              ? 'Available after the customer confirms the proforma'
+                              : undefined
+                          }
                           onClick={() => generateInvoice(order)}
                         >
                           <Download className='mr-2 h-4 w-4' />
                           Print / download invoice
                         </Button>
-                        {(order.accountingStatus === 'credit' ||
-                          order.accountingStatus === undefined) && (
-                          <Button
-                            variant='secondary'
-                            className='w-full'
-                            onClick={() => markPaymentReceived(order)}
-                          >
-                            Record payment received
-                          </Button>
-                        )}
+                        {(() => {
+                          const grand =
+                            order.total + (order.deliveryFee || 0);
+                          const paid =
+                            order.accountingStatus === 'paid' &&
+                            (order.amountPaidGHS == null ||
+                              order.amountPaidGHS === undefined)
+                              ? grand
+                              : (order.amountPaidGHS ?? 0);
+                          const openBalance = paid < grand - 0.0001;
+                          return openBalance ? (
+                            <Button
+                              variant='secondary'
+                              className='w-full'
+                              onClick={() => {
+                                setPaymentDialogOrder(order);
+                                setPaymentAmountInput(
+                                  Math.max(
+                                    0,
+                                    grand - paid
+                                  ).toFixed(2)
+                                );
+                              }}
+                            >
+                              Record payment
+                            </Button>
+                          ) : null;
+                        })()}
+                        <Button
+                          variant='outline'
+                          className='w-full'
+                          onClick={() => openDirectPaymentAdjust(order)}
+                        >
+                          Adjust paid / balance
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -1446,6 +1711,11 @@ Thank you for your business!
         </TabsContent>
 
         <TabsContent value='analytics' className='mt-6 space-y-6'>
+          <p className='text-sm text-muted-foreground max-w-3xl'>
+            Revenue and units sold include completed orders only, matching stock
+            removed when an order is completed. Expiry sections use your current
+            inventory list.
+          </p>
           <div className='grid gap-4 md:grid-cols-4'>
             <Card>
               <CardHeader className='pb-2'>
@@ -1752,6 +2022,7 @@ Thank you for your business!
           </div>
         </TabsContent>
 
+        {isSuperAdmin && (
         <TabsContent value='staff' className='mt-6 space-y-6'>
           <div className='flex justify-between items-center'>
             <h2 className='text-2xl font-serif font-bold'>Staff Management</h2>
@@ -1839,6 +2110,7 @@ Thank you for your business!
             </CardContent>
           </Card>
         </TabsContent>
+        )}
 
         <TabsContent value='pharmacies' className='mt-6 space-y-6'>
           <div>
@@ -1990,103 +2262,305 @@ Thank you for your business!
           </Card>
         </TabsContent>
 
-        <TabsContent value='inventory' className='mt-6'>
-          <div className='rounded-md border bg-card'>
-            <div className='grid grid-cols-12 gap-4 p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
-              <div className='col-span-4 md:col-span-3'>Name</div>
-              <div className='col-span-3 md:col-span-2'>Category</div>
-              <div className='col-span-2 md:col-span-2 text-right'>Price</div>
-              <div className='col-span-2 md:col-span-2 text-center'>Wholesale</div>
-              <div className='hidden md:block md:col-span-1 text-center'>Storeroom</div>
-              <div className='col-span-1 md:col-span-3 text-right'>Actions</div>
+        <TabsContent value='inventory' className='mt-6 space-y-4'>
+          <div className='flex flex-col sm:flex-row flex-wrap gap-3 sm:items-center sm:justify-between'>
+            <div className='flex gap-2'>
+              <Button
+                type='button'
+                size='sm'
+                variant={inventorySubTab === 'products' ? 'default' : 'outline'}
+                onClick={() => setInventorySubTab('products')}
+              >
+                Products
+              </Button>
+              <Button
+                type='button'
+                size='sm'
+                variant={inventorySubTab === 'returns' ? 'default' : 'outline'}
+                onClick={() => setInventorySubTab('returns')}
+                className='gap-1'
+              >
+                <PackageMinus className='h-4 w-4' />
+                Returns
+              </Button>
+              <Button
+                type='button'
+                size='sm'
+                variant={
+                  inventorySubTab === 'payments' ? 'default' : 'outline'
+                }
+                onClick={() => setInventorySubTab('payments')}
+              >
+                Order payments
+              </Button>
             </div>
-            {products.map((product) => {
-              const wholesaleStock = product.wholesaleStock ?? product.stock ?? 0;
-              const storeroomStock = product.storeroomStock ?? 0;
-              const totalStock = wholesaleStock + storeroomStock;
-              const isLow = totalStock > 0 && totalStock < 10;
-              return (
-                <div
-                  key={product.id}
-                  className={`grid grid-cols-12 gap-4 p-4 border-b last:border-0 items-center text-sm hover:bg-muted/5 transition-colors ${
-                    product.isHidden ? 'opacity-60 bg-muted/20' : ''
-                  }`}
-                >
-                <div
-                  className='col-span-4 md:col-span-3 font-medium truncate flex items-center gap-2'
-                  title={product.name}
-                >
-                  {product.isHidden && (
-                    <Badge variant='secondary' className='text-xs'>
-                      Hidden
-                    </Badge>
-                  )}
-                  <span>{product.name}</span>
-                </div>
-                <div className='col-span-3 md:col-span-2 truncate'>
-                  {product.category}
-                </div>
-                <div className='col-span-2 md:col-span-2 text-right'>
-                  ₵{product.price.toFixed(2)}
-                </div>
-                <div className='col-span-2 md:col-span-2 text-center'>
-                  <Badge
-                    variant={
-                      totalStock === 0
-                        ? 'destructive'
-                        : isLow
-                        ? 'secondary'
-                        : 'outline'
-                    }
-                    className={
-                      isLow
-                        ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-                        : ''
-                    }
-                  >
-                    {wholesaleStock}
-                  </Badge>
-                </div>
-                <div className='hidden md:flex md:col-span-1 justify-center'>
-                  <Badge variant='outline'>{storeroomStock}</Badge>
-                </div>
-                <div className='col-span-1 md:col-span-3 flex justify-end gap-2'>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-8 w-8'
-                    onClick={() => openProductDialog(product)}
-                    title='Edit product'
-                  >
-                    <Edit className='h-4 w-4' />
-                  </Button>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-8 w-8'
-                    onClick={() => handleToggleProductVisibility(product)}
-                    title={product.isHidden ? 'Show product' : 'Hide product'}
-                  >
-                    {product.isHidden ? (
-                      <EyeOff className='h-4 w-4' />
-                    ) : (
-                      <Eye className='h-4 w-4' />
-                    )}
-                  </Button>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                    onClick={() => handleDeleteProduct(product.id)}
-                    title='Delete product permanently'
-                  >
-                    <Trash2 className='h-4 w-4' />
-                  </Button>
-                </div>
-              </div>
-              );
-            })}
+            {inventorySubTab === 'products' && (
+              <Select
+                value={inventorySortMode}
+                onValueChange={(v) =>
+                  setInventorySortMode(v as 'default' | 'az' | 'code')
+                }
+              >
+                <SelectTrigger className='w-[220px]'>
+                  <SelectValue placeholder='Sort' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='default'>All (default order)</SelectItem>
+                  <SelectItem value='az'>Alphabetical (A–Z)</SelectItem>
+                  <SelectItem value='code'>By product code</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
+
+          {inventorySubTab === 'products' && (
+            <div className='flex flex-wrap items-center gap-2'>
+              <span className='text-sm text-muted-foreground shrink-0'>
+                Starts with:
+              </span>
+              <div className='flex flex-wrap gap-1.5'>
+                {INVENTORY_LETTER_OPTIONS.map((letter) => (
+                  <Button
+                    key={letter}
+                    type='button'
+                    variant={
+                      inventoryLetterFilter === letter ? 'default' : 'outline'
+                    }
+                    size='sm'
+                    className='min-w-[2rem] h-8 px-2 font-medium'
+                    onClick={() => setInventoryLetterFilter(letter)}
+                  >
+                    {letter === 'all' ? 'All' : letter}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {inventorySubTab === 'products' ? (
+            <div className='rounded-md border bg-card'>
+              <div className='hidden md:flex flex-row items-center gap-4 p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
+                <div className='flex-1 min-w-0'>Product</div>
+                <div className='w-28 text-right shrink-0'>Price</div>
+                <div className='w-44 text-center shrink-0'>Stock</div>
+                <div className='w-20 text-center shrink-0'>Storeroom</div>
+                <div className='w-[120px] shrink-0 text-right'>Actions</div>
+              </div>
+              {inventoryProductsFiltered.map((product) => {
+                const wholesaleStock = wholesaleOnHand(product);
+                const inProcess = reservedForOrders(product);
+                const avail = availableToSell(product);
+                const storeroomStock = product.storeroomStock ?? 0;
+                const totalStock = wholesaleStock + storeroomStock;
+                const isLow = totalStock > 0 && totalStock < 10;
+                return (
+                  <div
+                    key={product.id}
+                    className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 border-b last:border-0 hover:bg-muted/5 transition-colors ${
+                      product.isHidden ? 'opacity-60 bg-muted/20' : ''
+                    }`}
+                  >
+                    <div className='flex-1 min-w-0 space-y-1'>
+                      <div className='flex items-center gap-2 flex-wrap'>
+                        {product.isHidden && (
+                          <Badge variant='secondary' className='text-xs'>
+                            Hidden
+                          </Badge>
+                        )}
+                        <span
+                          className='font-medium truncate'
+                          title={product.name}
+                        >
+                          {product.name}
+                        </span>
+                      </div>
+                      <p className='text-xs text-muted-foreground truncate'>
+                        {product.category}
+                        {product.code ? ` · ${product.code}` : ''}
+                      </p>
+                    </div>
+                    <div className='flex flex-row flex-wrap sm:flex-nowrap items-center gap-4 w-full sm:w-auto justify-between sm:justify-end sm:ml-auto'>
+                      <div className='w-28 text-right text-sm tabular-nums'>
+                        ₵{product.price.toFixed(2)}
+                      </div>
+                      <div className='w-48 sm:w-44 text-center space-y-0.5'>
+                        <Badge
+                          variant={
+                            avail === 0
+                              ? 'destructive'
+                              : isLow
+                                ? 'secondary'
+                                : 'outline'
+                          }
+                          className={
+                            isLow
+                              ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                              : ''
+                          }
+                        >
+                          {avail} sellable
+                        </Badge>
+                        <p className='text-[11px] text-amber-800 leading-tight'>
+                          {inProcess} in process · {wholesaleStock} on shelf
+                        </p>
+                      </div>
+                      <div className='w-16 flex justify-center'>
+                        <Badge variant='outline'>{storeroomStock}</Badge>
+                      </div>
+                      <div className='flex justify-end gap-1 shrink-0'>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='h-8 w-8'
+                          onClick={() => openProductDialog(product)}
+                          title='Edit product'
+                        >
+                          <Edit className='h-4 w-4' />
+                        </Button>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='h-8 w-8'
+                          onClick={() => handleToggleProductVisibility(product)}
+                          title={
+                            product.isHidden ? 'Show product' : 'Hide product'
+                          }
+                        >
+                          {product.isHidden ? (
+                            <EyeOff className='h-4 w-4' />
+                          ) : (
+                            <Eye className='h-4 w-4' />
+                          )}
+                        </Button>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+                          onClick={() => handleDeleteProduct(product.id)}
+                          title='Delete product permanently'
+                        >
+                          <Trash2 className='h-4 w-4' />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : inventorySubTab === 'returns' ? (
+            <Card>
+              <CardHeader className='flex flex-row flex-wrap items-center justify-between gap-2'>
+                <CardTitle>Customer returns</CardTitle>
+                <Button onClick={() => setReturnDialogOpen(true)}>
+                  Log return
+                </Button>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                {returnsList.length === 0 ? (
+                  <p className='text-sm text-muted-foreground'>
+                    No returns logged. Use Log return when stock is sent back from
+                    a customer.
+                  </p>
+                ) : (
+                  returnsList.map((r) => (
+                    <div
+                      key={r.id}
+                      className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border p-4 text-sm'
+                    >
+                      <div className='space-y-1'>
+                        <p className='font-medium'>
+                          {r.productName || r.productId} × {r.quantity}
+                        </p>
+                        <p className='text-xs text-muted-foreground'>
+                          {r.reason || 'No reason'}{' '}
+                          {r.orderId ? `· Order: ${r.orderId}` : ''}
+                        </p>
+                        <Badge variant='outline'>{r.status}</Badge>
+                      </div>
+                      <div className='flex flex-wrap gap-2'>
+                        <Button
+                          size='sm'
+                          variant='secondary'
+                          disabled={r.status !== 'pending'}
+                          onClick={() => restockReturn(r)}
+                        >
+                          Restock to wholesale
+                        </Button>
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          disabled={r.status !== 'pending'}
+                          onClick={() => disposeReturn(r)}
+                        >
+                          Mark disposed
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Order payments</CardTitle>
+                <CardDescription>
+                  Set the total amount received per order. Paid and balance update
+                  for the client as soon as you save.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-2 max-h-[70vh] overflow-y-auto'>
+                {ordersForPaymentsTab.length === 0 ? (
+                  <p className='text-sm text-muted-foreground'>No orders yet.</p>
+                ) : (
+                  ordersForPaymentsTab.map((order) => {
+                    const grand = order.total + (order.deliveryFee || 0);
+                    const paid =
+                      order.accountingStatus === 'paid' &&
+                      (order.amountPaidGHS == null ||
+                        order.amountPaidGHS === undefined)
+                        ? grand
+                        : (order.amountPaidGHS ?? 0);
+                    const bal = Math.max(0, grand - paid);
+                    return (
+                      <div
+                        key={order.id}
+                        className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border p-3 text-sm'
+                      >
+                        <div className='min-w-0'>
+                          <p className='font-medium font-mono'>
+                            {formatOrderLabel(order)}
+                          </p>
+                          <p className='text-muted-foreground text-xs'>
+                            {getUserName(order.userId)}
+                          </p>
+                          <Badge variant='outline' className='mt-1 capitalize'>
+                            {order.status.replace(/_/g, ' ')}
+                          </Badge>
+                        </div>
+                        <div className='text-right tabular-nums text-xs space-y-0.5'>
+                          <p>Total ₵{grand.toFixed(2)}</p>
+                          <p className='text-emerald-700 font-medium'>
+                            Paid ₵{paid.toFixed(2)}
+                          </p>
+                          <p className='text-amber-800 font-medium'>
+                            Balance ₵{bal.toFixed(2)}
+                          </p>
+                        </div>
+                        <Button
+                          size='sm'
+                          variant='secondary'
+                          onClick={() => openDirectPaymentAdjust(order)}
+                        >
+                          Adjust
+                        </Button>
+                      </div>
+                    );
+                  })
+                )}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
 
@@ -2405,68 +2879,80 @@ Thank you for your business!
                 No items in order
               </p>
             ) : (
-              editedOrderItems.map((item) => (
-                <div
-                  key={item.id}
-                  className='flex items-center justify-between p-4 border rounded-lg'
-                >
-                  <div className='flex-1'>
-                    <p className='font-medium'>{item.name}</p>
-                    <p className='text-sm text-muted-foreground'>
-                      ₵{item.price.toFixed(2)} per {item.unit}
-                    </p>
-                  </div>
-                  <div className='flex items-center gap-3'>
-                    <div className='flex items-center gap-2'>
+              editedOrderItems.map((item) => {
+                const live = products.find((x) => x.id === item.id);
+                const lineMax = live
+                  ? maxOrderLineQty(live, item.quantity)
+                  : item.quantity;
+                return (
+                  <div
+                    key={item.id}
+                    className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg'
+                  >
+                    <div className='flex-1 min-w-0'>
+                      <p className='font-medium'>{item.name}</p>
+                      <p className='text-sm text-muted-foreground'>
+                        ₵{item.price.toFixed(2)} per {item.unit}
+                      </p>
+                      {editingOrder?.stockReserved && live && (
+                        <p className='text-xs text-amber-800 mt-1'>
+                          Max for this order: {lineMax} (sellable stock)
+                        </p>
+                      )}
+                    </div>
+                    <div className='flex items-center gap-3 shrink-0'>
+                      <div className='flex items-center gap-2'>
+                        <Button
+                          variant='outline'
+                          size='icon'
+                          className='h-8 w-8'
+                          onClick={() =>
+                            updateItemQuantity(item.id, item.quantity - 1)
+                          }
+                          disabled={item.quantity <= 1}
+                        >
+                          -
+                        </Button>
+                        <Input
+                          type='number'
+                          min={1}
+                          max={lineMax}
+                          value={item.quantity}
+                          onChange={(e) =>
+                            updateItemQuantity(
+                              item.id,
+                              parseInt(e.target.value, 10) || 1
+                            )
+                          }
+                          className='w-16 text-center'
+                        />
+                        <Button
+                          variant='outline'
+                          size='icon'
+                          className='h-8 w-8'
+                          onClick={() =>
+                            updateItemQuantity(item.id, item.quantity + 1)
+                          }
+                          disabled={item.quantity >= lineMax}
+                        >
+                          +
+                        </Button>
+                      </div>
+                      <p className='font-bold w-20 text-right tabular-nums'>
+                        ₵{(item.price * item.quantity).toFixed(2)}
+                      </p>
                       <Button
-                        variant='outline'
+                        variant='ghost'
                         size='icon'
-                        className='h-8 w-8'
-                        onClick={() =>
-                          updateItemQuantity(item.id, item.quantity - 1)
-                        }
-                        disabled={item.quantity <= 1}
+                        className='h-8 w-8 text-destructive'
+                        onClick={() => removeItemFromOrder(item.id)}
                       >
-                        -
-                      </Button>
-                      <Input
-                        type='number'
-                        min={1}
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateItemQuantity(
-                            item.id,
-                            parseInt(e.target.value) || 1
-                          )
-                        }
-                        className='w-16 text-center'
-                      />
-                      <Button
-                        variant='outline'
-                        size='icon'
-                        className='h-8 w-8'
-                        onClick={() =>
-                          updateItemQuantity(item.id, item.quantity + 1)
-                        }
-                        disabled={item.quantity >= item.stock}
-                      >
-                        +
+                        <Trash2 className='h-4 w-4' />
                       </Button>
                     </div>
-                    <p className='font-bold w-20 text-right'>
-                      ₵{(item.price * item.quantity).toFixed(2)}
-                    </p>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='h-8 w-8 text-destructive'
-                      onClick={() => removeItemFromOrder(item.id)}
-                    >
-                      <Trash2 className='h-4 w-4' />
-                    </Button>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
             {editedOrderItems.length > 0 && (
               <div className='pt-4 border-t flex justify-between font-bold text-lg'>
@@ -2732,6 +3218,219 @@ Thank you for your business!
             >
               {sendingProforma ? 'Sending…' : 'Send proforma'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!paymentDialogOrder}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPaymentDialogOrder(null);
+            setPaymentAmountInput('');
+          }
+        }}
+      >
+        <DialogContent className='max-w-md'>
+          <DialogHeader>
+            <DialogTitle>Record payment</DialogTitle>
+            <DialogDescription>
+              Enter the amount received now (partial or full). Balance updates for
+              the customer immediately.
+            </DialogDescription>
+          </DialogHeader>
+          {paymentDialogOrder && (
+            <div className='space-y-3 py-2 text-sm'>
+              <p className='text-muted-foreground'>
+                Order {formatOrderLabel(paymentDialogOrder)}
+              </p>
+              <p>
+                Order total: ₵
+                {(
+                  paymentDialogOrder.total +
+                  (paymentDialogOrder.deliveryFee || 0)
+                ).toFixed(2)}
+              </p>
+              <p>
+                Already paid: ₵
+                {(() => {
+                  const g =
+                    paymentDialogOrder.total +
+                    (paymentDialogOrder.deliveryFee || 0);
+                  const p =
+                    paymentDialogOrder.accountingStatus === 'paid' &&
+                    (paymentDialogOrder.amountPaidGHS == null ||
+                      paymentDialogOrder.amountPaidGHS === undefined)
+                      ? g
+                      : (paymentDialogOrder.amountPaidGHS ?? 0);
+                  return p.toFixed(2);
+                })()}
+              </p>
+              <div className='space-y-2'>
+                <Label htmlFor='pay-amt'>Amount to record (₵)</Label>
+                <Input
+                  id='pay-amt'
+                  type='number'
+                  min={0}
+                  step={0.01}
+                  value={paymentAmountInput}
+                  onChange={(e) => setPaymentAmountInput(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => {
+                setPaymentDialogOrder(null);
+                setPaymentAmountInput('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={submitPaymentRecording}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!directPaymentOrder}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDirectPaymentOrder(null);
+            setDirectPaidInput('');
+          }
+        }}
+      >
+        <DialogContent className='max-w-md'>
+          <DialogHeader>
+            <DialogTitle>Set total paid</DialogTitle>
+            <DialogDescription>
+              Enter the total amount this customer has paid so far for this order
+              (including partial payments). Balance updates for them immediately.
+            </DialogDescription>
+          </DialogHeader>
+          {directPaymentOrder && (
+            <div className='space-y-3 py-2 text-sm'>
+              <p className='text-muted-foreground'>
+                Order {formatOrderLabel(directPaymentOrder)}
+              </p>
+              <p>
+                Order total: ₵
+                {(
+                  directPaymentOrder.total +
+                  (directPaymentOrder.deliveryFee || 0)
+                ).toFixed(2)}
+              </p>
+              <div className='space-y-2'>
+                <Label htmlFor='direct-paid'>Total paid to date (₵)</Label>
+                <Input
+                  id='direct-paid'
+                  type='text'
+                  inputMode='decimal'
+                  value={directPaidInput}
+                  onChange={(e) => setDirectPaidInput(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => {
+                setDirectPaymentOrder(null);
+                setDirectPaidInput('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => void saveDirectPaidAmount()}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>
+        <DialogContent className='max-w-md'>
+          <DialogHeader>
+            <DialogTitle>Log product return</DialogTitle>
+            <DialogDescription>
+              Record returned stock. Use Restock to add quantity back to wholesale.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='grid gap-3 py-2'>
+            <div className='space-y-2'>
+              <Label>Product</Label>
+              <Select
+                value={returnForm.productId}
+                onValueChange={(v) =>
+                  setReturnForm((f) => ({ ...f, productId: v }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder='Select product' />
+                </SelectTrigger>
+                <SelectContent>
+                  {products.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='ret-qty'>Quantity</Label>
+              <Input
+                id='ret-qty'
+                type='number'
+                min={1}
+                value={returnForm.quantity}
+                onChange={(e) =>
+                  setReturnForm((f) => ({
+                    ...f,
+                    quantity: Math.max(1, parseInt(e.target.value, 10) || 1),
+                  }))
+                }
+              />
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='ret-reason'>Reason (optional)</Label>
+              <Input
+                id='ret-reason'
+                value={returnForm.reason}
+                onChange={(e) =>
+                  setReturnForm((f) => ({ ...f, reason: e.target.value }))
+                }
+              />
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='ret-oid'>Order id (optional)</Label>
+              <Input
+                id='ret-oid'
+                value={returnForm.orderId}
+                onChange={(e) =>
+                  setReturnForm((f) => ({ ...f, orderId: e.target.value }))
+                }
+              />
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='ret-notes'>Notes (optional)</Label>
+              <Textarea
+                id='ret-notes'
+                rows={2}
+                value={returnForm.notes}
+                onChange={(e) =>
+                  setReturnForm((f) => ({ ...f, notes: e.target.value }))
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setReturnDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={logProductReturn}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

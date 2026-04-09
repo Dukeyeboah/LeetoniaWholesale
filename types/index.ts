@@ -55,6 +55,8 @@ export interface Product {
   wholesaleStock?: number;
   /** Backroom/warehouse stock (not directly sold). */
   storeroomStock?: number;
+  /** Quantity held for open orders (checkout); released on cancel or fulfilled on complete. */
+  reservedQty?: number;
   unit: string;
   description?: string;
   imageUrl?: string;
@@ -101,12 +103,18 @@ export interface Order {
   invoiceSentAt?: number;
   /** Sale on account until payment is received. */
   accountingStatus?: 'credit' | 'paid';
+  /** Cumulative amount received in GHS (may be partial). */
+  amountPaidGHS?: number;
   paymentReceivedAt?: number;
+  /** Inventory reservation applied at checkout (new orders only). */
+  stockReserved?: boolean;
   total: number;
   deliveryOption?: 'pickup' | 'delivery';
   deliveryAddress?: string;
   deliveryFee?: number;
   paymentMethod?: 'momo' | 'cash';
+  /** Optional contact number for ready-to-collect / delivery coordination. */
+  contactPhone?: string;
   notes?: string;
   createdAt: number;
   updatedAt: number;
@@ -118,6 +126,20 @@ export interface Log {
   userId: string;
   details: string;
   timestamp: number;
+}
+
+/** Admin-managed customer returns (restock into wholesale). */
+export interface ProductReturn {
+  id: string;
+  productId: string;
+  productName?: string;
+  quantity: number;
+  reason?: string;
+  status: 'pending' | 'restocked' | 'disposed';
+  orderId?: string;
+  notes?: string;
+  createdAt: number;
+  updatedAt?: number;
 }
 
 export interface Notification {

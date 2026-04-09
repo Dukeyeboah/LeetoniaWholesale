@@ -4,7 +4,8 @@
 
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Notification } from '@/types';
+import type { Notification, Order } from '@/types';
+import { fulfillmentShortPhrase } from '@/lib/order-display';
 
 export async function createNotification(
   userId: string,
@@ -38,9 +39,11 @@ export async function createOrderStatusNotification(
   orderId: string,
   status: string,
   orderItems: Array<{ name: string; quantity: number }>,
-  displayOrderId?: string
+  displayOrderId?: string,
+  deliveryOption?: Order['deliveryOption']
 ): Promise<void> {
   const label = displayOrderId || orderId;
+  const f = fulfillmentShortPhrase(deliveryOption);
   const statusMessages: Record<string, { title: string; message: string }> = {
     proforma_sent: {
       title: 'Proforma sent',
@@ -58,7 +61,7 @@ export async function createOrderStatusNotification(
     },
     invoice_sent: {
       title: 'Invoice recorded',
-      message: `Your order #${label}: invoice has been recorded. The shop will pack for pickup or delivery.`,
+      message: `Your order #${label}: invoice has been recorded. The shop will pack your order for ${f}.`,
     },
     customer_confirmed: {
       title: 'Order Confirmed',
@@ -66,11 +69,11 @@ export async function createOrderStatusNotification(
     },
     processing: {
       title: 'Order Processing',
-      message: `Your order #${label} is being packed and prepared for pickup or delivery.`,
+      message: `Your order #${label} is being packed and prepared for ${f}.`,
     },
     completed: {
       title: 'Order Completed',
-      message: `Your order #${label} has been completed and is ready for pickup/delivery.`,
+      message: `Your order #${label} is complete. It is ready for ${f}. Thank you for your business!`,
     },
     cancelled: {
       title: 'Order Cancelled',

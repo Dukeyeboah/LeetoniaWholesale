@@ -1,7 +1,7 @@
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import type { Firestore } from 'firebase/firestore';
 import { createNotification } from '@/lib/notifications';
-import { formatOrderLabel } from '@/lib/order-display';
+import { formatOrderLabel, fulfillmentShortPhrase } from '@/lib/order-display';
 import type { Order } from '@/types';
 
 export const DEFAULT_PROFORMA_NOTE =
@@ -73,14 +73,15 @@ export async function notifyAdminsClientFinalizedOrder(
 /** Optional: tell client the invoice step was recorded. */
 export async function notifyClientInvoiceSent(
   db: Firestore,
-  order: Pick<Order, 'id' | 'userId' | 'displayOrderId'>
+  order: Pick<Order, 'id' | 'userId' | 'displayOrderId' | 'deliveryOption'>
 ): Promise<void> {
   const label = formatOrderLabel(order);
+  const f = fulfillmentShortPhrase(order.deliveryOption);
   await createNotification(
     order.userId,
     'order_update',
     'Invoice sent',
-    `Your order ${label}: the pharmacy has recorded your invoice. They will pack your order for pickup or delivery.`,
+    `Your order ${label}: the pharmacy has recorded your invoice. They will pack your order for ${f}.`,
     order.id
   );
 }

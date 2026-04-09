@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
+import { availableToSell } from '@/lib/inventory-availability';
 
 const CART_STORAGE_KEY = 'leetonia_cart';
 
@@ -143,10 +144,10 @@ export function useCart() {
       const existing = prev.find((item) => item.id === product.id);
       const currentQuantity = existing ? existing.quantity : 0;
       const newQuantity = currentQuantity + quantity;
+      const avail = availableToSell(product);
 
-      // Check if requested quantity exceeds available stock
-      if (newQuantity > product.stock) {
-        toast.error(`Only ${product.stock} ${product.unit} available in stock`);
+      if (newQuantity > avail) {
+        toast.error(`Only ${avail} ${product.unit} available to order right now`);
         return prev;
       }
 
@@ -186,9 +187,9 @@ export function useCart() {
       prev.map((item) => {
         if (item.id === productId) {
           const newQuantity = Math.max(1, item.quantity + delta);
-          // Check if new quantity exceeds stock
-          if (newQuantity > item.stock) {
-            toast.error(`Only ${item.stock} ${item.unit} available in stock`);
+          const avail = availableToSell(item);
+          if (newQuantity > avail) {
+            toast.error(`Only ${avail} ${item.unit} available to order right now`);
             return item;
           }
           return { ...item, quantity: newQuantity };
@@ -202,9 +203,10 @@ export function useCart() {
     setCart((prev) =>
       prev.map((item) => {
         if (item.id === productId) {
-          const newQuantity = Math.max(1, Math.min(quantity, item.stock));
-          if (quantity > item.stock) {
-            toast.error(`Only ${item.stock} ${item.unit} available in stock`);
+          const avail = availableToSell(item);
+          const newQuantity = Math.max(1, Math.min(quantity, avail));
+          if (quantity > avail) {
+            toast.error(`Only ${avail} ${item.unit} available to order right now`);
           }
           return { ...item, quantity: newQuantity };
         }

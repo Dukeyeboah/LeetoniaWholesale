@@ -17,6 +17,7 @@ import { Plus, AlertCircle, Minus } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { LoginDialog } from '@/components/login-dialog';
 import { LazyImage } from '@/components/lazy-image';
+import { availableToSell } from '@/lib/inventory-availability';
 
 interface ProductCardProps {
   product: Product;
@@ -29,10 +30,10 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
   const { user, isAdmin, viewMode } = useAuth();
   const showPrice = true;
-  const wholesaleQty = product.wholesaleStock ?? product.stock;
-  const isOutOfStock = wholesaleQty <= 0;
-  const isLowStock = wholesaleQty > 0 && wholesaleQty < 10;
-  const maxQuantity = Math.min(wholesaleQty, 999);
+  const sellableQty = availableToSell(product);
+  const isOutOfStock = sellableQty <= 0;
+  const isLowStock = sellableQty > 0 && sellableQty < 10;
+  const maxQuantity = Math.min(sellableQty, 999);
 
   const handleQuantityChange = (value: number) => {
     const newQuantity = Math.max(1, Math.min(value, maxQuantity));
@@ -54,7 +55,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       setShowLoginDialog(true);
       return;
     }
-    if (!isOutOfStock && quantity > 0 && quantity <= wholesaleQty) {
+    if (!isOutOfStock && quantity > 0 && quantity <= sellableQty) {
       onAddToCart(product, quantity);
       setQuantity(1); // Reset to 1 after adding
     }
@@ -121,7 +122,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                   : 'text-green-600'
             }
           >
-            {isOutOfStock ? 'Unavailable' : `${wholesaleQty} in stock`}
+            {isOutOfStock
+              ? 'Unavailable'
+              : `${sellableQty} available to order`}
           </span>
         </div>
       </CardContent>

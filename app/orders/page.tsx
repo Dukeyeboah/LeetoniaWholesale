@@ -255,14 +255,40 @@ export default function OrdersPage() {
                   </div>
                 )}
 
-                {showPrice && (
-                  <div className='pt-2 border-t flex justify-between font-bold'>
-                    <span>Total</span>
-                    <span>
-                      ₵{(order.total + (order.deliveryFee || 0)).toFixed(2)}
-                    </span>
-                  </div>
-                )}
+                <div className='pt-2 border-t space-y-2 text-sm'>
+                  {(() => {
+                    const grand = order.total + (order.deliveryFee || 0);
+                    const paid =
+                      order.accountingStatus === 'paid' &&
+                      (order.amountPaidGHS == null ||
+                        order.amountPaidGHS === undefined)
+                        ? grand
+                        : (order.amountPaidGHS ?? 0);
+                    const bal = Math.max(0, grand - paid);
+                    return (
+                      <>
+                        <div className='flex justify-between font-semibold'>
+                          <span>Order total</span>
+                          <span className='tabular-nums'>
+                            ₵{grand.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className='flex justify-between font-medium text-emerald-700'>
+                          <span>Paid (debit)</span>
+                          <span className='tabular-nums'>
+                            ₵{paid.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className='flex justify-between font-medium text-amber-800'>
+                          <span>Balance (credit)</span>
+                          <span className='tabular-nums'>
+                            ₵{bal.toFixed(2)}
+                          </span>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
 
                 {order.status === 'proforma_sent' && (
                   <Link href={`/orders/${order.id}`}>

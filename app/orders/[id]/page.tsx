@@ -2,15 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { doc, getDoc, updateDoc, deleteField } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  deleteField,
+  writeBatch,
+} from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
-import type { CartItem, Order } from '@/types';
+import type { CartItem, Order, Product } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
@@ -26,12 +33,26 @@ import {
   Minus,
   Plus,
   Trash2,
+  Printer,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createNotification } from '@/lib/notifications';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { formatOrderLabel } from '@/lib/order-display';
+import {
+  formatOrderLabel,
+  fulfillmentShortPhrase,
+} from '@/lib/order-display';
+import {
+  printOrderInvoice,
+  MOMO_DISPLAY_NAME,
+  MOMO_PHONE,
+} from '@/lib/print-invoice';
 import { notifyAdminsClientFinalizedOrder } from '@/lib/order-workflow';
+import {
+  appendReservedDeltaToWriteBatch,
+  maxOrderLineQty,
+  validateItemChangeAgainstStock,
+} from '@/lib/stock-reservation';
 
 const DELIVERY_FEE = 50; // GHS 50 delivery fee
 
@@ -49,6 +70,10 @@ export default function OrderVerificationPage() {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'momo' | 'cash'>('cash');
   const [notes, setNotes] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [stockByProductId, setStockByProductId] = useState<
+    Map<string, Product>
+  >(new Map());
 
   useEffect(() => {
     if (!user || !params.id) return;
@@ -87,6 +112,9 @@ export default function OrderVerificationPage() {
           if (orderData.notes) {
             setNotes(orderData.notes);
           }
+          if (orderData.contactPhone) {
+            setContactPhone(orderData.contactPhone);
+          }
         } else {
           toast.error('Order not found');
           router.push('/orders');
@@ -102,6 +130,23 @@ export default function OrderVerificationPage() {
     fetchOrder();
   }, [user, params.id, router]);
 
+  useEffect(() => {
+    if (!db || !order || order.status !== 'proforma_sent') return;
+    (async () => {
+      const ids = [...new Set(order.items.map((i) => i.id))];
+      const map = new Map<string, Product>();
+      await Promise.all(
+        ids.map(async (id) => {
+          const s = await getDoc(doc(db, 'inventory', id));
+          if (s.exists()) {
+            map.set(id, { id, ...s.data() } as Product);
+          }
+        })
+      );
+      setStockByProductId(map);
+    })();
+  }, [order?.id, order?.status, order?.updatedAt]);
+
   const lineSubtotal = editableItems.reduce(
     (s, i) => s + i.price * i.quantity,
     0
@@ -109,11 +154,16 @@ export default function OrderVerificationPage() {
 
   const bumpQty = (id: string, delta: number) => {
     setEditableItems((prev) =>
-      prev.map((i) =>
-        i.id === id
-          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
-          : i
-      )
+      prev.map((i) => {
+        if (i.id !== id) return i;
+        const p = stockByProductId.get(id);
+        const cap = p ? maxOrderLineQty(p, i.quantity) : i.quantity + delta;
+        const nq = Math.max(
+          1,
+          Math.min(i.quantity + delta, Math.max(cap, 1))
+        );
+        return { ...i, quantity: nq };
+      })
     );
   };
 
@@ -140,10 +190,33 @@ export default function OrderVerificationPage() {
         }
 
         const subtotal = lineSubtotal;
-        await updateDoc(doc(db, 'orders', order.id), {
+        const ids = [...new Set(editableItems.map((i) => i.id))];
+        const productMap = new Map(stockByProductId);
+        for (const id of ids) {
+          if (!productMap.has(id)) {
+            const s = await getDoc(doc(db, 'inventory', id));
+            if (s.exists()) {
+              productMap.set(id, { id, ...s.data() } as Product);
+            }
+          }
+        }
+        if (order.stockReserved) {
+          const check = validateItemChangeAgainstStock(
+            productMap,
+            order.items,
+            editableItems
+          );
+          if (!check.ok) {
+            toast.error(check.message);
+            setSubmitting(false);
+            return;
+          }
+        }
+
+        const orderPatch = {
           items: editableItems,
           total: subtotal,
-          status: 'client_finalized',
+          status: 'client_finalized' as const,
           deliveryOption,
           deliveryFee: deliveryOption === 'delivery' ? DELIVERY_FEE : 0,
           paymentMethod,
@@ -154,7 +227,24 @@ export default function OrderVerificationPage() {
           ...(notes.trim()
             ? { notes: notes.trim() }
             : { notes: deleteField() }),
-        });
+          ...(contactPhone.trim()
+            ? { contactPhone: contactPhone.trim() }
+            : { contactPhone: deleteField() }),
+        };
+
+        if (order.stockReserved) {
+          const batch = writeBatch(db);
+          batch.update(doc(db, 'orders', order.id), orderPatch);
+          appendReservedDeltaToWriteBatch(
+            batch,
+            db,
+            order.items,
+            editableItems
+          );
+          await batch.commit();
+        } else {
+          await updateDoc(doc(db, 'orders', order.id), orderPatch);
+        }
 
         await notifyAdminsClientFinalizedOrder(db, order);
         toast.success(
@@ -176,6 +266,9 @@ export default function OrderVerificationPage() {
           ...(notes.trim()
             ? { notes: notes.trim() }
             : { notes: deleteField() }),
+          ...(contactPhone.trim()
+            ? { contactPhone: contactPhone.trim() }
+            : { contactPhone: deleteField() }),
         });
 
         try {
@@ -261,6 +354,12 @@ export default function OrderVerificationPage() {
     order.status === 'processing' ||
     order.status === 'completed';
 
+  const canPrintInvoice =
+    order.status === 'invoice_sent' ||
+    order.status === 'customer_confirmed' ||
+    order.status === 'processing' ||
+    order.status === 'completed';
+
   /** Read-only success / tracking views */
   if (isClientFinalized || isInvoiceOrLater) {
     const title =
@@ -274,30 +373,43 @@ export default function OrderVerificationPage() {
               ? 'Order completed'
               : 'Order update';
 
+    const fulfill = fulfillmentShortPhrase(order.deliveryOption);
     const blurb =
       order.status === 'client_finalized'
-        ? 'Thank you. The pharmacy will send your invoice and then pack your order for pickup or delivery.'
+        ? `Thank you. The pharmacy will send your invoice and then pack your order for ${fulfill}.`
         : order.status === 'invoice_sent'
-          ? 'Your invoice has been recorded. The shop will pack your order shortly.'
+          ? `Your invoice has been recorded. The shop will pack your order for ${fulfill} shortly.`
           : order.status === 'processing'
-            ? 'Your order is being packed and will be ready for pickup or delivery as arranged.'
+            ? `Your order is being packed and will be ready for ${fulfill} as arranged.`
             : order.status === 'completed'
-              ? 'This order is complete. Thank you for your business.'
+              ? `This order is complete and ready for ${fulfill}. Thank you for your business.`
               : 'Your order is being processed.';
 
     return (
       <div className='space-y-8'>
-        <div className='flex items-center gap-4'>
-          <Button variant='ghost' onClick={() => router.push('/orders')}>
-            <ArrowLeft className='mr-2 h-4 w-4' />
-            Back to Orders
-          </Button>
-          <div>
-            <h1 className='text-3xl font-serif font-bold text-primary'>
-              {title}
-            </h1>
-            <p className='text-muted-foreground mt-1'>{blurb}</p>
+        <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
+          <div className='flex items-center gap-4'>
+            <Button variant='ghost' onClick={() => router.push('/orders')}>
+              <ArrowLeft className='mr-2 h-4 w-4' />
+              Back to Orders
+            </Button>
+            <div>
+              <h1 className='text-3xl font-serif font-bold text-primary'>
+                {title}
+              </h1>
+              <p className='text-muted-foreground mt-1'>{blurb}</p>
+            </div>
           </div>
+          {canPrintInvoice && (
+            <Button
+              variant='outline'
+              className='shrink-0'
+              onClick={() => printOrderInvoice(order)}
+            >
+              <Printer className='mr-2 h-4 w-4' />
+              Print invoice
+            </Button>
+          )}
         </div>
 
         <Card className='border-green-200 bg-green-50/50'>
@@ -314,6 +426,28 @@ export default function OrderVerificationPage() {
                       {order.paymentMethod === 'momo'
                         ? 'Mobile Money (Momo)'
                         : 'Cash'}
+                    </span>
+                  </div>
+                )}
+                {order.paymentMethod === 'momo' && (
+                  <div className='rounded-md border border-violet-200 bg-violet-50/80 px-3 py-2 text-sm text-violet-950'>
+                    <p className='font-medium'>MoMo payment details</p>
+                    <p className='mt-1'>
+                      Send to <strong>{MOMO_DISPLAY_NAME}</strong>
+                    </p>
+                    <p>
+                      MoMo number:{' '}
+                      <span className='font-mono font-semibold'>
+                        {MOMO_PHONE}
+                      </span>
+                    </p>
+                  </div>
+                )}
+                {order.contactPhone && (
+                  <div className='text-sm'>
+                    <span className='text-muted-foreground'>Contact phone: </span>
+                    <span className='font-medium font-mono'>
+                      {order.contactPhone}
                     </span>
                   </div>
                 )}
@@ -339,6 +473,40 @@ export default function OrderVerificationPage() {
                     <span className='font-medium'>{order.notes}</span>
                   </div>
                 )}
+                <div className='pt-3 border-t border-green-200 space-y-2 text-sm'>
+                  {(() => {
+                    const grand = order.total + (order.deliveryFee || 0);
+                    const paid =
+                      order.accountingStatus === 'paid' &&
+                      (order.amountPaidGHS == null ||
+                        order.amountPaidGHS === undefined)
+                        ? grand
+                        : (order.amountPaidGHS ?? 0);
+                    const bal = Math.max(0, grand - paid);
+                    return (
+                      <>
+                        <div className='flex justify-between font-semibold'>
+                          <span>Order total</span>
+                          <span className='tabular-nums'>
+                            ₵{grand.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className='flex justify-between font-medium text-emerald-800'>
+                          <span>Paid (debit)</span>
+                          <span className='tabular-nums'>
+                            ₵{paid.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className='flex justify-between font-medium text-amber-900'>
+                          <span>Balance (credit)</span>
+                          <span className='tabular-nums'>
+                            ₵{bal.toFixed(2)}
+                          </span>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -422,6 +590,20 @@ export default function OrderVerificationPage() {
                         : 'Cash'}
                     </span>
                   </div>
+                  {order.paymentMethod === 'momo' && (
+                    <div className='rounded-md border border-violet-200 bg-violet-50/80 px-3 py-2 text-sm text-violet-950'>
+                      <p className='font-medium'>MoMo payment details</p>
+                      <p className='mt-1'>
+                        Send to <strong>{MOMO_DISPLAY_NAME}</strong>
+                      </p>
+                      <p>
+                        MoMo number:{' '}
+                        <span className='font-mono font-semibold'>
+                          {MOMO_PHONE}
+                        </span>
+                      </p>
+                    </div>
+                  )}
                   <div className='flex justify-between text-sm'>
                     <span className='text-muted-foreground'>Delivery</span>
                     <span className='font-medium'>
@@ -430,6 +612,16 @@ export default function OrderVerificationPage() {
                         : 'Store pickup'}
                     </span>
                   </div>
+                  {order.contactPhone && (
+                    <div className='text-sm'>
+                      <span className='text-muted-foreground'>
+                        Contact phone:{' '}
+                      </span>
+                      <span className='font-medium font-mono'>
+                        {order.contactPhone}
+                      </span>
+                    </div>
+                  )}
                   {order.deliveryAddress && (
                     <div className='text-sm'>
                       <span className='text-muted-foreground'>Address: </span>
@@ -550,64 +742,76 @@ export default function OrderVerificationPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
-              {displayItems.map((item) => (
-                <div
-                  key={item.id}
-                  className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 py-3 border-b last:border-0'
-                >
-                  <div className='flex-1'>
-                    <p className='font-medium'>{item.name}</p>
-                    <p className='text-sm text-muted-foreground'>
-                      ₵{item.price.toFixed(2)} per {item.unit}
-                    </p>
-                  </div>
-                  {isProformaReview ? (
-                    <div className='flex items-center gap-2'>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        className='h-8 w-8'
-                        onClick={() => bumpQty(item.id, -1)}
-                        aria-label='Decrease quantity'
-                      >
-                        <Minus className='h-4 w-4' />
-                      </Button>
-                      <span className='w-8 text-center font-medium tabular-nums'>
-                        {item.quantity}
-                      </span>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        className='h-8 w-8'
-                        onClick={() => bumpQty(item.id, 1)}
-                        aria-label='Increase quantity'
-                      >
-                        <Plus className='h-4 w-4' />
-                      </Button>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='icon'
-                        className='h-8 w-8 text-destructive'
-                        onClick={() => removeLine(item.id)}
-                        disabled={editableItems.length <= 1}
-                        aria-label='Remove line'
-                      >
-                        <Trash2 className='h-4 w-4' />
-                      </Button>
-                      <span className='font-bold sm:min-w-[4.5rem] text-right'>
-                        ₵{(item.price * item.quantity).toFixed(2)}
-                      </span>
+              {displayItems.map((item) => {
+                const p = stockByProductId.get(item.id);
+                const lineMax = p
+                  ? maxOrderLineQty(p, item.quantity)
+                  : item.quantity;
+                return (
+                  <div
+                    key={item.id}
+                    className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 py-3 border-b last:border-0'
+                  >
+                    <div className='flex-1'>
+                      <p className='font-medium'>{item.name}</p>
+                      <p className='text-sm text-muted-foreground'>
+                        ₵{item.price.toFixed(2)} per {item.unit}
+                      </p>
+                      {isProformaReview && order.stockReserved && p && (
+                        <p className='text-xs text-amber-800 mt-1'>
+                          Max for this order: {lineMax} (available stock)
+                        </p>
+                      )}
                     </div>
-                  ) : (
-                    <p className='font-bold'>
-                      ₵{(item.price * item.quantity).toFixed(2)}
-                    </p>
-                  )}
-                </div>
-              ))}
+                    {isProformaReview ? (
+                      <div className='flex items-center gap-2 flex-wrap'>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          className='h-8 w-8'
+                          onClick={() => bumpQty(item.id, -1)}
+                          aria-label='Decrease quantity'
+                        >
+                          <Minus className='h-4 w-4' />
+                        </Button>
+                        <span className='w-8 text-center font-medium tabular-nums'>
+                          {item.quantity}
+                        </span>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          className='h-8 w-8'
+                          onClick={() => bumpQty(item.id, 1)}
+                          disabled={item.quantity >= lineMax}
+                          aria-label='Increase quantity'
+                        >
+                          <Plus className='h-4 w-4' />
+                        </Button>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='icon'
+                          className='h-8 w-8 text-destructive'
+                          onClick={() => removeLine(item.id)}
+                          disabled={editableItems.length <= 1}
+                          aria-label='Remove line'
+                        >
+                          <Trash2 className='h-4 w-4' />
+                        </Button>
+                        <span className='font-bold sm:min-w-[4.5rem] text-right'>
+                          ₵{(item.price * item.quantity).toFixed(2)}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className='font-bold'>
+                        ₵{(item.price * item.quantity).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
               <Separator />
               <div className='flex justify-between font-bold text-lg'>
                 <span>Subtotal</span>
@@ -683,6 +887,20 @@ export default function OrderVerificationPage() {
                   rows={2}
                 />
               </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor='contact-phone'>
+                  Contact phone (optional)
+                </Label>
+                <Input
+                  id='contact-phone'
+                  type='tel'
+                  placeholder='Number to reach you when items are ready'
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  autoComplete='tel'
+                />
+              </div>
             </CardContent>
           </Card>
 
@@ -690,7 +908,7 @@ export default function OrderVerificationPage() {
             <CardHeader>
               <CardTitle>Payment method</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className='space-y-4'>
               <RadioGroup
                 value={paymentMethod}
                 onValueChange={(value: 'momo' | 'cash') =>
@@ -722,6 +940,18 @@ export default function OrderVerificationPage() {
                   </Label>
                 </div>
               </RadioGroup>
+              {paymentMethod === 'momo' && (
+                <div className='rounded-md border border-violet-200 bg-violet-50/80 px-3 py-2 text-sm text-violet-950'>
+                  <p className='font-medium'>Send payment to</p>
+                  <p className='mt-1'>
+                    <strong>{MOMO_DISPLAY_NAME}</strong>
+                  </p>
+                  <p>
+                    MoMo number:{' '}
+                    <span className='font-mono font-semibold'>{MOMO_PHONE}</span>
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

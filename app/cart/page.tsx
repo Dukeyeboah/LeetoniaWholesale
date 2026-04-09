@@ -5,6 +5,8 @@ import { useCart } from '@/hooks/use-cart';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
@@ -14,7 +16,6 @@ import {
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ArrowRight, Trash2, ShoppingBag } from 'lucide-react';
-import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import type { Order } from '@/types';
@@ -29,6 +30,10 @@ import {
   placeOrderWithPharmacyLimit,
 } from '@/lib/pharmacy-limits';
 import { notifyAdminsNewOrderRequest } from '@/lib/order-workflow';
+import {
+  InsufficientStockError,
+  placeAdminOrderWithReservation,
+} from '@/lib/stock-reservation';
 
 export default function CartPage() {
   const {
@@ -43,6 +48,7 @@ export default function CartPage() {
   const showPrice = isAdmin || viewMode === 'admin';
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactPhone, setContactPhone] = useState('');
 
   const handleCheckout = async () => {
     if (!user) {
@@ -76,6 +82,7 @@ export default function CartPage() {
 
       const lineItems = cart.map((item) => ({ ...item }));
 
+      const phone = contactPhone.trim();
       const newOrder: Omit<Order, 'id'> = {
         userId: user.id,
         userName: user.name || user.email,
@@ -88,6 +95,7 @@ export default function CartPage() {
         total: calculatedTotal,
         createdAt: Date.now(),
         updatedAt: Date.now(),
+        ...(phone ? { contactPhone: phone } : {}),
       };
 
       if (user.role === 'client') {
@@ -118,6 +126,11 @@ export default function CartPage() {
             setIsSubmitting(false);
             return;
           }
+          if (err instanceof InsufficientStockError) {
+            toast.error(err.message);
+            setIsSubmitting(false);
+            return;
+          }
           throw err;
         }
       } else {
@@ -125,10 +138,10 @@ export default function CartPage() {
         const orderPrefix = 'Leetonia';
         const displayOrderId = buildDisplayOrderId(orderPrefix, suffix);
         const orderId = buildFirestoreOrderId(orderPrefix, suffix);
-        await setDoc(doc(db, 'orders', orderId), {
+        await placeAdminOrderWithReservation(db, orderId, {
           ...newOrder,
           displayOrderId,
-        });
+        }, lineItems);
         await notifyAdminsNewOrderRequest(db, {
           id: orderId,
           displayOrderId,
@@ -144,7 +157,11 @@ export default function CartPage() {
       router.push('/orders');
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error('Failed to place order. Please try again.');
+      if (error instanceof InsufficientStockError) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to place order. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -300,6 +317,20 @@ export default function CartPage() {
                   Pricing will be confirmed after pharmacy review
                 </p>
               )}
+
+              <div className='space-y-2 pt-2'>
+                <Label htmlFor='cart-contact-phone' className='text-muted-foreground'>
+                  Contact phone (optional)
+                </Label>
+                <Input
+                  id='cart-contact-phone'
+                  type='tel'
+                  placeholder='e.g. 0244… — we may call when your order is ready'
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  autoComplete='tel'
+                />
+              </div>
             </CardContent>
             <CardFooter>
               <Button

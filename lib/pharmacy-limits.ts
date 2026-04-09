@@ -16,6 +16,7 @@ import {
   currentMonthKey,
   randomOrderSuffix,
 } from '@/lib/pharmacies';
+import { transactionReserveLines } from '@/lib/stock-reservation';
 
 export class PharmacyLimitError extends Error {
   constructor(message: string) {
@@ -131,12 +132,19 @@ export async function placeOrderWithPharmacyLimit(
         { merge: true }
       );
 
+      await transactionReserveLines(
+        db,
+        transaction,
+        orderPayload.items.map((i) => ({ productId: i.id, qty: i.quantity }))
+      );
+
       const oRef = doc(db, 'orders', orderId);
       transaction.set(oRef, {
         ...orderPayload,
         pharmacyId,
         pharmacyName: pharmacyDisplayName,
         displayOrderId,
+        stockReserved: true,
       });
     });
   } catch (e: unknown) {
