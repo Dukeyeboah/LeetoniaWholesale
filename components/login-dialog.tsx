@@ -27,6 +27,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { User } from '@/types';
 import { AdminPasskeyDialog } from '@/components/admin-passkey-dialog';
 import { isAdminEmail } from '@/lib/admin-config';
+import { omitUndefinedFields } from '@/lib/firestore-sanitize';
+import { inferSignInProvider } from '@/lib/auth-providers';
 
 interface LoginDialogProps {
   open: boolean;
@@ -80,17 +82,24 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
           phone: phoneNumber || firebaseUser.phoneNumber || '',
           role: shouldBeAdmin ? 'admin' : 'client',
           name: firebaseUser.displayName || '',
-          photoURL: firebaseUser.photoURL || undefined,
+          signInProvider: inferSignInProvider(firebaseUser),
+          ...(firebaseUser.photoURL ? { photoURL: firebaseUser.photoURL } : {}),
           createdAt: Date.now(),
         };
         if (shouldBeAdmin) {
           const userWithoutRole = { ...newUser, role: 'client' as const };
-          await setDoc(userDocRef, userWithoutRole);
+          await setDoc(
+            userDocRef,
+            omitUndefinedFields(userWithoutRole as unknown as Record<string, unknown>)
+          );
           setPendingUser(firebaseUser);
           setShowAdminPasskeyDialog(true);
           return;
         }
-        await setDoc(userDocRef, newUser);
+        await setDoc(
+          userDocRef,
+          omitUndefinedFields(newUser as unknown as Record<string, unknown>)
+        );
         onOpenChange(false);
         router.refresh();
       } else {

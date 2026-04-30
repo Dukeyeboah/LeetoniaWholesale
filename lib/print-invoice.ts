@@ -1,4 +1,6 @@
 import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import type { Order } from '@/types';
 import { formatOrderLabel } from '@/lib/order-display';
 
@@ -6,9 +8,10 @@ import { formatOrderLabel } from '@/lib/order-display';
 export const MOMO_DISPLAY_NAME = 'Leetonia Wholesale';
 export const MOMO_PHONE = '0244763235';
 
-export function printOrderInvoice(order: Order): void {
+type DocWithAutoTable = jsPDF & { lastAutoTable?: { finalY: number } };
+
+function buildInvoicePdf(order: Order): jsPDF {
   const ordLabel = formatOrderLabel(order);
-  const fileSlug = ordLabel.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 48);
   const grand = order.total + (order.deliveryFee || 0);
   const paid =
     order.accountingStatus === 'paid' &&
@@ -17,141 +20,112 @@ export function printOrderInvoice(order: Order): void {
       : (order.amountPaidGHS ?? 0);
   const balance = Math.max(0, grand - paid);
 
-  const invoiceContent = `
-INVOICE
-Leetonia Wholesale
+  const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
 
-Invoice #: ${ordLabel}
-Date: ${format(new Date(order.createdAt), 'MMMM d, yyyy')}
-Customer: ${order.userName || order.userEmail}
-${order.contactPhone ? `Contact phone: ${order.contactPhone}` : ''}
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.text('INVOICE', pageW / 2, 16, { align: 'center' });
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Leetonia Wholesale', pageW / 2, 24, { align: 'center' });
 
-Items:
-${order.items
-  .map(
-    (item) =>
-      `${item.quantity}x ${item.name} @ ₵${item.price.toFixed(2)} = ₵${(item.quantity * item.price).toFixed(2)}`
-  )
-  .join('\n')}
-
-Subtotal: ₵${order.total.toFixed(2)}
-${order.deliveryFee ? `Delivery Fee: ₵${order.deliveryFee.toFixed(2)}` : ''}
-Total: ₵${grand.toFixed(2)}
-Paid: ₵${paid.toFixed(2)}
-Balance: ₵${balance.toFixed(2)}
-
-Payment Method: ${order.paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash'}
-${order.paymentMethod === 'momo' ? `Pay to: ${MOMO_DISPLAY_NAME} · ${MOMO_PHONE}` : ''}
-${order.deliveryOption === 'delivery' ? `Delivery Address: ${order.deliveryAddress || 'N/A'}` : 'Pickup: Store Pickup'}
-
-Status: ${order.status.replace(/_/g, ' ').toUpperCase()}
-
-Thank you for your business!
-  `.trim();
-
-  const blob = new Blob([invoiceContent], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `invoice-${fileSlug}-${format(new Date(), 'yyyy-MM-dd')}.txt`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    printWindow.document.write(`
-        <html>
-          <head>
-            <title>Invoice ${ordLabel}</title>
-            <style>
-              body { font-family: monospace; padding: 40px; }
-              h1 { text-align: center; }
-              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-              th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-              .total { font-weight: bold; font-size: 1.2em; }
-            </style>
-          </head>
-          <body>
-            <h1>INVOICE</h1>
-            <h2>Leetonia Wholesale</h2>
-            <p><strong>Invoice #:</strong> ${ordLabel}</p>
-            <p><strong>Date:</strong> ${format(new Date(order.createdAt), 'MMMM d, yyyy')}</p>
-            <p><strong>Customer:</strong> ${order.userName || order.userEmail}</p>
-            ${order.contactPhone ? `<p><strong>Contact phone:</strong> ${order.contactPhone}</p>` : ''}
-            <table>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${order.items
-                  .map(
-                    (item) => `
-                  <tr>
-                    <td>${item.name}</td>
-                    <td>${item.quantity}</td>
-                    <td>₵${item.price.toFixed(2)}</td>
-                    <td>₵${(item.quantity * item.price).toFixed(2)}</td>
-                  </tr>
-                `
-                  )
-                  .join('')}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="3"><strong>Subtotal:</strong></td>
-                  <td><strong>₵${order.total.toFixed(2)}</strong></td>
-                </tr>
-                ${
-                  order.deliveryFee
-                    ? `
-                <tr>
-                  <td colspan="3">Delivery Fee:</td>
-                  <td>₵${order.deliveryFee.toFixed(2)}</td>
-                </tr>
-                `
-                    : ''
-                }
-                <tr class="total">
-                  <td colspan="3"><strong>Total:</strong></td>
-                  <td><strong>₵${grand.toFixed(2)}</strong></td>
-                </tr>
-                <tr>
-                  <td colspan="3">Paid:</td>
-                  <td>₵${paid.toFixed(2)}</td>
-                </tr>
-                <tr>
-                  <td colspan="3">Balance:</td>
-                  <td>₵${balance.toFixed(2)}</td>
-                </tr>
-              </tfoot>
-            </table>
-            <p><strong>Payment Method:</strong> ${order.paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash'}</p>
-            ${
-              order.paymentMethod === 'momo'
-                ? `<p><strong>MoMo:</strong> ${MOMO_DISPLAY_NAME} · ${MOMO_PHONE}</p>`
-                : ''
-            }
-            ${
-              order.deliveryOption === 'delivery'
-                ? `<p><strong>Delivery Address:</strong> ${order.deliveryAddress || 'N/A'}</p>`
-                : '<p><strong>Pickup:</strong> Store Pickup</p>'
-            }
-            <p><strong>Status:</strong> ${order.status.replace(/_/g, ' ').toUpperCase()}</p>
-            <p style="margin-top: 40px; text-align: center;">Thank you for your business!</p>
-          </body>
-        </html>
-      `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-    }, 250);
+  let y = 34;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Invoice #: ${ordLabel}`, 14, y);
+  y += 6;
+  doc.text(
+    `Date: ${format(new Date(order.createdAt), 'MMMM d, yyyy')}`,
+    14,
+    y
+  );
+  y += 6;
+  const customerLabel =
+    order.userName || order.userEmail || order.contactPhone || 'Customer';
+  doc.text(`Customer: ${customerLabel}`, 14, y);
+  if (order.contactPhone) {
+    y += 6;
+    doc.text(`Contact phone: ${order.contactPhone}`, 14, y);
   }
+
+  autoTable(doc, {
+    startY: y + 6,
+    head: [['Item', 'Qty', 'Price', 'Total']],
+    body: order.items.map((item) => [
+      item.name,
+      String(item.quantity),
+      `GHS ${item.price.toFixed(2)}`,
+      `GHS ${(item.quantity * item.price).toFixed(2)}`,
+    ]),
+    theme: 'striped',
+    headStyles: { fillColor: [22, 101, 52] },
+    styles: { fontSize: 9, cellPadding: 3 },
+    columnStyles: {
+      0: { cellWidth: 'auto' },
+    },
+  });
+
+  const finalY =
+    (doc as DocWithAutoTable).lastAutoTable?.finalY != null
+      ? (doc as DocWithAutoTable).lastAutoTable!.finalY + 8
+      : y + 40;
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  let ty = finalY;
+  doc.text(`Subtotal: GHS ${order.total.toFixed(2)}`, 14, ty);
+  ty += 6;
+  if (order.deliveryFee) {
+    doc.text(`Delivery fee: GHS ${order.deliveryFee.toFixed(2)}`, 14, ty);
+    ty += 6;
+  }
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Total: GHS ${grand.toFixed(2)}`, 14, ty);
+  doc.setFont('helvetica', 'normal');
+  ty += 6;
+  doc.text(`Paid: GHS ${paid.toFixed(2)}`, 14, ty);
+  ty += 6;
+  doc.text(`Balance: GHS ${balance.toFixed(2)}`, 14, ty);
+  ty += 8;
+
+  doc.text(
+    `Payment: ${order.paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash'}`,
+    14,
+    ty
+  );
+  if (order.paymentMethod === 'momo') {
+    ty += 6;
+    doc.text(`MoMo: ${MOMO_DISPLAY_NAME} · ${MOMO_PHONE}`, 14, ty);
+  }
+  ty += 6;
+
+  if (order.deliveryOption === 'delivery') {
+    const addr = order.deliveryAddress || 'N/A';
+    const lines = doc.splitTextToSize(`Delivery address: ${addr}`, pageW - 28);
+    doc.text(lines, 14, ty);
+    ty += lines.length * 5 + 2;
+  } else {
+    doc.text('Pickup: Store pickup', 14, ty);
+    ty += 6;
+  }
+
+  doc.text(
+    `Status: ${order.status.replace(/_/g, ' ').toUpperCase()}`,
+    14,
+    ty
+  );
+  ty += 12;
+  doc.setFont('helvetica', 'italic');
+  doc.text('Thank you for your business!', pageW / 2, ty, { align: 'center' });
+
+  return doc;
+}
+
+/** Builds a PDF invoice and triggers download (filename ends in `.pdf`). */
+export function printOrderInvoice(order: Order): void {
+  const ordLabel = formatOrderLabel(order);
+  const fileSlug = ordLabel.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 48);
+  const doc = buildInvoicePdf(order);
+  doc.save(`invoice-${fileSlug}-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
 }

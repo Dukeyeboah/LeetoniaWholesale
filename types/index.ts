@@ -13,6 +13,8 @@ export interface User {
   name?: string;
   phone?: string;
   photoURL?: string; // Profile image URL from Google/Gmail
+  /** Primary auth method used when the account was created (phone / password email / Google). */
+  signInProvider?: 'phone' | 'email' | 'google';
   createdAt: number;
   /** Workplace title for pharmacy reps (e.g. Pharmacist, Owner). */
   jobRole?: string;

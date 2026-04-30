@@ -10,7 +10,6 @@ import {
   GoogleAuthProvider,
   signInWithPhoneNumber,
   RecaptchaVerifier,
-  type UserCredential,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -31,7 +30,17 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { User } from '@/types';
 import { AdminPasskeyDialog } from '@/components/admin-passkey-dialog';
 import { isAdminEmail } from '@/lib/admin-config';
+import { omitUndefinedFields } from '@/lib/firestore-sanitize';
+import { normalizeGhanaPhoneToE164, isValidGhanaE164 } from '@/lib/ghana-phone';
+import { inferSignInProvider } from '@/lib/auth-providers';
 import { useState, useEffect } from 'react';
+
+declare global {
+  interface Window {
+    recaptchaVerifier?: RecaptchaVerifier;
+    recaptchaWidgetId?: number;
+  }
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -50,7 +59,10 @@ export default function LoginPage() {
   const setupRecaptcha = () => {
     if (typeof window === 'undefined' || !auth) return null;
 
-    // Clear any existing recaptcha
+    // Reuse a single verifier instance to avoid:
+    // "reCAPTCHA has already been rendered in this element"
+    if (window.recaptchaVerifier) return window.recaptchaVerifier;
+
     const recaptchaContainer = document.getElementById('recaptcha-container');
     if (recaptchaContainer) {
       recaptchaContainer.innerHTML = '';
@@ -60,7 +72,8 @@ export default function LoginPage() {
       auth,
       'recaptcha-container',
       {
-        size: 'invisible',
+        // Visible tends to be more reliable in dev (fewer silent timeouts).
+        size: 'normal',
         callback: () => {
           // reCAPTCHA solved
         },
@@ -70,8 +83,49 @@ export default function LoginPage() {
       }
     );
 
+    window.recaptchaVerifier = recaptchaVerifier;
+    // Proactively render so the user completes the challenge before SMS send.
+    // This avoids `auth/invalid-app-credential` that can happen when the widget
+    // hasn't rendered or the token is stale.
+    void recaptchaVerifier
+      .render()
+      .then((id) => {
+        window.recaptchaWidgetId = id;
+      })
+      .catch(() => {
+        // ignore; Firebase will attempt fallback flows
+      });
     return recaptchaVerifier;
   };
+
+  const resetPhoneFlow = () => {
+    setConfirmationResult(null);
+    setVerificationCode('');
+    if (typeof window !== 'undefined' && window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+      } catch {
+        // ignore
+      }
+      window.recaptchaVerifier = undefined;
+      window.recaptchaWidgetId = undefined;
+    }
+    const recaptchaContainer = document.getElementById('recaptcha-container');
+    if (recaptchaContainer) recaptchaContainer.innerHTML = '';
+  };
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch {
+          // ignore
+        }
+        window.recaptchaVerifier = undefined;
+      }
+    };
+  }, []);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,19 +209,10 @@ export default function LoginPage() {
     }
 
     // Format phone number for Ghana (+233)
-    let formattedPhone = phone.trim();
-    if (!formattedPhone.startsWith('+')) {
-      if (formattedPhone.startsWith('0')) {
-        formattedPhone = '+233' + formattedPhone.substring(1);
-      } else if (formattedPhone.startsWith('233')) {
-        formattedPhone = '+' + formattedPhone;
-      } else {
-        formattedPhone = '+233' + formattedPhone;
-      }
-    }
+    const formattedPhone = normalizeGhanaPhoneToE164(phone);
 
     // Validate Ghana phone number
-    if (!formattedPhone.match(/^\+233[0-9]{9}$/)) {
+    if (!isValidGhanaE164(formattedPhone)) {
       setError(
         'Please enter a valid Ghana phone number (e.g., 0244123456 or +233244123456)'
       );
@@ -176,11 +221,20 @@ export default function LoginPage() {
     }
 
     try {
+      // Ensure we start clean (avoid reusing an old rendered widget)
+      resetPhoneFlow();
       const recaptchaVerifier = setupRecaptcha();
       if (!recaptchaVerifier) {
         setError('Failed to initialize reCAPTCHA. Please refresh the page.');
         setPhoneLoading(false);
         return;
+      }
+
+      // Ensure the widget is rendered before attempting SMS send.
+      try {
+        await recaptchaVerifier.render();
+      } catch {
+        // ignore; signInWithPhoneNumber will attempt to continue
       }
 
       const confirmation = await signInWithPhoneNumber(
@@ -192,6 +246,10 @@ export default function LoginPage() {
       setError('');
     } catch (err: any) {
       let errorMessage = 'Failed to send verification code.';
+      if (err.code === 'auth/invalid-app-credential') {
+        errorMessage =
+          'reCAPTCHA verification failed for this browser/domain. Check Firebase Auth → Settings → Authorized domains, disable ad blockers, and try again.';
+      }
       if (err.code === 'auth/invalid-phone-number') {
         errorMessage = 'Invalid phone number format.';
       } else if (err.code === 'auth/too-many-requests') {
@@ -218,7 +276,7 @@ export default function LoginPage() {
 
     try {
       const userCredential = await confirmationResult.confirm(verificationCode);
-      await ensureUserProfile(userCredential.user, phone);
+      await ensureUserProfile(userCredential.user);
     } catch (err: any) {
       let errorMessage = 'Invalid verification code. Please try again.';
       if (err.code === 'auth/invalid-verification-code') {
@@ -235,13 +293,14 @@ export default function LoginPage() {
   };
 
   // Ensure user profile exists in Firestore
-  const ensureUserProfile = async (firebaseUser: any, phoneNumber?: string) => {
+  const ensureUserProfile = async (firebaseUser: any) => {
     if (!db) return;
 
     try {
       const userDocRef = doc(db, 'users', firebaseUser.uid);
       const userDoc = await getDoc(userDocRef);
       const email = firebaseUser.email || '';
+      const phoneE164 = firebaseUser.phoneNumber || '';
 
       if (!userDoc.exists()) {
         // Check if email is in admin whitelist
@@ -251,24 +310,31 @@ export default function LoginPage() {
         const newUser: User = {
           id: firebaseUser.uid,
           email: email,
-          phone: phoneNumber || firebaseUser.phoneNumber || '',
+          phone: phoneE164,
           role: shouldBeAdmin ? 'admin' : 'client',
-          name: firebaseUser.displayName || '',
-          photoURL: firebaseUser.photoURL || undefined,
+          name: firebaseUser.displayName || phoneE164 || '',
+          signInProvider: inferSignInProvider(firebaseUser),
+          ...(firebaseUser.photoURL ? { photoURL: firebaseUser.photoURL } : {}),
           createdAt: Date.now(),
         };
 
         // If admin email, don't set role yet - require passkey
         if (shouldBeAdmin) {
           const userWithoutRole = { ...newUser, role: 'client' as const };
-          await setDoc(userDocRef, userWithoutRole);
+          await setDoc(
+            userDocRef,
+            omitUndefinedFields(userWithoutRole as unknown as Record<string, unknown>)
+          );
           // Show passkey dialog
           setPendingUser(firebaseUser);
           setShowAdminPasskeyDialog(true);
           return;
         }
 
-        await setDoc(userDocRef, newUser);
+        await setDoc(
+          userDocRef,
+          omitUndefinedFields(newUser as unknown as Record<string, unknown>)
+        );
         router.push('/inventory');
       } else {
         const userData = userDoc.data() as User;
@@ -280,9 +346,9 @@ export default function LoginPage() {
           return;
         }
 
-        // Update phone if provided and not already set
-        if (phoneNumber && !userData.phone) {
-          await setDoc(userDocRef, { phone: phoneNumber }, { merge: true });
+        // Sync phone from Firebase (e.g. first phone sign-in)
+        if (phoneE164 && !userData.phone) {
+          await setDoc(userDocRef, { phone: phoneE164 }, { merge: true });
         }
 
         router.push('/inventory');
@@ -389,9 +455,15 @@ export default function LoginPage() {
                     <Input
                       id='phone'
                       type='tel'
-                      placeholder='0244123456 or +233244123456'
+                      placeholder='+233243569981'
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
+                      onBlur={() => {
+                        const normalized = normalizeGhanaPhoneToE164(phone);
+                        if (normalized && normalized !== phone) {
+                          setPhone(normalized);
+                        }
+                      }}
                       required
                       className='bg-background'
                     />
@@ -440,8 +512,7 @@ export default function LoginPage() {
                     variant='outline'
                     className='w-full'
                     onClick={() => {
-                      setConfirmationResult(null);
-                      setVerificationCode('');
+                      resetPhoneFlow();
                     }}
                   >
                     Use Different Number

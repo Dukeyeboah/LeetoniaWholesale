@@ -3,12 +3,14 @@
 import type React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import type { User } from '@/types';
 import { useRouter } from 'next/navigation';
 import { isAdminEmail } from '@/lib/admin-config';
+import { omitUndefinedFields } from '@/lib/firestore-sanitize';
+import { inferSignInProvider } from '@/lib/auth-providers';
 
 interface AuthContextType {
   user: User | null;
@@ -102,7 +104,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
-            const userData = userDoc.data() as User;
+            let userData = userDoc.data() as User;
+            if (!userData.signInProvider) {
+              const inferred = inferSignInProvider(firebaseUser);
+              try {
+                await updateDoc(userDocRef, { signInProvider: inferred });
+                userData = { ...userData, signInProvider: inferred };
+              } catch (e) {
+                console.error('Backfill signInProvider failed', e);
+              }
+            }
             applyFirebaseUser(firebaseUser, userData);
           } else {
             // Check if email is in admin whitelist
@@ -116,13 +127,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               role: shouldBeAdmin ? 'admin' : 'client',
               name: firebaseUser.displayName || '',
               phone: firebaseUser.phoneNumber || '',
-              photoURL: firebaseUser.photoURL || undefined,
+              signInProvider: inferSignInProvider(firebaseUser),
+              ...(firebaseUser.photoURL ? { photoURL: firebaseUser.photoURL } : {}),
               createdAt: Date.now(),
             };
 
             // Try to save to Firestore
             try {
-              await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+              await setDoc(
+                doc(db, 'users', firebaseUser.uid),
+                omitUndefinedFields(newUser as unknown as Record<string, unknown>)
+              );
             } catch (error) {
               console.error('Error creating user profile:', error);
             }

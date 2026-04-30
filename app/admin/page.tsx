@@ -421,7 +421,7 @@ export default function AdminDashboard() {
 
   const generateInvoice = (order: Order) => {
     printOrderInvoice(order);
-    toast.success('Invoice generated and download started');
+    toast.success('Invoice PDF download started');
   };
 
   const saveDirectPaidAmount = async () => {
@@ -620,13 +620,16 @@ export default function AdminDashboard() {
       return;
     }
     try {
+      const reason = returnForm.reason.trim();
+      const orderId = returnForm.orderId.trim();
+      const notes = returnForm.notes.trim();
       await addDoc(collection(db, 'returns'), {
         productId: p.id,
         productName: p.name,
         quantity: returnForm.quantity,
-        reason: returnForm.reason.trim() || undefined,
-        orderId: returnForm.orderId.trim() || undefined,
-        notes: returnForm.notes.trim() || undefined,
+        ...(reason ? { reason } : {}),
+        ...(orderId ? { orderId } : {}),
+        ...(notes ? { notes } : {}),
         status: 'pending',
         createdAt: Date.now(),
       });

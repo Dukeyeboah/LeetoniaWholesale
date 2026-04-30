@@ -14,6 +14,7 @@ import {
   MoreHorizontal,
   LogOut,
   Bell,
+  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
@@ -180,6 +181,7 @@ export function AppSidebar() {
                       <AvatarFallback className='bg-secondary text-primary font-bold'>
                         {user.name?.charAt(0).toUpperCase() ||
                           user.email?.charAt(0).toUpperCase() ||
+                          user.phone?.replace(/\D/g, '').slice(-1) ||
                           'U'}
                       </AvatarFallback>
                     </Avatar>
@@ -187,6 +189,16 @@ export function AppSidebar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end'>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href='/profile'
+                      className='flex cursor-pointer items-center'
+                    >
+                      <User className='mr-2 h-4 w-4' />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => logout()}
                     variant='destructive'
@@ -206,6 +218,7 @@ export function AppSidebar() {
                   <AvatarFallback className='bg-secondary text-primary font-bold'>
                     {user.name?.charAt(0).toUpperCase() ||
                       user.email?.charAt(0).toUpperCase() ||
+                      user.phone?.replace(/\D/g, '').slice(-1) ||
                       'U'}
                   </AvatarFallback>
                 </Avatar>
@@ -214,7 +227,7 @@ export function AppSidebar() {
                     {user.name || 'User'}
                   </p>
                   <p className='truncate text-xs text-muted-foreground'>
-                    {user.email}
+                    {user.email || user.phone || '—'}
                   </p>
                   {user.role === 'client' && user.pharmacyName && (
                     <p className='truncate text-xs text-primary/90 mt-0.5'>
@@ -230,6 +243,16 @@ export function AppSidebar() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href='/profile'
+                        className='flex cursor-pointer items-center'
+                      >
+                        <User className='mr-2 h-4 w-4' />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => logout()}
                       variant='destructive'
