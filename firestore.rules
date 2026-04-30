@@ -38,7 +38,6 @@ service cloud.firestore {
     function staffHasPermission(permission) {
       return isPrivilegedAdmin() || (isStaff() && getStaffPermissions() != null && getStaffPermissions()[permission] == true);
     }
-
     function isKnownSeedPharmacy(id) {
       return id in ['amanfrom', 'avalon', 'caads', 'carehub', 'dayben', 'diagnopharma', 'dixxons', 'empat', 'grit', 'interpharma'];
     }
