@@ -30,6 +30,11 @@ pnpm-debug.log*
 .env*.local
 .env
 
+# Firebase Admin SDK JSON (sync scripts) — never commit
+secrets/*
+!secrets/.gitkeep
+**/firebase-adminsdk*.json
+
 # vercel
 .vercel
 

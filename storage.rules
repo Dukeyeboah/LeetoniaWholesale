@@ -7,10 +7,12 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    // Helper function to check if user is admin
+    // Admin or super_admin (matches Firestore `isPrivilegedAdmin`)
     function isAdmin() {
-      return isAuthenticated() && 
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return isAuthenticated() && (
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'super_admin'
+      );
     }
 
     // Helper function to check if user is staff with inventory management permission

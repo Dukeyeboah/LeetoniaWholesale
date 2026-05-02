@@ -1,0 +1,8597 @@
+[
+  {
+    "client": "CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER ( PK)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER jj",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER( DARKO)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "JENICH PHARMACY",
+    "location": "ACCRA",
+    "phone": null
+  },
+  {
+    "client": "KEZWELL PHARMACY",
+    "location": "ADENTA",
+    "phone": "0246317584"
+  },
+  {
+    "client": "VIDA-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ALPHA AND OMEGA HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CARE & SOCIAL POLYCLINIC",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER JERRY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DIANA",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "EAST ORANGE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ELFEY OVER THE COUNTER",
+    "location": "OYIBI",
+    "phone": "0247912443"
+  },
+  {
+    "client": "ERIC KYEI CHEMICAL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "GODMYETH CHEMICAL SHOP",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "JULIA SABI ABABIO CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LENUS PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MUKHTAR CHEMICAL",
+    "location": "KANDA-NAFIU",
+    "phone": "0244620344"
+  },
+  {
+    "client": "NAA SHIKA CHEMICAL",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "OFORI ATTA CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OFORI ATTAH CHEMICAL SHOP",
+    "location": "ST.PETERS",
+    "phone": "0240574123"
+  },
+  {
+    "client": "RICHARD OCRAN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ROYAL CARE PHARMACY-TUTU",
+    "location": "TUTU",
+    "phone": "0240714641"
+  },
+  {
+    "client": "STABLE PLUS PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "TOP HEART CLINIC",
+    "location": "BAWALESHIE",
+    "phone": "0244364658"
+  },
+  {
+    "client": "VICENTIA CHEMICAL",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "3 CARE PHARMACY",
+    "location": "BAWULESHIE",
+    "phone": null
+  },
+  {
+    "client": "3K CHEMICAL",
+    "location": "TEIMAN",
+    "phone": null
+  },
+  {
+    "client": "3K CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "3K CHEMICAL SHOP",
+    "location": "TEIMAN",
+    "phone": null
+  },
+  {
+    "client": "3K OVER THE COUNTER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "3K OVER THE COUNTER",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "3K OVER THE COUNTER SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "3K PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "3K PHARMACY",
+    "location": "TEIMAN",
+    "phone": null
+  },
+  {
+    "client": "3KB JEWELRY SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "3RD GATE PHARMACY",
+    "location": "3RD-GATE",
+    "phone": null
+  },
+  {
+    "client": "3RD GATE PHARMACY",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "3RD GATE PHARMACY",
+    "location": "ASHALEY-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "3RD GATE PHARMACY",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "72 PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "72ND PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "72ND PHARMACY",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "72ND PHARMACY",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "AAYALOLO PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AAYALOLO PHARMACY",
+    "location": "AGBOGBLOSHI",
+    "phone": null
+  },
+  {
+    "client": "ABBY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ABBY PHARMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ABBY PHARMA",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ABBY PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ABBYPHARM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ABBYPHARMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ABBYPHARMA",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ABBYPHARMA LTD",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ABBYPHARMA LTD",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ABBYPHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ABIGAIL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ABRAHAM KWASI KLOBODU CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ABURI-MAMPONG OUTREACH",
+    "location": null,
+    "phone": "0560812857"
+  },
+  {
+    "client": "ABYMIC CHEMICALS",
+    "location": "KANTAMANSO",
+    "phone": null
+  },
+  {
+    "client": "ADDPHARMA",
+    "location": "SPINTEX",
+    "phone": null
+  },
+  {
+    "client": "ADE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ADELAIDE NARTEY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ADENTA PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "ADNIAD PHARMACY",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "ADORE GHEMICAL",
+    "location": "SAMANPUOM",
+    "phone": null
+  },
+  {
+    "client": "ADUSA PHARMACY",
+    "location": "BUBUASHIE",
+    "phone": null
+  },
+  {
+    "client": "ADUSAL PHARMACY",
+    "location": "BUBUASHIE",
+    "phone": null
+  },
+  {
+    "client": "ADUSAL PHARMACY",
+    "location": "BUBUASHIEVERM",
+    "phone": null
+  },
+  {
+    "client": "ADUSAL PHARMACY",
+    "location": "BUBUASHIE",
+    "phone": null
+  },
+  {
+    "client": "AFIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AFRAKOMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AGNES BOATENG",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AGYEMANG JOSEPH KWESI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AID CHEMIST",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "AID CHEMIST",
+    "location": "FADAMA",
+    "phone": null
+  },
+  {
+    "client": "AID CHEMIST",
+    "location": "K.G",
+    "phone": null
+  },
+  {
+    "client": "AID CHEMIST",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "AID CHEMIST",
+    "location": "MADINA-ZONGO",
+    "phone": null
+  },
+  {
+    "client": "AID CHEMIST",
+    "location": "OYARIFA",
+    "phone": null
+  },
+  {
+    "client": "AID CHEMIST",
+    "location": "SOWUTUOM",
+    "phone": null
+  },
+  {
+    "client": "AID-CHEMIST",
+    "location": "RAWLINGS",
+    "phone": null
+  },
+  {
+    "client": "AID-CHEMIST",
+    "location": "RITZ",
+    "phone": null
+  },
+  {
+    "client": "AIDE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST",
+    "location": "ATOMIC",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST",
+    "location": "MADINA-RC",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST",
+    "location": "MATAHIKO",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST",
+    "location": "RAWLINGS",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST",
+    "location": "SOWUTUOM",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST ADENTA",
+    "location": "ADENTA-BRANCH",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST S RC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMIST-ZONGO",
+    "location": "ZONGO-JUNCTION",
+    "phone": "0507072383"
+  },
+  {
+    "client": "AIDE CHEMISTS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMISTS",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMISTS",
+    "location": "RAWLINGS",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMISTS RC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMISTS RC",
+    "location": "RAWLINGS",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMISTS-RC",
+    "location": "RAWLINGS",
+    "phone": null
+  },
+  {
+    "client": "AIDE CHEMISTS-RC",
+    "location": "RAWLINGS",
+    "phone": "0507072383"
+  },
+  {
+    "client": "AIDE CHEMISTs RC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AIDE-CHEMIST",
+    "location": "RAWLINGS",
+    "phone": null
+  },
+  {
+    "client": "AIRAM PHARMACY",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "AKUA AFRIYIE",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ALEX ABOTSIKUMA CHEMICAL SHOP",
+    "location": "NANAKROM",
+    "phone": "0246528532"
+  },
+  {
+    "client": "ALEX CHEMICAL SHOP",
+    "location": "NANAKROM",
+    "phone": "0246528532"
+  },
+  {
+    "client": "ALEX-ROYAL-CARE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ALISCO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ALISCO CHEMICAL SHOP",
+    "location": "KATAMANSO",
+    "phone": "0551966448"
+  },
+  {
+    "client": "ALPHA AND OMEGA HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ALPHA CHEMIST",
+    "location": "TESANO",
+    "phone": "0247171124"
+  },
+  {
+    "client": "ALPHA DELTA",
+    "location": "RING-ROAD",
+    "phone": null
+  },
+  {
+    "client": "ALPHA DELTA PHARMACY",
+    "location": "LABONE",
+    "phone": null
+  },
+  {
+    "client": "ALPHA DELTA PHARMACY",
+    "location": "RING ROAD",
+    "phone": null
+  },
+  {
+    "client": "ALSONS PHARMACY",
+    "location": "OYIBI-ROAD",
+    "phone": "0592421223"
+  },
+  {
+    "client": "AM MUKHTAR CHEMICAL SHOP",
+    "location": "MADINA-ZONGO",
+    "phone": "0244620344"
+  },
+  {
+    "client": "AMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AMA SAKYIWAA",
+    "location": "FOSTER-HOME",
+    "phone": null
+  },
+  {
+    "client": "AMANFROM PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AMANFROM PHARMACY",
+    "location": null,
+    "phone": "0240053499"
+  },
+  {
+    "client": "AMGEL CHEMICAL",
+    "location": "HAATSO-WINSCO",
+    "phone": "0534100169"
+  },
+  {
+    "client": "AMGEL PHARMACY",
+    "location": "KASOA",
+    "phone": "0242714114"
+  },
+  {
+    "client": "AMOFA CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AMPOMAH PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AMPOMAH PHARMACY",
+    "location": "ATOMIC-DOWN",
+    "phone": null
+  },
+  {
+    "client": "AMPOMAH PHARMACY",
+    "location": "TAIFA",
+    "phone": null
+  },
+  {
+    "client": "AMPONSAH PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANAS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANDEX-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGEL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGEL-CASH",
+    "location": "AGBOGBLOSHI",
+    "phone": null
+  },
+  {
+    "client": "ANGELA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA -CASH CUSTOMER",
+    "location": "MADINA-ESTATE",
+    "phone": null
+  },
+  {
+    "client": "ANGELA -ORDER 1",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA 1",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA 1 ORDER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA 2",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA ASIEDU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA ORDER 1",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA ORDER 2",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA-LENUS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA-LENUS WELFARE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA-LENUS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA-LENUS PHR",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANGELA-ORDER 2",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICAL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICALS",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ANIM CHEMICALS",
+    "location": "MADINA",
+    "phone": "0243186875"
+  },
+  {
+    "client": "ANITA- CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANNET ATIVOR",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANTHONIA BANNERMAN -QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ANTHONIA BANNERMAN-QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "APANYIN PHARMACY",
+    "location": "MADINA",
+    "phone": "0560812858"
+  },
+  {
+    "client": "APTAMED PHARMACY",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "AR-RAHMAN GH MUSLIM CLINIC",
+    "location": "NORTH",
+    "phone": null
+  },
+  {
+    "client": "ARCHVIEW CHEMICAL SHOP",
+    "location": "KASOA",
+    "phone": "0548122568"
+  },
+  {
+    "client": "ARMSBEST PHARMACY",
+    "location": "OYARIFA",
+    "phone": null
+  },
+  {
+    "client": "ASABEA MAMA LIT",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ASANTEWA CHEMICAL",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "ASANTEWA CHEMICAL SHOP",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "ASANTEWA-MASCOT PHR.",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ASANTEWAA CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ASANTEWAA CHEMICAL",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "ASANTEWAA CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ASANTEWAA CHEMICAL SHOP",
+    "location": "OGBJO-OLD",
+    "phone": null
+  },
+  {
+    "client": "ASANTEWAA CHEMICAL SHOP",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "ASANTEWAA CHEMICAL SHOP",
+    "location": "OGBOJO-OLD",
+    "phone": null
+  },
+  {
+    "client": "ASANTEWAA CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ASANTEWAA CHEMICALS",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "ASANTEWAA-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ASEYE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ASEYE PHARMACY",
+    "location": "BOTWE SCHOOL",
+    "phone": "0501537834"
+  },
+  {
+    "client": "ASEYE PHARMACY",
+    "location": "BOTWE-SCHOOL",
+    "phone": null
+  },
+  {
+    "client": "ASEYE PHARMACY",
+    "location": "BOTWE-SCHOOL",
+    "phone": null
+  },
+  {
+    "client": "ASEYE PHARMACY",
+    "location": "NANAKROM",
+    "phone": null
+  },
+  {
+    "client": "ASEYE PHARMACY",
+    "location": "SCHOOL",
+    "phone": null
+  },
+  {
+    "client": "ASHIYIE PHARMACY",
+    "location": "ASHIYIE",
+    "phone": null
+  },
+  {
+    "client": "ASHIYIE PHARMACY",
+    "location": "ASHIYIE-FULANI",
+    "phone": null
+  },
+  {
+    "client": "ASLAB PHARMACY",
+    "location": "OYIBI",
+    "phone": null
+  },
+  {
+    "client": "ASSEMBLIES OF GOD",
+    "location": "MADINA-CENTRAL",
+    "phone": null
+  },
+  {
+    "client": "ASSEMBLIES OF GOD CHURCH",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ASSEMBLIES OF GOD MED. STORE",
+    "location": "MADINA-NEW",
+    "phone": null
+  },
+  {
+    "client": "ASUNI ERIC CHEMICAL",
+    "location": "ADENTA-HOUSING",
+    "phone": "0541618267"
+  },
+  {
+    "client": "ATOMIC ROAD PHARMACY",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "ATTA-FYNN EMIL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUGUSTINE ADJEI CHEMICAL SHOP",
+    "location": "OYIBI",
+    "phone": "0242621088"
+  },
+  {
+    "client": "AUNTIE ADIZA",
+    "location": "EAST-LEGON",
+    "phone": "0208940019"
+  },
+  {
+    "client": "AUNTIE CAROL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUNTIE DIANA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUNTIE DORIS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUNTIE ELAINE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUNTIE ELAINE",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "AUNTIE EMILIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUNTIE EMILIA",
+    "location": "MADINA",
+    "phone": "0277580857"
+  },
+  {
+    "client": "AUNTIE HANNAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUNTIE HELENA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUNTIE JUDITH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUNTIE MAGGIE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AUNTIE SOPHIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AVALON PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AVALON PHARMACY",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "AVALON PHARMACY",
+    "location": "SAMANPUOM",
+    "phone": null
+  },
+  {
+    "client": "AVALON PHARMACY WELFARE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AVIATION DOWN PHARMACY LTD",
+    "location": "ASHALEY-BOTWE",
+    "phone": "0201545834"
+  },
+  {
+    "client": "AYA HEALTH",
+    "location": "ASHIYIE",
+    "phone": null
+  },
+  {
+    "client": "AYA HEALTH PHARMACY",
+    "location": "ASHIYIE",
+    "phone": null
+  },
+  {
+    "client": "AYALOLO PHARMACY LIMITED",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AYAO MEDICAL CENTER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "AYAO MEDICAL CENTER",
+    "location": "TEIMAN",
+    "phone": "0242867260"
+  },
+  {
+    "client": "AYAO MEDICAL CENTRE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "B. ANNANG",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "B. E. CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "B. E. CHEMICAL",
+    "location": "3RD-GATE-BOTWE",
+    "phone": "0240618794"
+  },
+  {
+    "client": "B.E CHEMICAL SHOP",
+    "location": "3RD-GATE",
+    "phone": "0240618794"
+  },
+  {
+    "client": "B.E CHEMICL",
+    "location": "3RD-GATE",
+    "phone": "0240618794"
+  },
+  {
+    "client": "BAABA THOMPSON",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BANY PHARMACY",
+    "location": null,
+    "phone": "0242943385"
+  },
+  {
+    "client": "BATCH AND BATCH",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "BAYBEE GHANA LIMITED",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BAYBEE GHANA LIMITED",
+    "location": "NIMA-CBG",
+    "phone": null
+  },
+  {
+    "client": "BAYORSMITH",
+    "location": "TEMA-COMM-25",
+    "phone": "0244120120"
+  },
+  {
+    "client": "BAYORSMITH PHARMACY",
+    "location": "TEMA-COMM-25",
+    "phone": "0244120120"
+  },
+  {
+    "client": "BDNUT CLINIC",
+    "location": "OBGOJO",
+    "phone": "0244722880"
+  },
+  {
+    "client": "BEANATHAN PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BEATRICE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BEATRICE",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "BEATRICE CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BEATRICE-CASH",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "BECKY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BEDIAKO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BELA PHARMACY-DONATION",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BELAH 1 PHARMACY",
+    "location": "EASTLEGON",
+    "phone": null
+  },
+  {
+    "client": "BELAH 2 PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BELAH 2 PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "BELAH PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "BELAH PHARMACY 2",
+    "location": "NORTH-LEGON",
+    "phone": null
+  },
+  {
+    "client": "BELAH-1 PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "BELINDA NORTEY CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BELMOAH ROYAL HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BELMOR PHARMACY",
+    "location": "MADINA-MARKET",
+    "phone": null
+  },
+  {
+    "client": "BEMUAH ROYAL HOSPITAL",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "BEN DUGBAH CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BEN J CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BENATHAN PHARMACY",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "BENICE PHARMACY",
+    "location": "NORTH-LEGON",
+    "phone": null
+  },
+  {
+    "client": "BENJAMIN",
+    "location": "HAATSO",
+    "phone": "0244708916"
+  },
+  {
+    "client": "BENJAMIN CHEMICAL SHOP",
+    "location": null,
+    "phone": "0559846387"
+  },
+  {
+    "client": "BENNETT CLINIC",
+    "location": "MADINA-ESTATE",
+    "phone": null
+  },
+  {
+    "client": "BEPAN PHARMACY",
+    "location": "ABENWOHA",
+    "phone": "0559536351"
+  },
+  {
+    "client": "BERK PHARMACY",
+    "location": "ASHALEY-BOTWE",
+    "phone": "0256040809"
+  },
+  {
+    "client": "BERNICE DOREEN OPOKU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BETHEL CHEMIST LTD",
+    "location": "PIG-FARM",
+    "phone": null
+  },
+  {
+    "client": "BISVICO CHEMICAL SHOP",
+    "location": "A.R.S",
+    "phone": "0277063205"
+  },
+  {
+    "client": "BLESS HERBAL CENTER",
+    "location": "MADINA",
+    "phone": "0540870351"
+  },
+  {
+    "client": "BLESSING",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BLESSING N-GEO PHARMACY",
+    "location": "MADINA",
+    "phone": "0540870351"
+  },
+  {
+    "client": "BLOOM HOSPITAL",
+    "location": "LEGON",
+    "phone": "0546266759"
+  },
+  {
+    "client": "BOAHEMAA CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BOLA",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "BONSU KODA LODGE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BONSUKODA LODGE",
+    "location": "MADINA-UPS",
+    "phone": null
+  },
+  {
+    "client": "BREDU CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BREDU CHEMICAL",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "BREDU CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BREDU CHEMICALS",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "BRIAN PHARMACY",
+    "location": "SOCIAL-WELFARE",
+    "phone": "0550308303"
+  },
+  {
+    "client": "BRIDGET",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "BRIGHT APPIRKON",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "BRIGHT CHEMICAL",
+    "location": "ASHALA-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "BRIGHT CHEMICAL",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "BRIGHT CHEMICAL SHOP",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "BRIGHT CHEMICALS",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "BUIPE PHARMACY",
+    "location": "ODORKOR-WATER",
+    "phone": "0546366332"
+  },
+  {
+    "client": "BURMA-CAMP PHARMACY",
+    "location": "BURMA-CAMP",
+    "phone": "0246382643"
+  },
+  {
+    "client": "BETRICE",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "C.K PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "C.S ALLOT PHARMACY",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "C.S ALLOT PHARMACY(2)",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "CAAD PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CAADS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CAADS PHARMACY",
+    "location": "BARON",
+    "phone": null
+  },
+  {
+    "client": "CAADS PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CAADS PHARMACY",
+    "location": "BARON",
+    "phone": null
+  },
+  {
+    "client": "CAADS PHARMACY BARON",
+    "location": "BARON",
+    "phone": null
+  },
+  {
+    "client": "CAADS PHARMACY-AMARHIA",
+    "location": "AMARHIA",
+    "phone": null
+  },
+  {
+    "client": "CAMDEN",
+    "location": "SOCIAL-WELFARE",
+    "phone": null
+  },
+  {
+    "client": "CAMDEN PHARMACEUTICAL",
+    "location": "SOCIAL-WELFARE",
+    "phone": null
+  },
+  {
+    "client": "CAMDEN PHARMACY J",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CARDINAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CARDINAL CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CARDINAL CHEMIST",
+    "location": "MADINA-ESTATE",
+    "phone": null
+  },
+  {
+    "client": "CARDINAL CHEMIST",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "CARDINAL CHEMISTS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CARDINAL PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CARE & SOCIAL CLINIC",
+    "location": "MADINA-ESTATE",
+    "phone": null
+  },
+  {
+    "client": "CARE & SOCIAL POLY CLINIC",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "CARE & SOCIAL POLY CLINIC",
+    "location": "MADINA-ESTATES Z",
+    "phone": null
+  },
+  {
+    "client": "CARE & SOCIAL POLYCLINIC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CARE & SOCIAL POLYCLINIC",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CARE & SOCIAL POLYCLINIC",
+    "location": "MADINA ESTATES",
+    "phone": null
+  },
+  {
+    "client": "CARE & SOCIAL POLYCLINIC",
+    "location": "MADINA-ESTATE",
+    "phone": null
+  },
+  {
+    "client": "CARE & SOCIAL POLYCLINIC",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "CARE AND SOCIAL CLINIC",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CARE AND SOCIAL POLYCLINIC",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CARE CHANNEL PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CARE CHANNEL PHARMACY",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "CARE PLUS PHARMACY",
+    "location": "DOME",
+    "phone": null
+  },
+  {
+    "client": "CARE PRIME PHARMACY",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "CAREHUB PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CAREHUB PHARMACY",
+    "location": "KWABENYA",
+    "phone": null
+  },
+  {
+    "client": "CAREHUB PHARMACY",
+    "location": "KWABENYA",
+    "phone": "0244576410"
+  },
+  {
+    "client": "CAS- DANKWAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER ( C.S ALLOT)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER JJ",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER JUDE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER( ADWOA)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER( GIFTY)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER( PRINCE)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER(ANGELA)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER(NAFISAH)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER(OFFICE)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER(RITA)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH - CUSTOMER-ABIGAIL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH -CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH -CUSTOMER(OSBORN)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH -CUSTOMER-NATH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH -HAMMED",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH -NAT",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": "MADINA",
+    "phone": "0240211604"
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": "OKPOIGONO",
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": "SOCIAL-WELFARE",
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER",
+    "location": "WENCOL-HSE",
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER ( PK)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER ABIGAIL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER EMELIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER GN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER IBRAHIM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER JERRY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER JESSICA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER THELMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER( DARKO)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER(MIRIAM)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER- JULIE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER- KOBBY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER-ABIGAIL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOMER-HOSTLE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUSTOR",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH CUTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH EMMAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH INVOICE (R.B.H)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH MAY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH ORDER",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CASH VINCENTIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH- DANKWAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH- JENNIFER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH- STEPHEN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH- STEPHEN UNICHEM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH-ABI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH-CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH-DAVID",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH-EMMAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH-MR. APPAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH-NAOMI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CASH-VIREST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CECILIA DONKOR CHEMICAL",
+    "location": "AMARAHIE",
+    "phone": "0277428676"
+  },
+  {
+    "client": "CEKAM PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "CHARITY ASANTE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CHARLOTTE-CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CHARRICON CHEMICAL SHOP",
+    "location": "BOTWE",
+    "phone": "0249878541"
+  },
+  {
+    "client": "CHEMIST E OBENG",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CHEMIST E OBENG",
+    "location": "MADINA",
+    "phone": "0506308985"
+  },
+  {
+    "client": "CHEMIST E OBENG",
+    "location": "MADINA",
+    "phone": "0558126284"
+  },
+  {
+    "client": "CHEMIST E-OBENG",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CHICO GH. LTD.(UESD-KOLON)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CHRIS CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CHRISTABEL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CHRISTABEL-LUMINA PHARMACY",
+    "location": "ATOMIC-ROAD",
+    "phone": null
+  },
+  {
+    "client": "CHRISTIANA E-OBENG CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CHRISTIANA E-OBENG CHEMICAL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CHRISTIANA TETTEH",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "CHRISTMAS PACKAGE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CHRISTODIA PHARMACY",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "CHURCH ROAD CHEMIST",
+    "location": "ST.JOHNS",
+    "phone": "0209459180"
+  },
+  {
+    "client": "CINDY CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CLARON HEALTH INTERNATIONAL",
+    "location": "AIRPORT",
+    "phone": null
+  },
+  {
+    "client": "CLARON HEALTHCARE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CLIFCO PHARMACY",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "CLIFCO PHARMACY",
+    "location": "MPEASEM",
+    "phone": null
+  },
+  {
+    "client": "CLIFFCO PHARMACY",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "COLLINS -CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "COMFORT-CASH",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "COMMUNITY SCHOOL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CORNERSTONE PHARMACY",
+    "location": "DODOWA",
+    "phone": "0552753999"
+  },
+  {
+    "client": "COUNSELLOR-OA&J",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "COVENANT CLINIC",
+    "location": "MADINA-OGBOJO",
+    "phone": "0546698998"
+  },
+  {
+    "client": "CRYSTABEL-CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CSAH CUSTOMER OBED",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "CYNTHIA-CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "D&J PHARMACY",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "D&J PHARMACY",
+    "location": "COSWAY",
+    "phone": null
+  },
+  {
+    "client": "D818 CHEMIST",
+    "location": "TESHIE",
+    "phone": null
+  },
+  {
+    "client": "D818 PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "D818 PHARMACY",
+    "location": "TESHIE",
+    "phone": null
+  },
+  {
+    "client": "DADDY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAINA OBENG",
+    "location": "MPEASEM",
+    "phone": "0243253202"
+  },
+  {
+    "client": "DAINA OBENG CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAINA OBENG CHEMICAL",
+    "location": "MPEASEM",
+    "phone": null
+  },
+  {
+    "client": "DAINA OBENG CHEMICAL SHOP",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "DAKAL PHARMACY",
+    "location": "AMERHIA-ZONGO",
+    "phone": "0502224333"
+  },
+  {
+    "client": "DAKAL PHARMACY-CASH",
+    "location": "AMERHIA-ZONGO",
+    "phone": "0502224333"
+  },
+  {
+    "client": "DAN PHARMA",
+    "location": "GBAWE-WEIJA",
+    "phone": null
+  },
+  {
+    "client": "DAN PHARMA",
+    "location": "SOCIAL-WELFARE",
+    "phone": null
+  },
+  {
+    "client": "DANIEL ACHEAMPONG",
+    "location": "GBAWE-WEIJA",
+    "phone": null
+  },
+  {
+    "client": "DANIEL SAM-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DANKWA CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DANKWA CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DANKWAH CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "DANKWAH CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "DANKWAH CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DANNY CHEMICAL SHOP",
+    "location": "ODORKOR",
+    "phone": "0546366332"
+  },
+  {
+    "client": "DANPHARMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DANQUAH CHEM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DANQUAH CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DANTAM PHARMACY",
+    "location": "BOLGATANGA",
+    "phone": null
+  },
+  {
+    "client": "DANTANI PHARMACY",
+    "location": "SOMANYA",
+    "phone": "0244562149"
+  },
+  {
+    "client": "DAVID",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAVID KOSSI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAVID VASCO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAVIDL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAYDEN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAYDEN PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAYDEN PHARMACY-1",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAYDEN PHARMACY-2",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAYDEN PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAYDEN PHARMACY",
+    "location": "LA",
+    "phone": null
+  },
+  {
+    "client": "DAYDEN PHARMACY",
+    "location": "LA",
+    "phone": "0208136522"
+  },
+  {
+    "client": "DE'ALVINS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DEL HERBAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DENTAL CLINIC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DERRICK",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DIAGNO PHARMACY",
+    "location": null,
+    "phone": "0244586206"
+  },
+  {
+    "client": "DIAMOND PHARMACY",
+    "location": "KASOA",
+    "phone": "0244531095"
+  },
+  {
+    "client": "DIANA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DIANA",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "DIANA OBENG CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DIANA OBENG CHEMICAL SHOP",
+    "location": "MPEASEM",
+    "phone": null
+  },
+  {
+    "client": "DIANA OBENG CHEMICHAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DICKSON A. AGYEMANG",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DINAH GLOVER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DINKAL PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "DIXXON PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DIXXON PHARMACY",
+    "location": "EAST LEGON",
+    "phone": null
+  },
+  {
+    "client": "DIXXON PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "DIXXON PHARMACY",
+    "location": "EASTLEGON",
+    "phone": null
+  },
+  {
+    "client": "DIXXON PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "DIXXONS PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "DOBEA CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DOC'S MEDICAL CONSULT",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DOC'S MEDICAL CONSULT",
+    "location": "ASHALE-BOTWE",
+    "phone": "0246919120"
+  },
+  {
+    "client": "DOC'S MEDICAL CONSULT",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "DOC'S MEDICAL CONSULT",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "DOCS MEDICAL CONSULT",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DOCS MEDICAL CONSULT",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "DOKU CLINIC",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "DONATION-EFIDA PHARMACY",
+    "location": "TRADE-FAIR-LA",
+    "phone": null
+  },
+  {
+    "client": "DORDAN PHARMACY",
+    "location": "MADINA-WAREHOUSE",
+    "phone": null
+  },
+  {
+    "client": "DORDAN PHARMACY",
+    "location": "REDCO",
+    "phone": null
+  },
+  {
+    "client": "DOREEN BOADI",
+    "location": "OYIBI",
+    "phone": "0243767797"
+  },
+  {
+    "client": "DOREEN BOADI 2",
+    "location": "OYIBI",
+    "phone": "0243767797"
+  },
+  {
+    "client": "DOROTHY QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DOTS PHARMACY",
+    "location": "AKATAMANSO",
+    "phone": null
+  },
+  {
+    "client": "DOTS PHARMACY",
+    "location": "AKATAMANSO",
+    "phone": null
+  },
+  {
+    "client": "DR ADUMAH DRUG STORE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DR SANTIAGO",
+    "location": "EAST-LEGON",
+    "phone": "0204631040"
+  },
+  {
+    "client": "DR. ATEKO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DR. ATTA FYNN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DR. BOBSON GHANA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DR. GETRUDE",
+    "location": "UGMC",
+    "phone": null
+  },
+  {
+    "client": "DR. GYIMAH ASANTE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DR. KYERE AKOSUAH ( GAEH)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DR. PEARL ( GAEH)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DR.KIM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DUA CLINIC",
+    "location": "RINGROAD",
+    "phone": null
+  },
+  {
+    "client": "DYCON CHEMISTS",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "DYNCON CHEMISTS",
+    "location": "OGBOJO",
+    "phone": "0244582458"
+  },
+  {
+    "client": "E-RIVER HERBAL SHOP",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "EAST ORANGE PHARMACY",
+    "location": "EAST",
+    "phone": null
+  },
+  {
+    "client": "EBENEZER ASANTE CHEMICAL",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "EBENEZER ASANTE CHEMICAL SHOP",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "EBENEZER OSEI OWUSU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EBENEZER OWUSU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EDNUT",
+    "location": "OGBOJO",
+    "phone": "0244722880"
+  },
+  {
+    "client": "EDNUT CLINIC",
+    "location": "OGBOJO",
+    "phone": "0244722880"
+  },
+  {
+    "client": "EDNUT PHARMACY",
+    "location": "OGBOJO",
+    "phone": "0244722880"
+  },
+  {
+    "client": "EDWARD OCANSEY CHEMICAL SHOP",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "EDWIN ODAME CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EDYKOB PHARMACY",
+    "location": "SANTEO",
+    "phone": "0243903897"
+  },
+  {
+    "client": "EFIDA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EFKWA PHARMACY",
+    "location": "ASHONGMAN",
+    "phone": null
+  },
+  {
+    "client": "EKOW S. JOHNSON CHEMICAL SHOP",
+    "location": "OYIBI",
+    "phone": "0541082802"
+  },
+  {
+    "client": "EKOW S. JOHNSON CHEMICAL SHOP",
+    "location": "OYIBI",
+    "phone": "0541082802"
+  },
+  {
+    "client": "EL-LEN PHARMACY",
+    "location": "A&C-MALL-EAST-LEGON",
+    "phone": "0241842530"
+  },
+  {
+    "client": "EL-LEN PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "ELAINE",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ELFEY OVER THE COUNTER",
+    "location": "OYIBI",
+    "phone": "0247912443"
+  },
+  {
+    "client": "ELI PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ELI- PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ELID PHARMACY",
+    "location": "ACADEMIC-CITY",
+    "phone": "0243356038"
+  },
+  {
+    "client": "ELIKEM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ELISFERG CHEMICAL SHOP",
+    "location": "ABOKOBI",
+    "phone": null
+  },
+  {
+    "client": "ELITECARE MEDICAL CENTRE",
+    "location": "ADJIRIGANO",
+    "phone": null
+  },
+  {
+    "client": "ELITECARE MEDICAL CENTRE",
+    "location": "MADINA",
+    "phone": "0537912291"
+  },
+  {
+    "client": "ELMASH HEALTHCARE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ELMASH HEALTHCARE",
+    "location": "OKPONGLO",
+    "phone": "0546345353"
+  },
+  {
+    "client": "ELMESH MEDICAL HEALTH CENTRE",
+    "location": "OKPONGLO",
+    "phone": "0546345353"
+  },
+  {
+    "client": "ELOBEN HAIR & COSMETICS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ELVIS CHEMICAL SHOP",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "ELVIS CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ELVIS CHEMIST",
+    "location": "OGBODJO",
+    "phone": null
+  },
+  {
+    "client": "ELVIS CHEMIST",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "ELVIS CHEMISTS",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "EMERALD CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMMA-ABBYPHARMA LTD",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMMA-REPUBLIC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMMAH-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMMANUEL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMMANUEL",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "EMMANUEL",
+    "location": "TAIFA",
+    "phone": null
+  },
+  {
+    "client": "EMMANUEL ARMAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMMANUEL BOAHEN CHEMICAL SHOP",
+    "location": "AMRAHIA",
+    "phone": null
+  },
+  {
+    "client": "EMMANUEL KOFI AFRAM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMMANUEL OFFEI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMMANUEL OFFEI",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "EMMANUELLA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMPAT PHARMACY",
+    "location": "TEMA",
+    "phone": null
+  },
+  {
+    "client": "EMPAT-CAIQUO MEDICAL CENTER",
+    "location": "TEMA",
+    "phone": null
+  },
+  {
+    "client": "ENVIRO PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ENVIRO PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ENVIRO PHARMACY",
+    "location": "SANTOE",
+    "phone": null
+  },
+  {
+    "client": "ENYO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EPHRAIM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EQUITY PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": "020225005"
+  },
+  {
+    "client": "ERI PHARMACY",
+    "location": "BOTWE-ROAD",
+    "phone": "0208152330"
+  },
+  {
+    "client": "ERI-PHARMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ERIC ADJEI CHEMICAL",
+    "location": "DOME",
+    "phone": null
+  },
+  {
+    "client": "ERIC ADJEI CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ERIC KYEI CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ERIC KYEI CHEMICAL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ERIC KYEI CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ERIC KYEI CHEMICAL SHOP",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ERIC KYEI CHEMICAL SHOP",
+    "location": "BOTWE-THIRD",
+    "phone": "0243644640"
+  },
+  {
+    "client": "ERIC KYEI CHEMICALS",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ERIC KYEI CHEMICHAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ERIC KYEI PHARMACY",
+    "location": "AVIATION-ROAD",
+    "phone": null
+  },
+  {
+    "client": "ERIC NII ADJEI ADJETEY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "ERNHIL CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ESHUN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ESPAT CHEMICAL SHOP",
+    "location": "LAPAZ",
+    "phone": "0242324397"
+  },
+  {
+    "client": "ETAY PHARMACY",
+    "location": "SHIASHIE",
+    "phone": null
+  },
+  {
+    "client": "ETHEL SANTIAGO",
+    "location": "EAST-LEGON",
+    "phone": "0204631040"
+  },
+  {
+    "client": "EUGENE DAVIS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EUNICE CHEMICAL",
+    "location": "MADINA-ZEBROTI",
+    "phone": null
+  },
+  {
+    "client": "EUNICE ETORNAM MODZAKA",
+    "location": "MADINA-ESTATE",
+    "phone": "0540285059"
+  },
+  {
+    "client": "EUNICE MASCOT",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EVA",
+    "location": "LA",
+    "phone": null
+  },
+  {
+    "client": "EVELYN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EVELYN",
+    "location": null,
+    "phone": "0243-551076"
+  },
+  {
+    "client": "EVELYN BOATENG",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EVEPET PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EVEPET PHARMACY",
+    "location": null,
+    "phone": "0243345428"
+  },
+  {
+    "client": "EVEPET PHARMACY",
+    "location": "TESHIE",
+    "phone": null
+  },
+  {
+    "client": "EVERYTHING SUPLLEMENTS GH.",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EWURABENA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EXPECT HANDS CLINIC",
+    "location": "MADINA-ZONGO",
+    "phone": "0244781965"
+  },
+  {
+    "client": "EXPERIENCE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EXPEXCT HAND CLINIC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EXPIRES",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "F ALPHA AND OMEGA SPEC. HOSP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "F.ALPHA AND OMEGA HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FADELA-CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FAFA",
+    "location": "OKPONGLO",
+    "phone": "0546345353"
+  },
+  {
+    "client": "FAFA AMEKO",
+    "location": "NUNA",
+    "phone": null
+  },
+  {
+    "client": "FAFALI CHEMICAL",
+    "location": "OKPONGLO",
+    "phone": null
+  },
+  {
+    "client": "FAMAZAAZA",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "FAMAZAAZA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FAMAZAAZA PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "FAMAZAZA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FAMAZAZA PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "FAMAZAZA PHARMACY",
+    "location": "EASTLEGON",
+    "phone": null
+  },
+  {
+    "client": "FAMILY HEALTH",
+    "location": "TESHIE",
+    "phone": null
+  },
+  {
+    "client": "FAMILY HEALTH HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FAMILY HEALTH HOSPITAL",
+    "location": "TESHIE",
+    "phone": null
+  },
+  {
+    "client": "FAMILY HEALTH HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FAMILY HEALTH HOSPITAL",
+    "location": "TESHIE",
+    "phone": null
+  },
+  {
+    "client": "FAMILY HEALTH HOSPITAL",
+    "location": "TESHIE",
+    "phone": "0242579023"
+  },
+  {
+    "client": "FAMILY HEALTH-ISMAIL",
+    "location": "TESHIE",
+    "phone": null
+  },
+  {
+    "client": "FAMZAAZA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FAMZAAZA PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "FAMZAZA",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "FAMZAZA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FAMZAZA PHARMACY",
+    "location": "EAST-LEGON ARS",
+    "phone": null
+  },
+  {
+    "client": "FARAPHAMA PHARMACY",
+    "location": "LABADI",
+    "phone": null
+  },
+  {
+    "client": "FAUSTINA DONKOR",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FAUSTINA DONKOR CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FAUSTINA DONKOR CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FAUSTINA DONKOR CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FAUSTINA DONKOR CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": "0243624300"
+  },
+  {
+    "client": "FAUSTINA DONKOR CHEMICAL SHOP2",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FAUSTINOR DONKOR",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FAUSTINOR DONKOR CHEMICAL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FELBET PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FELIX",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FELIX ASEYE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FIRST AID-MR OWUSU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FIRST GRASP HEALTH & COSMETICS",
+    "location": "ABOKOBI",
+    "phone": null
+  },
+  {
+    "client": "FLOBEEN CHEMICAL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FLORENCE",
+    "location": null,
+    "phone": "0208374310"
+  },
+  {
+    "client": "FLORENCE",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FLORENCE OCANSEY CHEMICAL",
+    "location": "AGBOGBA-GOLD",
+    "phone": null
+  },
+  {
+    "client": "FLOWSBY PHARMACY",
+    "location": "DOME-PILLAR-2",
+    "phone": "0570462407"
+  },
+  {
+    "client": "FMMS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FMMS PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FRANCIS OCLOO CHEMICAL SHOP",
+    "location": "OYARIFA",
+    "phone": "0244985489"
+  },
+  {
+    "client": "FRANCIS OKLU",
+    "location": "OYARIFA",
+    "phone": "0244985489"
+  },
+  {
+    "client": "FRANCISCA KORANTENG",
+    "location": "KORLE-BU",
+    "phone": "0246901468"
+  },
+  {
+    "client": "FRANDERT SOLUTIONS",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "FRANK CHEMICAL SHOP",
+    "location": "ADJRINGANO",
+    "phone": "0593860659"
+  },
+  {
+    "client": "FRANKMART PHARMACY",
+    "location": "TAIFA",
+    "phone": null
+  },
+  {
+    "client": "FREDA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FREENESS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FREENESS PHARMACY",
+    "location": "AMARHIA",
+    "phone": null
+  },
+  {
+    "client": "FREESEA CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FREESEA CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "FREESEA CHEMICAL SHOP",
+    "location": "RAWLINGS-CIRCLE",
+    "phone": null
+  },
+  {
+    "client": "FREESEA CHEMICAL SHOP",
+    "location": "RAWLINGS",
+    "phone": null
+  },
+  {
+    "client": "FREESEA CHEMICAL SHOP",
+    "location": "RAWLINGS",
+    "phone": null
+  },
+  {
+    "client": "FREESEA CHEMICAL SHOP RC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "FREESEA CHEMICAL STORE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "G POWER PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "G POWER PHARMACY",
+    "location": "OYARIFA",
+    "phone": null
+  },
+  {
+    "client": "GABRIEL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "GABRIEL CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GABRIEL CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "GABRIEL CHEMICAL SHOP",
+    "location": "MADINA",
+    "phone": "0245782183"
+  },
+  {
+    "client": "GARIBA CHEMICAL",
+    "location": "SOMANYA",
+    "phone": "0246473813"
+  },
+  {
+    "client": "GD OTENG CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GD OTENG CHEMICAL SHOP",
+    "location": "JAPAN MOTORS",
+    "phone": "0260808096"
+  },
+  {
+    "client": "GEM CHEMIST",
+    "location": "OSU-BLUE-GATE",
+    "phone": "0244611193"
+  },
+  {
+    "client": "GENESIS CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GENESIS CHEMIST",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "GEO F PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GEO-F PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GEO-F PHARMACY",
+    "location": "ADJIRIGANO",
+    "phone": null
+  },
+  {
+    "client": "GEO-F PHARMACY",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "GEO-F PHARMACY",
+    "location": "ASHALE BOTWE",
+    "phone": null
+  },
+  {
+    "client": "GEO-F PHARMACY",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "GEORGE AMUZU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GEORGE ARTHUR",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GEORGINA ASUNU CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GEORGINA OVER THE COUNTER SHOP",
+    "location": "FRAFRAHA",
+    "phone": "0244655359"
+  },
+  {
+    "client": "GERDAL PHARMACY",
+    "location": "SPINTEX",
+    "phone": null
+  },
+  {
+    "client": "GETAID PHARMACY",
+    "location": "ADENTA-RITZ",
+    "phone": "0546125894"
+  },
+  {
+    "client": "GETAID PHARMACY",
+    "location": "MADINA",
+    "phone": "0546125894"
+  },
+  {
+    "client": "GETAID PHARMACY",
+    "location": "MADINA-ATOMIC",
+    "phone": "0546125894"
+  },
+  {
+    "client": "GETAID PHARMACY",
+    "location": "RITZ-JUNCTION",
+    "phone": "0546125894"
+  },
+  {
+    "client": "GETAID PHARMACY -RITZ",
+    "location": "RITZ",
+    "phone": null
+  },
+  {
+    "client": "GETAID PHARMACY-ATOMIC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GETAID PHARMACY-RITZ",
+    "location": "MADINA-RITZ",
+    "phone": "0546125894"
+  },
+  {
+    "client": "GETAID PHARMACY-SOWUTUOM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GETAID PHARMACY-TAMALE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GETTY LENUS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GIABIMILL PHARMACY",
+    "location": null,
+    "phone": "0242439670"
+  },
+  {
+    "client": "GIDEON",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GIFTY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GIFTY-KAYVEL",
+    "location": "ARS",
+    "phone": "0596287250"
+  },
+  {
+    "client": "GIFTY-PILL POINT",
+    "location": "OKPONGLO",
+    "phone": null
+  },
+  {
+    "client": "GINA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GINAD PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GLORIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GLORIA ODONKOR",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "GN PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GN PHARMACY",
+    "location": "SAKORA",
+    "phone": null
+  },
+  {
+    "client": "GN PHARMACY 2",
+    "location": "ST.PETERS",
+    "phone": null
+  },
+  {
+    "client": "GOD MYETH 1 CHEMICAL",
+    "location": "DJAEN-AYOR",
+    "phone": "0591914586"
+  },
+  {
+    "client": "GOD MYETH CHEMICAL 2",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "GODMYETH",
+    "location": "DJION-LAST",
+    "phone": null
+  },
+  {
+    "client": "GODMYETH CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GODMYETH CHEMICAL",
+    "location": "DJAEN-AYOR",
+    "phone": "0591914586"
+  },
+  {
+    "client": "GODMYETH CHEMICAL",
+    "location": "DJEN-AYOR",
+    "phone": null
+  },
+  {
+    "client": "GODMYETH CHEMICAL SHOP",
+    "location": "DJEN-AYOR",
+    "phone": null
+  },
+  {
+    "client": "GODMYETH CHEMICAL SHOP",
+    "location": "DJION-LASTSTOP",
+    "phone": null
+  },
+  {
+    "client": "GODMYETH CHEMICAL SHOP",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "GODS VILLE CHEMICAL",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "GODS VILLE CHEMICAL",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "GODS VILLE CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GODS VILLE CHEMICAL SHOP",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "GODS VILLE CHEMICAL SHOP-1",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GODS VILLE CHEMICAL SHOP-2",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GODSVILLE CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GODSVILLE CHEMICAL SHOP-3",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GODSWAY PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GOKALS",
+    "location": "ACCRA",
+    "phone": null
+  },
+  {
+    "client": "GOSLINK PHARMACY",
+    "location": "AGBOGBA",
+    "phone": "0555056236"
+  },
+  {
+    "client": "GRACE NANTWI",
+    "location": "AFIENYA",
+    "phone": null
+  },
+  {
+    "client": "GRACE-CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GRATIA & GRATIS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GRATIA & GRATIS",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "GRATIA & GRATIS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GRATIA AND GRATIS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GRATIA AND GRATIS PHARMACY",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "GRATIS & GRATIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GRATIS & GRATIA PHARMACY",
+    "location": null,
+    "phone": "0552843430"
+  },
+  {
+    "client": "GRATIS AND GRATIA",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "GRATIS AND GRATIA PHARMACY",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "GREEN HAVEN CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GREENPICK HEALTH SHOP",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "GRENN PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "GRENN PHARMACY",
+    "location": "MADINA",
+    "phone": "0242208688"
+  },
+  {
+    "client": "GRIT PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "GRIT PHARMACY",
+    "location": "ACCRA",
+    "phone": null
+  },
+  {
+    "client": "GRIT PHARMACY",
+    "location": "MOVENPICK",
+    "phone": null
+  },
+  {
+    "client": "GROSSO CHEMICAL SHOP",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "GLORIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "H FOCUS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HAG HOSPITAL",
+    "location": "IXORA",
+    "phone": "0546627716"
+  },
+  {
+    "client": "HANNAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HARRIET CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HARRIET CHEMICAL SHOP",
+    "location": "AKWETEYMAN",
+    "phone": null
+  },
+  {
+    "client": "HARRIET DEBRAH CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HARRISSON",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HAYFORD-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HEAL-LINK PHARMACY",
+    "location": "HAATSO-WESTLANDS",
+    "phone": "0591477525"
+  },
+  {
+    "client": "HEALTH GATE PHARMACY",
+    "location": "DONKOR KROM",
+    "phone": null
+  },
+  {
+    "client": "HEALTH GATE PHARMACY",
+    "location": "DONKORKROM",
+    "phone": null
+  },
+  {
+    "client": "HEALTH GATE PHARMACY",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "HEALTH HAVEN",
+    "location": "OYARIFA",
+    "phone": "0266548672"
+  },
+  {
+    "client": "HEALTH KEEPERS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HEALTH KEEPERS PHARMACY",
+    "location": "GBAWE",
+    "phone": null
+  },
+  {
+    "client": "HEALTH MATE PHARMACY",
+    "location": "TESHIE",
+    "phone": "0264113396"
+  },
+  {
+    "client": "HEALTHFIT CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HEALTHFIT CHEMICAL SHOP",
+    "location": "SOCIAL-WELFARE",
+    "phone": null
+  },
+  {
+    "client": "HEALTHGATE PHARMACY",
+    "location": "DONKOR-KROM",
+    "phone": null
+  },
+  {
+    "client": "HEALTHLINK HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HEALTHLINK HOSPITAL",
+    "location": "ADJIRIGANNO",
+    "phone": null
+  },
+  {
+    "client": "HEALTHLINK MEDICAL HOSPITAL",
+    "location": "ADJIRIGANO",
+    "phone": null
+  },
+  {
+    "client": "HEALTHLINK-MARIAM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HEALTHMARK PHARMACY",
+    "location": "KWABENYA",
+    "phone": null
+  },
+  {
+    "client": "HEALTHY PLACE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HEALTHY PLACE",
+    "location": "AMANFROM",
+    "phone": null
+  },
+  {
+    "client": "HEMIX PHARMACY",
+    "location": "LAKESIDE",
+    "phone": "0508005080"
+  },
+  {
+    "client": "HENRY-CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HERBAL CONNECT",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HERBAL CONNECT",
+    "location": "NORTH-LEGON",
+    "phone": null
+  },
+  {
+    "client": "HILLS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HILLS PHARMACY",
+    "location": "OKAISHIE",
+    "phone": null
+  },
+  {
+    "client": "HILLS PHARMACY LTD",
+    "location": "ACCRA-OKAISHIE",
+    "phone": null
+  },
+  {
+    "client": "HIS MIGHTY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HIS MIGHTY PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "HOMETOWN PHARMACY",
+    "location": "ADENTA-SAKORA",
+    "phone": null
+  },
+  {
+    "client": "HONEST CARE PHARMACY",
+    "location": "BAWLESHIE",
+    "phone": "0558395331"
+  },
+  {
+    "client": "HUMANO PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "HYMALL PHARMACY",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "HYMALL PHARMACY & CLINIC",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "HYMALL PHARMACY AND CLINIC",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ICGC HOLY GHOST TEMPLE",
+    "location": "ADENTA",
+    "phone": "054 473 0391"
+  },
+  {
+    "client": "IMMACULATE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "INNER CITY HOSPITAL",
+    "location": "BOGOSO",
+    "phone": null
+  },
+  {
+    "client": "INTER PHARMA",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "INTER PHARMA ANNEX",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "INTER PHARMA LTD",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "INTER PHARMA LTD-MAIN",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "INTER PHARMA-MAIN",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "INTERPHARMA ANNEX",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "INTERPHARMA MAIN",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "IS MIGHTY PHARMACY",
+    "location": "TEMA",
+    "phone": null
+  },
+  {
+    "client": "ISAAC EMMANUEL QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ISAAC SIAW",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ISAAC SIAW",
+    "location": null,
+    "phone": "0246528532"
+  },
+  {
+    "client": "ISAAC YEBOAH DEBRAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ISAAC-TOBINCO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ISABELAD ENTERPRISE",
+    "location": "VOLTA-REGION",
+    "phone": "0208163222"
+  },
+  {
+    "client": "ISABELAD ENTERPRISE",
+    "location": "VOLTA-REGION",
+    "phone": "0208163222"
+  },
+  {
+    "client": "ISABELAD ENTERPRISE",
+    "location": "VOLTA-REGION",
+    "phone": "0208163222"
+  },
+  {
+    "client": "ISABELAD ENTERPRISE",
+    "location": "VOLTA-REGION",
+    "phone": "0208163222"
+  },
+  {
+    "client": "ISABELAD'S ENTERPRISE 2",
+    "location": "ANFOETA-VOLTA",
+    "phone": null
+  },
+  {
+    "client": "ISABELAD'S ENTERPRISE 2",
+    "location": "ANFOETA-TSEBI",
+    "phone": "0208163222"
+  },
+  {
+    "client": "ISABELAD'S ENTERPRISE 2",
+    "location": "ANFOETA-VOLTA",
+    "phone": null
+  },
+  {
+    "client": "J & J PHARMACY",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "J & J PHARMACY",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "J & J PHARMACY",
+    "location": "KOFORIDUA",
+    "phone": "02089700062"
+  },
+  {
+    "client": "J &J PHARMACY",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "J &J PHARMACY",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "J&J PHARMA",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "J&J PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "J&J PHARMACY",
+    "location": "KOFORIDUA",
+    "phone": null
+  },
+  {
+    "client": "J&J PHARMACY",
+    "location": "KOFORIDUA",
+    "phone": "0208970062"
+  },
+  {
+    "client": "J.B OTENG CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "J.B.T CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "J.B.T CHEMICAL SHOP",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "J.M.J CHEMICAL",
+    "location": "ASHONMANG",
+    "phone": "0241992220"
+  },
+  {
+    "client": "J.T.B CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "J.T.B CHEMICAL SHOP",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "J.TB CHEMICAL SHOP",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "JACKSON",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JAMI HUTCH",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "JAMI HUTCH PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JAMI HUTCH PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "JAMI HUTCH PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "JAMI HUTCH PHARMACY",
+    "location": "ADENTA",
+    "phone": "0552514114"
+  },
+  {
+    "client": "JANET ASAREGAH",
+    "location": "SPINTEX",
+    "phone": null
+  },
+  {
+    "client": "JANICE CHEMICAL",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "JANICE CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JANICE CHEMICAL SHOP",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "JANICE CHEMICAL SHOP",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "JANICE CHEMICAL SHOP",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "JANICE CHEMICAL SHOP",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "JANICE CHEMIST",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "JANICE CHEMIST",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "JASPEL PHARMACY",
+    "location": "ASHALEY BOTWE",
+    "phone": null
+  },
+  {
+    "client": "JB CHEMICAL SHOP",
+    "location": "ASHONMAN",
+    "phone": "0244367498"
+  },
+  {
+    "client": "JEFFERY -CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JEFFERY OWUSU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JEMIMA CHEMICAL SHOP",
+    "location": "BABA-YARA",
+    "phone": "0242539454"
+  },
+  {
+    "client": "JENICE CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JENICH PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JENICH PHARMACY",
+    "location": "ACCRA",
+    "phone": null
+  },
+  {
+    "client": "JENNEIFER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JENNIFER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JENNIFER",
+    "location": "ACCRA",
+    "phone": null
+  },
+  {
+    "client": "JENNIFER GAISIE",
+    "location": "MADINA",
+    "phone": "0248399443"
+  },
+  {
+    "client": "JENNIFER MENSAH CHEMICAL SHOP",
+    "location": "MADINA-ZONGO",
+    "phone": "0244895063"
+  },
+  {
+    "client": "JENNIFER-CASH",
+    "location": "ACCRA",
+    "phone": null
+  },
+  {
+    "client": "JERYY - CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JESSICA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JESSICA HYMALL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JILEAD",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JISLORD",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JISLORD",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "JISLORD",
+    "location": "OSU",
+    "phone": "0244254750"
+  },
+  {
+    "client": "JISLORD PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JISLORD PHARMACY",
+    "location": "LA",
+    "phone": null
+  },
+  {
+    "client": "JISLORD PHARMACY",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "JISSLORD PHARMACY",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "JOAB PHARMACEUTICALS",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "JOAN ZAMZY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JOE PHARMA",
+    "location": "LEGON",
+    "phone": null
+  },
+  {
+    "client": "JOHN-GV BLISS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JOHNSON",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JOSEPH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JOSEPH",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "JOSEPH AMOATENG CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JOSEPH KWESI AGYEMANG",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JOSSTEVE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JOYCE CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JOYCE NIKOI CHEMICAL SHOP",
+    "location": "MALEDJOR-OYEBI",
+    "phone": "0248258616"
+  },
+  {
+    "client": "JOYCE PHARMACY",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "JUDE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JUDI MENSAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JUICY PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JULIA SABI ABABIO CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JULIA SABI ABABIO CHEMICAL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "JULIENNE ATIASE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "JULIET AMAWU CHEMICAL",
+    "location": "NMAI-DJORN",
+    "phone": null
+  },
+  {
+    "client": "JULIET AMAWU CHEMICAL",
+    "location": "OMAIJOR",
+    "phone": null
+  },
+  {
+    "client": "JULIET AMAWU CHEMICAL",
+    "location": "OMAIJOR",
+    "phone": "0244269440"
+  },
+  {
+    "client": "JULIET AMAWU CHEMICAL",
+    "location": "OMALEDJOR",
+    "phone": null
+  },
+  {
+    "client": "JULIET AMEWU CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "K ASANTE CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "K ASANTE CHEMICAL SHOP",
+    "location": "TESHIE-TSUI",
+    "phone": null
+  },
+  {
+    "client": "K.A.K PRIME",
+    "location": "LAKESIDE",
+    "phone": "0244447165"
+  },
+  {
+    "client": "K.I.F CLINIC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA ADENTA BRANCH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA",
+    "location": "ADENTA-BRANCH",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA",
+    "location": "BAWALESHIE",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA",
+    "location": "BAWALESHIE",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA",
+    "location": "EASTLEGON",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA ADENTA BRANCH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA ADENTA BRANCH",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA EAST LEGON",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA EAST LEGON",
+    "location": "BAWALESHI",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMA EAST LEGON",
+    "location": "BAWALESHIE",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY",
+    "location": "BAWALESHIE",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY",
+    "location": "BAWLESHIE",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY",
+    "location": "BAWULESHI",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY",
+    "location": "KASOA",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY-ADENTA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY-ADENTA",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "KABS PHARMACY-EAST LEGON",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KADIJAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KAFUI",
+    "location": "AMERICAN",
+    "phone": "0208938877"
+  },
+  {
+    "client": "KAFUI-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KAK PRIME HEALTH SHOP",
+    "location": "LAKE-SIDE",
+    "phone": null
+  },
+  {
+    "client": "KAM AID-GHANA FLAG",
+    "location": "GHANA-FLAG",
+    "phone": null
+  },
+  {
+    "client": "KAM-AID PHARMACY",
+    "location": "ATOMIC-ROAD",
+    "phone": null
+  },
+  {
+    "client": "KAM-AID PHARMACY",
+    "location": "ATOMIC",
+    "phone": null
+  },
+  {
+    "client": "KAM-AID PHARMACY",
+    "location": "GHANA-FLAG",
+    "phone": null
+  },
+  {
+    "client": "KAMAID PHARMACY -OYARIFA",
+    "location": "OYARIFA",
+    "phone": null
+  },
+  {
+    "client": "KARIS J VENTURES",
+    "location": null,
+    "phone": "0244645089"
+  },
+  {
+    "client": "KASBA PHARMACY",
+    "location": "MADINA-MARKET",
+    "phone": null
+  },
+  {
+    "client": "KASSEH PHARMACY",
+    "location": "ADA-JUNCTION",
+    "phone": "0542807577"
+  },
+  {
+    "client": "KATE EFFAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KATE ALBAN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KATE EFFAH CHEMICAL SHOP",
+    "location": "LAKE-SIDE",
+    "phone": "0208190391"
+  },
+  {
+    "client": "KATE EFFAH-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KATE KORANG",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KAYVEL PHARMACY",
+    "location": "ARS-OGBOJO-TWI",
+    "phone": "0242011889"
+  },
+  {
+    "client": "KEN-INTERPHARMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KENEVE PHARMACY",
+    "location": "OYARIFA",
+    "phone": "0244624735"
+  },
+  {
+    "client": "KEZWEL PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "KEZWELL PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "KEZWELL PHARMACY",
+    "location": "ADENTA",
+    "phone": "0246317584"
+  },
+  {
+    "client": "KHADIJA PHARMACY",
+    "location": "APAPA-LABADI",
+    "phone": null
+  },
+  {
+    "client": "KHADIS PHARMACY",
+    "location": "LABADI-POLICE",
+    "phone": "0243009317"
+  },
+  {
+    "client": "KHARIS CLINIC",
+    "location": "ADJIRIGANO",
+    "phone": null
+  },
+  {
+    "client": "KIK PRESTIGE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KIK PHARMACY",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "KIK PPRESTIGE PHARMACY",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "KIK PRESTIGE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KIK PRESTIGE PHARMACY",
+    "location": "ADJIRIGANOR",
+    "phone": null
+  },
+  {
+    "client": "KIK PRESTIGE PHARMACY",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "KIK PRESTIGE PHARMACY",
+    "location": "ADJIRINGANOR",
+    "phone": "0593839832"
+  },
+  {
+    "client": "KIK PRESTIGE PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "KIK PRESTIGE PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "KINGSLEY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "KLUSON",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KOBAFCO PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KOFI AQUAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KORANIA",
+    "location": "IXORA",
+    "phone": "0546627716"
+  },
+  {
+    "client": "KORANIA HUSBAND",
+    "location": "IXORA",
+    "phone": "0546627716"
+  },
+  {
+    "client": "KORANIA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KORANIA PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "KORANIA PHARMACY",
+    "location": "ADENTA-POST",
+    "phone": null
+  },
+  {
+    "client": "KORANIA PHARMACY",
+    "location": "ADENTA-POST",
+    "phone": "0208111815"
+  },
+  {
+    "client": "KORANIA PHARMACY",
+    "location": "ADENTA-POST",
+    "phone": "0244208852"
+  },
+  {
+    "client": "KORANIA PHARMACY",
+    "location": "ADENTA-POST",
+    "phone": null
+  },
+  {
+    "client": "KORANIA PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "KORANIA PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "KUWAIT CLINIC",
+    "location": null,
+    "phone": "0543957715"
+  },
+  {
+    "client": "KUWAIT CLINIC",
+    "location": "MADINA",
+    "phone": "0543957715"
+  },
+  {
+    "client": "KWABENA ADISI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KWABENYA PHARMACY",
+    "location": "KWABENYA",
+    "phone": null
+  },
+  {
+    "client": "KWADY CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KWAMBOFO PICK UP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KWAMOSO CHPS",
+    "location": "KWAMOSO",
+    "phone": null
+  },
+  {
+    "client": "KWESI NYARKO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LARTEH ROADS-DONATIONS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LASCARE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LASCARE PHARMACY",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "LASCARE PHARMACY",
+    "location": "ST.PETERS",
+    "phone": "0542853383"
+  },
+  {
+    "client": "LASCARE PHARMACY-2",
+    "location": "ST.PETERS",
+    "phone": "0542853383"
+  },
+  {
+    "client": "LAWRENCE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LAWRENCE-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LAWRENCIA J.M. ADDO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LAWRENCIA-CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LEETONIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY RETAIL",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY RETAIL",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY RETAIL",
+    "location": "ASHALE BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY",
+    "location": "ASHALEBOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY RETAIL",
+    "location": "ASHALE BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY RETAIL",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY RETAIL",
+    "location": "ASHALEY-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY RETAIL",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY-RETAIL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY-RETAIL",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY-RETAIL",
+    "location": "ASHALEY-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY-RETAIL",
+    "location": "ASHLEY-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY RETAIL",
+    "location": "ASHALE BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA PHARMACY RETAIL",
+    "location": "ASHALE BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA RETAIL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LEETONIA RETAIL",
+    "location": "ASAHLE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA RETAIL",
+    "location": "ASHALE BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA RETAIL",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA RETAIL PHARMACY",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "LEETONIA WHOLESALE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LENUS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LENUS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LENUS PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "LENUS PHARMACY",
+    "location": "MADINA",
+    "phone": "0246514361"
+  },
+  {
+    "client": "LENUS PHARMACY",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "LENUS PHARMACY",
+    "location": "SOCIAL-WELFARE",
+    "phone": null
+  },
+  {
+    "client": "LETICIA AGBENYO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LEXIBITA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LIFE HEALTHCARE PHARMACY",
+    "location": "A&C-CORNER",
+    "phone": null
+  },
+  {
+    "client": "LIFE HEALTHCARE PHARMACY",
+    "location": "AIRPORT",
+    "phone": null
+  },
+  {
+    "client": "LIFE HEALTHCARE PHARMACY",
+    "location": "AIRPORT",
+    "phone": "0266246744"
+  },
+  {
+    "client": "LIFE HEALTHCARE PHARMACY",
+    "location": "AIRPORT",
+    "phone": "0546362040"
+  },
+  {
+    "client": "LIFE HEALTHCARE PHARMACY",
+    "location": "AIRPORT",
+    "phone": null
+  },
+  {
+    "client": "LIFE HEALTHCARE PHARMACY",
+    "location": "AIRPORT",
+    "phone": null
+  },
+  {
+    "client": "LIFE HEALTHCARE PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": "0244080118"
+  },
+  {
+    "client": "LIFE SENSE SOLUTIONS",
+    "location": "KASOA",
+    "phone": "0244074518"
+  },
+  {
+    "client": "LIM PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LIM PHARMACY",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "LIM PHARMACY",
+    "location": "MADINA-MARKET",
+    "phone": null
+  },
+  {
+    "client": "LINDA -2",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LINDA 1",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LISTINGS PHARMACY",
+    "location": "NEWTOWN",
+    "phone": null
+  },
+  {
+    "client": "LISTINGS PHARMACY",
+    "location": "SOWUTUOM",
+    "phone": null
+  },
+  {
+    "client": "LISTINGS PHARMACY NEWTOWN",
+    "location": "NEWTOWN",
+    "phone": null
+  },
+  {
+    "client": "LOUISA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LOUISA A.",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "LOUISA MENSAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LOUSA CHEM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LUCAS AMANKWAH",
+    "location": "ASHONGMANG",
+    "phone": "0249898936"
+  },
+  {
+    "client": "LUMINA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LUMINA PHARMACY",
+    "location": "MADINA-ATOMIC",
+    "phone": null
+  },
+  {
+    "client": "LUNA MEDS GHANA LTD",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LYDIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LYDIA CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LYNN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "LYNN-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "M-LIN ENTERPRISE",
+    "location": "MADINA WELFARE",
+    "phone": null
+  },
+  {
+    "client": "MA & M PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MA & M PHARMACY",
+    "location": "KISSEMAN",
+    "phone": null
+  },
+  {
+    "client": "MA & M PHARMACY",
+    "location": "KISSIEMAN",
+    "phone": null
+  },
+  {
+    "client": "MA & M PHARMACY-2",
+    "location": "PANTANG-ROAD",
+    "phone": null
+  },
+  {
+    "client": "MAAME ADWOA CHEMICALS",
+    "location": "NEW-LEGON",
+    "phone": null
+  },
+  {
+    "client": "MAAME ADWOA EFFAH CHEMICAL",
+    "location": "NEW-LEGON",
+    "phone": null
+  },
+  {
+    "client": "MAAME ANIMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAAME ANIMA-2",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAAME ESI-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MABOAT VENTURES",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MACANDY",
+    "location": "KATAMANSO",
+    "phone": null
+  },
+  {
+    "client": "MACANDY PHARMACY",
+    "location": "AMRAHIA",
+    "phone": null
+  },
+  {
+    "client": "MACANDY PHARMACY",
+    "location": "AMRANHIA",
+    "phone": null
+  },
+  {
+    "client": "MACANDY PHARMACY",
+    "location": "AMRANHIA",
+    "phone": null
+  },
+  {
+    "client": "MACANDY PHARMACY",
+    "location": "AMRANHIA",
+    "phone": null
+  },
+  {
+    "client": "MACANDY PHARMACY",
+    "location": "KATAMANSO",
+    "phone": null
+  },
+  {
+    "client": "MACANDY PHARMACY",
+    "location": "OTINIBI",
+    "phone": null
+  },
+  {
+    "client": "MACARTHY HILLS PHARMACY",
+    "location": "MACARTHY-HILL",
+    "phone": null
+  },
+  {
+    "client": "MACARTHY HILLS PHARMACY",
+    "location": "MACARTHY-HILLS",
+    "phone": null
+  },
+  {
+    "client": "MAD. BECKY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAD. EDITH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAD. FAFA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAD. MAGGIE",
+    "location": "ADENTA",
+    "phone": "0551484260"
+  },
+  {
+    "client": "MAD. SOPHIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM ABREFI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM ANTHONIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM ANTHONIA BANNERMAN-QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM ANTHONIA BANNERMAN-QUIST",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MADAM ANTONIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM BEATRICE",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MADAM BECKY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM CAROL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM CYNTHIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM DORA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM DORIS SAM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM ELAINE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM ERNESTINA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM ESI MUSEY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM GRACE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM HAGAR",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM JULIE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM JULIENNE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM JULIET",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MADAM LAWRENCIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM LETICIA",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MADAM MARGARET WINFEL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM PAMELA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADAM SOPHIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADINA COMMUNITY HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADINA COMMUNITY HOSPITAL",
+    "location": "RITZ",
+    "phone": null
+  },
+  {
+    "client": "MADNA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MADNA PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MADNA PHARMACY",
+    "location": "MADINA",
+    "phone": "0555117051"
+  },
+  {
+    "client": "MAGGIE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MALTITI CHEMIST",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MAM CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAM CHEMIST",
+    "location": "KWABENYA",
+    "phone": null
+  },
+  {
+    "client": "MAM CHEMIST",
+    "location": "KWABENYA",
+    "phone": "0244636155"
+  },
+  {
+    "client": "MAM CHEMIST",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MAM CHEMIST-KWABENYA",
+    "location": "KWABENYA",
+    "phone": "0244636155"
+  },
+  {
+    "client": "MAM CHEMISTS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAM CHEMISTS",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MAM CHEMISTS",
+    "location": "RAWLINGS",
+    "phone": null
+  },
+  {
+    "client": "MAM CHEMISTS-OGBOJO",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "MAM-1 PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAMA AFI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAMA AKUA",
+    "location": "DANSOMAN",
+    "phone": null
+  },
+  {
+    "client": "MAMPONG OUTREACH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAMPROBI POLYCLINIC",
+    "location": "MAMPROBI",
+    "phone": "0540960042"
+  },
+  {
+    "client": "MARIAM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MARIAM CHEMICAL SHOP",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "MARIAM CHEMICAL SHOP",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "MARIAM HEALTHLINK",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MARIAN",
+    "location": "MADINA",
+    "phone": "0242377911"
+  },
+  {
+    "client": "MARITA'S CHEMICAL SHOP",
+    "location": "ADJIRIGANOR",
+    "phone": "0556880572"
+  },
+  {
+    "client": "MARITAS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MARKET STREET PHARMACY",
+    "location": "TESHIE",
+    "phone": "0244797988"
+  },
+  {
+    "client": "MARS PHARMACY",
+    "location": "BOTWE",
+    "phone": "0201198421"
+  },
+  {
+    "client": "MARY CHEMICAL SHOP",
+    "location": "DODOWA",
+    "phone": null
+  },
+  {
+    "client": "MARY CHEMICAL SHOP",
+    "location": "DODOWA",
+    "phone": "0244587296"
+  },
+  {
+    "client": "MARY CHEMICAL SHOP",
+    "location": "DODOWA ROAD",
+    "phone": null
+  },
+  {
+    "client": "MARY CHEMICAL SHOP",
+    "location": "DODOWA-ROAD",
+    "phone": "0244587296"
+  },
+  {
+    "client": "MARY-MAMALIT SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MASCOT PHARMACY",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "MASPHYL CHEMICAL SHOP",
+    "location": null,
+    "phone": "0240113388"
+  },
+  {
+    "client": "MATILDA NNOMAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAVIS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAVIS",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "MAVIS AFRIFA",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MAVIS APPIAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MAY-MART PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MAY-MART PHARMACY",
+    "location": "MADINA",
+    "phone": "0244651043"
+  },
+  {
+    "client": "MCCARTHY HILL PHARMACY",
+    "location": "MCCARTHY-HILL",
+    "phone": null
+  },
+  {
+    "client": "MCCARTHY HILL PHARMACY",
+    "location": "McCARTHY-HILL",
+    "phone": null
+  },
+  {
+    "client": "MEDAID PHARMACY",
+    "location": "ADJIRIGANNO",
+    "phone": null
+  },
+  {
+    "client": "MEDAID PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "MEDCOT VENTURES",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MEDEXPRESS PHARMACY",
+    "location": "ADJIRINGANO",
+    "phone": null
+  },
+  {
+    "client": "MEDIWELL PHARMACY",
+    "location": "ANUM-TESSA-AVE",
+    "phone": "0540131987"
+  },
+  {
+    "client": "MEDMAX CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MEDMAX CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MEDMAX CHEMICAL SHOP",
+    "location": "OYARIFA",
+    "phone": "0243835295"
+  },
+  {
+    "client": "MEDMAX CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MEDMAX CHEMICALS",
+    "location": "OYARIFA",
+    "phone": null
+  },
+  {
+    "client": "MEDMAX CHEMICALS",
+    "location": "TEIMAN",
+    "phone": "0244026433"
+  },
+  {
+    "client": "MEDMAX PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MEDMAX PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MEDNIGHT PHARMACY LTD",
+    "location": "KUMASI",
+    "phone": "0204328058"
+  },
+  {
+    "client": "MELIA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MELIA PHARMACY",
+    "location": "RITZ",
+    "phone": null
+  },
+  {
+    "client": "MELISA-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MERCY A.TATAGA CHEMICAL",
+    "location": "ABOKOBI",
+    "phone": null
+  },
+  {
+    "client": "MERCY ARTHUR CHEMICAL",
+    "location": "AMRAHIA",
+    "phone": null
+  },
+  {
+    "client": "MERCY ARTHUR CHEMICAL",
+    "location": "ARMAHIA",
+    "phone": null
+  },
+  {
+    "client": "MERCY ARTHUR CHEMICAL",
+    "location": "DODOWA",
+    "phone": null
+  },
+  {
+    "client": "MERCY ARTHUR CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MERCY ARTHUR CHEMICAL SHOP",
+    "location": "AMARHIA",
+    "phone": null
+  },
+  {
+    "client": "MERCY ARTHUR CHEMICAL SHOP",
+    "location": "AMRAHIA",
+    "phone": null
+  },
+  {
+    "client": "MERCY SEAK CLINIC CENTRE",
+    "location": "MADINA",
+    "phone": "0557230026"
+  },
+  {
+    "client": "MERCY SEAT CLINIC CENTRE",
+    "location": "MADINA",
+    "phone": "0557230026"
+  },
+  {
+    "client": "MFAGO CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MI AND MA PHARMACY",
+    "location": "ADENTA-SAKORA",
+    "phone": "0555145936"
+  },
+  {
+    "client": "MICHAEL KOPOANYA",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MIKADDO PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MILLICENT B.Q.CHEMICAL SHOP",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "MILLICENT QUANSAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MILLS CHEMICAL SHOP",
+    "location": "MEMPEASEM",
+    "phone": "0244747089"
+  },
+  {
+    "client": "MILLS COSMETICS",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "MIPILL PHARMACY",
+    "location": "OYARIFA",
+    "phone": null
+  },
+  {
+    "client": "MIPILL PHARMACY",
+    "location": "OYARIFA",
+    "phone": "0239479702"
+  },
+  {
+    "client": "MIRIAM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MIRIAM BOATENG",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MIRIAM VULORINA",
+    "location": "DANSOMAN",
+    "phone": null
+  },
+  {
+    "client": "MISS CHRISTIANA TETTEH",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MISS DIANA",
+    "location": "AMERICAN",
+    "phone": null
+  },
+  {
+    "client": "MISS KAY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MISS KONADU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MISS SARAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MISS SARAH KONADU",
+    "location": "AGBOGBA",
+    "phone": "0247546346"
+  },
+  {
+    "client": "MISS SARAH KONADU",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MK VENTURES",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MODA BERTA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MOHAMMED",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MOHAMMED ADAMS CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MOHAMMED CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MONAZ PHARMACY",
+    "location": "KORLE",
+    "phone": null
+  },
+  {
+    "client": "MORRISON",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR ABUBAKAR",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR AMOATENG CHEMICAL",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "MR BANAFO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR BANKY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MR DICKSON ASAMOAH-ADU",
+    "location": null,
+    "phone": "0244-568139"
+  },
+  {
+    "client": "MR EDEM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR EMMANUEL ARMAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR I.E QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR ISAAC QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR JUDE QUARSHIE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR JUDE QUARSHIE",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "MR JULIUS J.K OCLOO",
+    "location": "HAATSO-ATOMIC",
+    "phone": null
+  },
+  {
+    "client": "MR KWABENA ANOKYE ADISI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR KWABENA ANOKYE AJISI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR LEEFORD BANNERMAN-QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR OFFEI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR RAJ",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR RICHARD ADDO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR TETTEH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR. APPIAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR. BAAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR. BANNERMAN QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR. DEBRAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR. DICKSON A. AGYEMAN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR. FELIX FORFOE",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "MR. I.E QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MR. JUDE QUARSHIE",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "MR. SAMMY",
+    "location": "AKROPONG",
+    "phone": null
+  },
+  {
+    "client": "MR.EMMANUEL QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS ANTHONIA BANNERMAN-QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS ANTHONIA BANNERMAN -QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS ANTHONIA BANNERMAN QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS ANTHONIA BANNERMAN-QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS ANTHONIA BANNERMAN-QUIST",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "MRS ANTHONIA BANNERMAN-QUIST",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MRS BANNERMAN-QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS BROWN",
+    "location": "ADJIRIGANOR",
+    "phone": null
+  },
+  {
+    "client": "MRS HANNAH QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS JULIET",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS SHIRLEY AMARTEY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS SRIBOE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS. ABENA WIAFE OWUSU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS. ADISI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS. AMISSAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS. ANTHONIA BANNERMAN -QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS. ANTHONIA BANNERMAN-QUIST",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MRS. ANTHONIA QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS. EDITH BANNERMAN QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MRS. HANNAH QUIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MS DAINA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MS DIANA",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "MS GERTRUDE",
+    "location": "WELFARE",
+    "phone": null
+  },
+  {
+    "client": "MS JENNIFER-PHARMATRUST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MS KONADU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MS KONADU",
+    "location": "ABOKOBI",
+    "phone": null
+  },
+  {
+    "client": "MS RITA",
+    "location": "EAST LEGON",
+    "phone": null
+  },
+  {
+    "client": "MS SARAH KONADU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MS SARAH KONADU",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "MS SHIRLEY AMARTEY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "MUHKTAR CHEMICALS",
+    "location": "NIMA",
+    "phone": "0244620344"
+  },
+  {
+    "client": "MUSA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "McCARTHY HILL PHARMACY",
+    "location": "McCARTHY-HILL",
+    "phone": null
+  },
+  {
+    "client": "McCarthy Hills Pharmacy",
+    "location": "McCarthy Hills",
+    "phone": null
+  },
+  {
+    "client": "N-GEO PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "N-GEO PHARMACY",
+    "location": null,
+    "phone": "0240904311"
+  },
+  {
+    "client": "N-GEO PHARMACY",
+    "location": "LAKE-SIDE",
+    "phone": "0244064419"
+  },
+  {
+    "client": "N-GEO PHARMACY",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "N-GEO PHARMACY",
+    "location": "LAKESIDE",
+    "phone": "0240904311"
+  },
+  {
+    "client": "N-GEO PHARMACY",
+    "location": "LAKESIDE",
+    "phone": "0540870351"
+  },
+  {
+    "client": "N-GEO PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "N-GEO PHARMACY",
+    "location": "MADINA",
+    "phone": "0240904311"
+  },
+  {
+    "client": "N-GEO PHARMACY",
+    "location": "MADINA",
+    "phone": "0240904311"
+  },
+  {
+    "client": "N-GEO PHARMACY-LAKESIDE",
+    "location": "MADINA",
+    "phone": "0240904311"
+  },
+  {
+    "client": "NAA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NAA SHIKA CHEMICAL",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "NAA SHIKA CHEMICAL SHOP",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "NAA SHIKA CHEMICALS",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "NAA SHIKA CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NAASHIKA CHEM",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "NAASHIKA CHEMICAL",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "NAASHIKA CHEMICAL",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "NAASHIKA CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NAASHIKA CHEMICAL SHOP",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "NAASHIKA CHEMICALS",
+    "location": "MEMPEASEM",
+    "phone": null
+  },
+  {
+    "client": "NAFISAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA AFRAKUMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA AKOSUA KONADU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA BEDIAKO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA HEMAA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA OPOKU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA OPOKU",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "NANA OPOKU-LEETONIA",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "NANA POKU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA YAW",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA- CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NANA-SALES REP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NAOMI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NASDAL PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NAT",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NAT. KWABENA ADISI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NATHAN-BATCH AND BATCH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NATHAN-CASH CUSTOMER",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "NATHANIEL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "NATHANIEL AFFUM",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "NEXT CARE PHARMACY",
+    "location": "SCHOOL",
+    "phone": null
+  },
+  {
+    "client": "NEXTCARE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NEXTCARE PHARMACY",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "NEXTCARE PHARMACY",
+    "location": "LEGON-HILLS",
+    "phone": null
+  },
+  {
+    "client": "NII",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NII AYI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NII DARKU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NITA CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NITA CHEMICAL SHOP",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "NITA CHEMICAL SHOP",
+    "location": "SOCIAL-WELFARE",
+    "phone": "0243143501"
+  },
+  {
+    "client": "NK VENTURES",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "NOBLE KEKELI AMEGASHIE",
+    "location": "DRUGLANE",
+    "phone": null
+  },
+  {
+    "client": "NORTH LEGON HOSPITAL",
+    "location": "NORTH-LEGON",
+    "phone": "0547978824"
+  },
+  {
+    "client": "NORVATIS AMA",
+    "location": "ACCRA",
+    "phone": null
+  },
+  {
+    "client": "NURAB PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OAKA PHARMACY",
+    "location": "LAPAZ",
+    "phone": null
+  },
+  {
+    "client": "OAKLEX PHARMACY",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "OAKPLEX PHARMACY",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "OBAAPA CHEMIST",
+    "location": "NSAWAM",
+    "phone": "0547755487"
+  },
+  {
+    "client": "OBED",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OBED CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OBENG MAXWELL CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OBENG MAXWELL CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OCHESTA CHEMICAL",
+    "location": "ASHALEY-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ODORKOR PHARMACY",
+    "location": "ODORKOR",
+    "phone": null
+  },
+  {
+    "client": "OFFORI ATTA CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OFFSHORE PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "OFFSHORE PHARMACY",
+    "location": "MADINA",
+    "phone": "0244111678"
+  },
+  {
+    "client": "OFFSHORE PHARMACY2",
+    "location": "MADINA-ZONGO",
+    "phone": null
+  },
+  {
+    "client": "OFORI ATTA CHEMICALS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OFORI ATTAH CHEMICAL SHOP",
+    "location": "ST.PETERS",
+    "phone": "0240574123"
+  },
+  {
+    "client": "OFOSU HEMAA CHEMICAL SHOP",
+    "location": "MABEY",
+    "phone": "0248955959"
+  },
+  {
+    "client": "OHENEBA",
+    "location": "MADINA-ESTATES",
+    "phone": "0302983045"
+  },
+  {
+    "client": "ONE TAB PHARMACY",
+    "location": "ASANTE-AND-ASANTE",
+    "phone": "0548253585"
+  },
+  {
+    "client": "ONE TAP PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ORCHESTRA PHARMACY",
+    "location": "LAKESIDE",
+    "phone": null
+  },
+  {
+    "client": "ORCHID CHEMICAL",
+    "location": "NANAKROM",
+    "phone": null
+  },
+  {
+    "client": "ORION PHARMACY",
+    "location": "ADENTA",
+    "phone": "0203998789"
+  },
+  {
+    "client": "OSBON PHARMACY",
+    "location": "LIBYA-QUARTERS",
+    "phone": null
+  },
+  {
+    "client": "OSBON PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "OSBON PHARMACY",
+    "location": "MADINA-LIBYA",
+    "phone": null
+  },
+  {
+    "client": "OSBON PHARMACY",
+    "location": "MADINA-LIBYA",
+    "phone": null
+  },
+  {
+    "client": "OSEI BERKO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OTY'S PHARMACY",
+    "location": "DODOWA",
+    "phone": null
+  },
+  {
+    "client": "OTY'S PHARMACY",
+    "location": "DODOWA",
+    "phone": "0247344168"
+  },
+  {
+    "client": "OTY'S PHARMACY-2",
+    "location": "DODOWA-ROAD",
+    "phone": null
+  },
+  {
+    "client": "OTY'S PHARMACY",
+    "location": "DODOWA",
+    "phone": "0547344168"
+  },
+  {
+    "client": "OUR CHEMIST",
+    "location": "SAMANPOMU",
+    "phone": "0502663226"
+  },
+  {
+    "client": "OWUSU-CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "OYOKO CLINIC",
+    "location": "ADENTA-LOTTO",
+    "phone": null
+  },
+  {
+    "client": "OYOKO-DUKU CLINIC",
+    "location": "MADINA-DUKU",
+    "phone": null
+  },
+  {
+    "client": "PAA KWASI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PAA KWASI",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PAA KWASI ( PK)",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PAA KWESI",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PALM-AID PHARMACY",
+    "location": "LA",
+    "phone": null
+  },
+  {
+    "client": "PALZAH PHARMACY",
+    "location": "OGBOJO",
+    "phone": "0209250448"
+  },
+  {
+    "client": "PASSION CLINIC",
+    "location": "WELFARE",
+    "phone": null
+  },
+  {
+    "client": "PASTOR BONA",
+    "location": "PEDUASE",
+    "phone": null
+  },
+  {
+    "client": "PASTOR BONA",
+    "location": "PEDUASE-ABURI",
+    "phone": null
+  },
+  {
+    "client": "PASTOR BONA",
+    "location": "PEDUASE-LODGE",
+    "phone": null
+  },
+  {
+    "client": "PATIENCE-CARE CHANNEL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PAULINA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PEED CHEMIST",
+    "location": "JIRON-OGBOJO",
+    "phone": "0247943112"
+  },
+  {
+    "client": "PESCA CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PFAGO CHEMIST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PFAGO CHEMIST",
+    "location": null,
+    "phone": "0246-410067"
+  },
+  {
+    "client": "PFAGO CHEMIST",
+    "location": "DOKU",
+    "phone": null
+  },
+  {
+    "client": "PFAGO CHEMIST",
+    "location": "MADINA-DOKU",
+    "phone": "0246410067"
+  },
+  {
+    "client": "PFAGO CHEMIST",
+    "location": "MADINA-DOKU",
+    "phone": "0596267146"
+  },
+  {
+    "client": "PFAGO CHEMIST",
+    "location": "TRASSACO-PHASE",
+    "phone": "0596267146"
+  },
+  {
+    "client": "PHARM ADDIPAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PHARM BEATRICE",
+    "location": "LEGON",
+    "phone": null
+  },
+  {
+    "client": "PHARM BEATRICE CS ALLOT",
+    "location": "HAATSO",
+    "phone": null
+  },
+  {
+    "client": "PHARM KWESI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PHARM. BEATRICE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PHARM.DERRICK",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PHARMACCESS GROUP GHANA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PHARMACCESS GROUP GHANA",
+    "location": "BAWALESHIE",
+    "phone": "0244487988"
+  },
+  {
+    "client": "PHARMAGEORGE",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PHARMATRUST",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PHR. MATHEW FRIMPONG",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PICOLOLO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PILL CARE PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PILL HUB",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PILL HUB PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PILL HUB PHARMACY",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "PILL HUB PHARMACY",
+    "location": "SOCIAL-WELFARE",
+    "phone": null
+  },
+  {
+    "client": "PILL HUBB",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PILL RACK PHARMACY",
+    "location": "NORTH-LEGON",
+    "phone": "0243183964"
+  },
+  {
+    "client": "PILLHUB",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PILLHUB PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PILLHUB PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PILLHUB PHARMACY",
+    "location": "MADINA",
+    "phone": "0302527177"
+  },
+  {
+    "client": "PILLHUB PHARMACY",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "PLEASANT MEDICAL CENTER",
+    "location": "ASHAIMAN",
+    "phone": null
+  },
+  {
+    "client": "PLEASANT PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PLEASANT PHARMACY",
+    "location": "ASHAIMAN",
+    "phone": null
+  },
+  {
+    "client": "POINT OF CARE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "POINT OF CARE PHARMACY",
+    "location": "ABOKOBI",
+    "phone": null
+  },
+  {
+    "client": "POINT OF CARE PHARMACY",
+    "location": "DZORWULU",
+    "phone": null
+  },
+  {
+    "client": "PORTIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PORTIA 3K",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PORTIA @3K PILLHUB REDCO",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PREMIER SPECIALIST HOSPITAL",
+    "location": "TARKWA",
+    "phone": null
+  },
+  {
+    "client": "PREMIUM PHARMACY",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "PREMIUM PHARMACY",
+    "location": "OSU",
+    "phone": "0596557070"
+  },
+  {
+    "client": "PREMIUM PHARMACY-2",
+    "location": "OSU",
+    "phone": "0596557070"
+  },
+  {
+    "client": "PRESCOTT MEDICAL CENTER",
+    "location": "MADINA-NEW",
+    "phone": null
+  },
+  {
+    "client": "PRESSON PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PRESSON PHARMACY",
+    "location": "AMERICAN",
+    "phone": "0594008188"
+  },
+  {
+    "client": "PRIJO 1 PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "PRIJO 2 PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "PRIJO PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "PRIJO PHARMACY",
+    "location": "ADENTA-STATION",
+    "phone": null
+  },
+  {
+    "client": "PRIJO PHARMACY 2",
+    "location": "ADENTA-MALL",
+    "phone": null
+  },
+  {
+    "client": "PRIJO PHARMACY-2",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PRIJO-2 PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PRINCE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PRINCE BOATENG",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PRINCE CHEMICAL SHOP",
+    "location": "PANTANG-PNT",
+    "phone": "0245330401"
+  },
+  {
+    "client": "PRINCESS",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "PRISCILLA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PRISCILLA -DORDAN PHARMACY",
+    "location": "REDCO",
+    "phone": null
+  },
+  {
+    "client": "PRISCILLA ADE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PRISCILLA CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PRISCILLA MARKU",
+    "location": "ASHALEY-BOTWE",
+    "phone": "0598400830"
+  },
+  {
+    "client": "PRISCILLA-CASH CUSTOMER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PROH PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PROPHET",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "PROPHET ESHUN",
+    "location": "SOMANYA",
+    "phone": "0598564137"
+  },
+  {
+    "client": "PROSPECT PHARMACY",
+    "location": "EAST",
+    "phone": "0594667977"
+  },
+  {
+    "client": "PharmaGeorge Pharmacy",
+    "location": "Madina",
+    "phone": null
+  },
+  {
+    "client": "QUICK HEALTH PHARMACY",
+    "location": "ASYLUM-DOWN",
+    "phone": "0244958661"
+  },
+  {
+    "client": "QUNLOON GHANA",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "RACHEAL OFORI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RAHINATU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RAHMAN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RAHMAN SEIDU CHEMICAL SHOP",
+    "location": "PANTANG-P&T",
+    "phone": "0244162511"
+  },
+  {
+    "client": "RANKOF PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "REB-J ENTERPRISE",
+    "location": "MADINA-ESTATES",
+    "phone": "0244704710"
+  },
+  {
+    "client": "REB-JAY CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "REBBECA CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "REBECCA CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "REBECCA CHEMICAL",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "REBECCA CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "REBECCA CHEMICAL SHOP",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "REBECCA CHEMICALS",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "REBECCA ENYAN",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "REDCO CALLAGEN PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "REDCO COLLAGEN PHARMACY",
+    "location": "LIBYA-QUARTERS",
+    "phone": null
+  },
+  {
+    "client": "REDCO COLLAGEN PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "REDEEMER CHURCH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "REGINA BIOH CHEM",
+    "location": "KUMASI",
+    "phone": null
+  },
+  {
+    "client": "REGINA CHEM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "REGINALD CHEMICAL SHOP",
+    "location": "LAKESIDE-COMM",
+    "phone": "0546236597"
+  },
+  {
+    "client": "REINNA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "REINNA PHARMACY-DONATION",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RICHARD",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RICHARD OCRAN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RICHMOND-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RINGWAY CHEMISTS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RIT DOE PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "RITA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RITA MENSAH",
+    "location": "MADINA",
+    "phone": "0554236093"
+  },
+  {
+    "client": "RITE DOSE PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "ROMART PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ROMART PHARMACY",
+    "location": "KASOA",
+    "phone": null
+  },
+  {
+    "client": "RONNY PHARMACY",
+    "location": "ADENTA-NEW",
+    "phone": "0547642387"
+  },
+  {
+    "client": "ROSE AID PHARMACY",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ROYAL CARE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ROYAL CARE PHARMACY",
+    "location": "AKROPONG",
+    "phone": null
+  },
+  {
+    "client": "ROYAL CARE PHARMACY",
+    "location": "AKROPONG",
+    "phone": "0240714641"
+  },
+  {
+    "client": "ROYAL CARE PHARMACY",
+    "location": "TUTU",
+    "phone": "0240714641"
+  },
+  {
+    "client": "ROYAL CARE PHARMACY-2",
+    "location": "AKROPONG",
+    "phone": "0240714641"
+  },
+  {
+    "client": "ROYAL CARE PHARMACY-ABURI",
+    "location": "ABURI",
+    "phone": null
+  },
+  {
+    "client": "ROYAL CARE PHARMACY-TUTU",
+    "location": "TUTU",
+    "phone": "0240714641"
+  },
+  {
+    "client": "ROYALCARE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ROYALCARE PHARMACY",
+    "location": "AKROPONG",
+    "phone": null
+  },
+  {
+    "client": "ROYALCARE PHARMACY",
+    "location": "AKROPONG",
+    "phone": "0240714641"
+  },
+  {
+    "client": "RUTH DARKO",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RUTH PAT CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "RUTH-PAT CHEMICAL SHOP",
+    "location": "AMERICAN",
+    "phone": null
+  },
+  {
+    "client": "RUTHPAT CHEMICAL SHOP",
+    "location": "DJION",
+    "phone": "0244658376"
+  },
+  {
+    "client": "RYTCOL PHARMACY",
+    "location": "GBAWE",
+    "phone": null
+  },
+  {
+    "client": "S AND V PHARM",
+    "location": "ADENTA-LOTTO",
+    "phone": "0247569083"
+  },
+  {
+    "client": "S&S PHARMACY",
+    "location": "TESANO",
+    "phone": null
+  },
+  {
+    "client": "SADAS CHEMIST",
+    "location": "LA",
+    "phone": null
+  },
+  {
+    "client": "SADAS CHEMISTS",
+    "location": "LA",
+    "phone": null
+  },
+  {
+    "client": "SADAS CHEMISTS",
+    "location": "LA",
+    "phone": "0244208545"
+  },
+  {
+    "client": "SADAS PHARMACY",
+    "location": "LA",
+    "phone": null
+  },
+  {
+    "client": "SADIA CHEM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SAFE ARMS PHARMACY",
+    "location": null,
+    "phone": "0244719426"
+  },
+  {
+    "client": "SAFE ARMS PHARMACY",
+    "location": "AMANFROM",
+    "phone": "0244719426"
+  },
+  {
+    "client": "SAINT JUDE MEDICAL CENTER",
+    "location": "KASOA",
+    "phone": null
+  },
+  {
+    "client": "SALOMAY TS CHEMICAL",
+    "location": "MADINA-DOKU",
+    "phone": "0543616299"
+  },
+  {
+    "client": "SALVEO PHARMACY",
+    "location": "BAATSONA",
+    "phone": null
+  },
+  {
+    "client": "SAM J HOSPITAL",
+    "location": "HAATSO-ECOMOG",
+    "phone": null
+  },
+  {
+    "client": "SAMGYEN",
+    "location": "LA",
+    "phone": null
+  },
+  {
+    "client": "SAMGYEN PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SAMGYEN PHARMACY",
+    "location": "LA",
+    "phone": null
+  },
+  {
+    "client": "SAMGYEN PHARMACY",
+    "location": "LA-TRADE-FAIR",
+    "phone": null
+  },
+  {
+    "client": "SAMGYEN PHARMACY",
+    "location": "LABADI",
+    "phone": null
+  },
+  {
+    "client": "SAMGYEN PHARMACY",
+    "location": "TRADE FAIR(LA)",
+    "phone": null
+  },
+  {
+    "client": "SAMGYEN TABS",
+    "location": "LABADI",
+    "phone": null
+  },
+  {
+    "client": "SAMUEL MENSAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SAMUEL MENSAH O.T.C.",
+    "location": "OYIBI",
+    "phone": "0244383343"
+  },
+  {
+    "client": "SAMUEL QUARSHIE",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "SANDRA NANOR CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SANDRA NANOR CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SANDRA-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SARAH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SARAH KONADU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SAVIOUR-DIXXONS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SCRIPT AND ME PHARMACY",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "SEED PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SEED PHARMACY",
+    "location": "NANAKROM",
+    "phone": null
+  },
+  {
+    "client": "SEED PHARMACY",
+    "location": "NANAKROM",
+    "phone": "0246524612"
+  },
+  {
+    "client": "SEFAMED PHARMACY",
+    "location": "POKUASE",
+    "phone": "0244586206"
+  },
+  {
+    "client": "SEKYI-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SELLY CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SELORM",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SELORM-DAKAL PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SELPHARMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SELPHARMA",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "SENA QUARSHIE",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "SENELLOYD PHARMACY",
+    "location": "BOTWEY",
+    "phone": "0243458669"
+  },
+  {
+    "client": "SERDS PHARMACY",
+    "location": "AMARHIA",
+    "phone": null
+  },
+  {
+    "client": "SETCO CHEMICAL SHOP",
+    "location": "MADINA TAXIRANK",
+    "phone": "0205333115"
+  },
+  {
+    "client": "SEYRAM-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SEYSEL PHARMACEUTICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SHAMAT HERBALS",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "SHEILA CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SHEILA CHEMICAL SHOP",
+    "location": "MADINA-ESTATES",
+    "phone": null
+  },
+  {
+    "client": "SHILO CHEMICAL SHOP",
+    "location": "NEW-LEGON",
+    "phone": "0244213803"
+  },
+  {
+    "client": "SIKA DUA INTERNATIONAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SIKA- DUA INTERNATIONAL",
+    "location": "MADINA-ESTATE",
+    "phone": null
+  },
+  {
+    "client": "SISTER ADJO",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "SISTER AFIA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SK GLOBAL PHARMACY",
+    "location": "OYARIFA",
+    "phone": "020587687"
+  },
+  {
+    "client": "SK GLOBAL PHARMACY",
+    "location": "OYARIFA",
+    "phone": "0536133103"
+  },
+  {
+    "client": "SKYVIEW CHEMICAL SHOP",
+    "location": "OYIBI-VALLEY",
+    "phone": "0550524983"
+  },
+  {
+    "client": "SMILEPILL PHARMACY",
+    "location": "BOTWE",
+    "phone": "0209339912"
+  },
+  {
+    "client": "SOGLO CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SOLOMON ABABIO CHEMICAL",
+    "location": null,
+    "phone": "0241992220"
+  },
+  {
+    "client": "SOLOMON-EMCURE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SOPHIA AMISSAH-LARYEA",
+    "location": "DANSOMAN",
+    "phone": null
+  },
+  {
+    "client": "SOPHIA ZONTA",
+    "location": "DANSOMAN",
+    "phone": null
+  },
+  {
+    "client": "SOWAH TETTEH CHEMICAL",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "SOWAH TETTEH CHEMICAL SHOP",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "SPACE PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SPECTRA WELLNESS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SPENDILOVE- CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ST.PETERS MISSION SCHOOL",
+    "location": "ASHALEY-BOTWE",
+    "phone": "0244313734"
+  },
+  {
+    "client": "STABLE PLUS HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STABLE PLUS HOSPITAL",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "STABLE PLUS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STABLE PLUS PHARMACY",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "STABLE PLUS PHARMACY",
+    "location": "MADINA-MELCOM",
+    "phone": null
+  },
+  {
+    "client": "STABLE PLUS PHARMACY",
+    "location": "MADINA-MELCOM",
+    "phone": null
+  },
+  {
+    "client": "STABLE PLUS PHARMACY -2",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "STAYWELL HEALTH CLINIC",
+    "location": "DJION-JUNCTION",
+    "phone": null
+  },
+  {
+    "client": "STAYWELL PHARMACY",
+    "location": "ASHONGMAN",
+    "phone": null
+  },
+  {
+    "client": "STEDA PHARMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STEPHEN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STEPHEN AWUNI",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STEPHEN KLUTSE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STEPHEN-ACCTS",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STEPHEN-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STEVEN",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STEVEN-RIDER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "STIPPS PHARMACY & WHOLESALE",
+    "location": "ADENTA-MELCOM",
+    "phone": null
+  },
+  {
+    "client": "SUAD",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "SUMMER HILLS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SUMMER HILLS PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "SUMMER HILLS PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": "0244530392"
+  },
+  {
+    "client": "SUMMER HILLS PHARMACY",
+    "location": "EASTLEGON",
+    "phone": null
+  },
+  {
+    "client": "SUMMERHILLS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "SUNLETHA PHARMACY",
+    "location": "KASOA",
+    "phone": null
+  },
+  {
+    "client": "SUNLETHA PHARMACY",
+    "location": "KASOA",
+    "phone": "0243369373"
+  },
+  {
+    "client": "SUNLETHA PHARMACY",
+    "location": "KASOA",
+    "phone": "0244234197"
+  },
+  {
+    "client": "SUPREME BOSS PHARMACY",
+    "location": "ASHONGMAN",
+    "phone": "0545477942"
+  },
+  {
+    "client": "SUPREME MOTHER",
+    "location": "MADINA",
+    "phone": "0202333300"
+  },
+  {
+    "client": "SUPREME MOTHER-CARE",
+    "location": "MADINA",
+    "phone": "0202333300"
+  },
+  {
+    "client": "SUZIE-BURMA CAMP",
+    "location": "BURMA-CAMP",
+    "phone": null
+  },
+  {
+    "client": "SWIFT MEDCARE PHARMA LTD",
+    "location": "OLD",
+    "phone": null
+  },
+  {
+    "client": "SWIFTMEDCARE PHARMACY LTD",
+    "location": "ASHONGMAN",
+    "phone": null
+  },
+  {
+    "client": "TABSMART PHARMACY",
+    "location": "DANSOMAN",
+    "phone": null
+  },
+  {
+    "client": "TABSMART PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "TABSMART PHARMACY",
+    "location": "BULEMIN",
+    "phone": null
+  },
+  {
+    "client": "TABSMART PHARMACY",
+    "location": "GBAWE-BULEMIN",
+    "phone": null
+  },
+  {
+    "client": "TANAHA PHARMACY",
+    "location": "PANTANG",
+    "phone": null
+  },
+  {
+    "client": "TARGET PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "TARGET PHARMACY",
+    "location": "OYARIFA",
+    "phone": "0244135743"
+  },
+  {
+    "client": "TELAD PHARMACY WHOLESALE",
+    "location": "ASHALE BOTWE",
+    "phone": null
+  },
+  {
+    "client": "TELAD PHARMACY WHOLESALE",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "THE DIAMOND PHARMACY",
+    "location": "KASOA",
+    "phone": "0244531905"
+  },
+  {
+    "client": "THERESA-PHYTO RIKER",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "TIMOTHY TIKO-CASH CUSTOMER",
+    "location": "FRAFRAHA",
+    "phone": "0244655359"
+  },
+  {
+    "client": "TIMOTHY TIKO",
+    "location": "FRAFRAHA",
+    "phone": "0244655359"
+  },
+  {
+    "client": "TINYOS CHEMICAL",
+    "location": "FOSTER-HALL",
+    "phone": "0244258084"
+  },
+  {
+    "client": "TINYOS CHEMICAL SHOP",
+    "location": "FOSTER-HALL",
+    "phone": "0244258084"
+  },
+  {
+    "client": "TINYOS CHEMICAL SHOP",
+    "location": "FOSTER-HOME",
+    "phone": "0244258084"
+  },
+  {
+    "client": "TOBINCO PHR.",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "TOP HEART CLINIC",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "TOP HEART CLINIC",
+    "location": "BAWALASHIE",
+    "phone": null
+  },
+  {
+    "client": "TOP HEART CLINIC",
+    "location": "BAWALESHIE",
+    "phone": null
+  },
+  {
+    "client": "TOP HEART CLINIC",
+    "location": "BAWALESHIE",
+    "phone": "0244364658"
+  },
+  {
+    "client": "TOP HEART CLINIC",
+    "location": "EAST-LEGON",
+    "phone": "0244364658"
+  },
+  {
+    "client": "TOP HEART CLINIC",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "TOP HEART CLINIC",
+    "location": "ST.PETERS",
+    "phone": null
+  },
+  {
+    "client": "TOTAL HEALTH CARE CHEMICAL",
+    "location": "SAMANPOM",
+    "phone": null
+  },
+  {
+    "client": "TOTAL HEALTH CARE PHARMACY",
+    "location": "SAMANPUOM",
+    "phone": null
+  },
+  {
+    "client": "TOTAL HEALTHCARE CHEMICAL",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "TOTAL HEALTHCARE PHARMACY",
+    "location": "NSAMAMPOM",
+    "phone": "0553355036"
+  },
+  {
+    "client": "TOTAL HEALTHCARE PHARMACY",
+    "location": "SAMANPOOM",
+    "phone": null
+  },
+  {
+    "client": "TREE OF LIFE CLINIC",
+    "location": "ASHALEY-BOTWE",
+    "phone": "0551690059"
+  },
+  {
+    "client": "TRUDY CHEMICALS",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "TRUST HOSPITAL",
+    "location": "MAIN-OSU",
+    "phone": null
+  },
+  {
+    "client": "TSALACH FOUNDATION",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "TWUMASIWAA HOSPITAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "UNCLE TOMMY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "UNIRICH CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "UNIRICH CHEMICAL SHOP",
+    "location": "TESHIE",
+    "phone": "024597699"
+  },
+  {
+    "client": "VADEM PHARMACY",
+    "location": "MADINA ESTATES",
+    "phone": null
+  },
+  {
+    "client": "VANESSA-KAMAID",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VANIAH PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VANIAH PHARMACY",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "VANIAH PHARMACY",
+    "location": "BOTWE-AVIATION",
+    "phone": null
+  },
+  {
+    "client": "VANIAH PHARMACY",
+    "location": "BOTWE-ROAD",
+    "phone": null
+  },
+  {
+    "client": "VANORA PHARMACY",
+    "location": "ADENTA-SSNIT",
+    "phone": "0504878540"
+  },
+  {
+    "client": "VANORA PHARMACY-1",
+    "location": "ADENTA-SSNIT",
+    "phone": "0504878540"
+  },
+  {
+    "client": "VANORA PHARMACY-2",
+    "location": "ADENTA-SSNIT",
+    "phone": "0504878540"
+  },
+  {
+    "client": "VICENTIA CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VICENTIA CHEMICAL",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "VICENTIA CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VICENTIA CHEMICAL SHOP",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "VICENTIA CHEMICAL SHOP",
+    "location": "OGBOJO",
+    "phone": "0207447073"
+  },
+  {
+    "client": "VICENTIA CHEMICAL SHOP",
+    "location": "OGBOJO",
+    "phone": "0207447073"
+  },
+  {
+    "client": "VICENTIA CHEMICALS",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "VICTORIA REPUBLIC BANK",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGODUA CHEMICAL",
+    "location": "BAWALESHIE",
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGODUA CHEMICAL-2",
+    "location": "BAWALESHIE",
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGODUAH CHEMICAL",
+    "location": "DJEN-AYOR",
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGUDU",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGUDUA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGUDUA",
+    "location": "OGBOJO",
+    "phone": "0207447073"
+  },
+  {
+    "client": "VICTORIA AGUDUA CHEMICAL",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGUDUA CHEMICAL",
+    "location": "AGBOGBA",
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGUDUA CHEMICAL",
+    "location": "BAWALESHIE",
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGUDUA CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VICTORIA AGUDUAH CHEMICAL",
+    "location": "DJEN-AYOR",
+    "phone": null
+  },
+  {
+    "client": "VICTORIA BOAHEMAA CHEM",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "VICTORIA BOAHEMAA CHEMICAL SHOP",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "VIDA",
+    "location": "MADINA",
+    "phone": null
+  },
+  {
+    "client": "VIDA CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VIDA KORANTEMAA",
+    "location": "DANSOMAN",
+    "phone": "0243393182"
+  },
+  {
+    "client": "VIDA-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VINA PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "VINA PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VINA PHARMACY",
+    "location": "ADENTA",
+    "phone": null
+  },
+  {
+    "client": "VINA PHARMACY",
+    "location": "BOTWE-AVIATION",
+    "phone": null
+  },
+  {
+    "client": "VINAH PHARMACY",
+    "location": "ADENTA-SSNIT",
+    "phone": "0504878540"
+  },
+  {
+    "client": "VINAH PHARMACY",
+    "location": "ADENTA-SSNIT",
+    "phone": "0504878540"
+  },
+  {
+    "client": "VINCENTIAL CHEMICAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VINE MEDICS CENTER",
+    "location": "MILE-7",
+    "phone": "0243889672"
+  },
+  {
+    "client": "VINGEN PHARMACY",
+    "location": "TESHIE",
+    "phone": null
+  },
+  {
+    "client": "VINGEN PHARMACY",
+    "location": "TESHIE",
+    "phone": "0243276491"
+  },
+  {
+    "client": "VINJANE PHARMACY",
+    "location": "TESHIE",
+    "phone": "0243276491"
+  },
+  {
+    "client": "VINJEN PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VINJEN PHARMACY",
+    "location": "TESHIE",
+    "phone": null
+  },
+  {
+    "client": "VINJEN PHARMACY",
+    "location": "TESHIE",
+    "phone": "0243276491"
+  },
+  {
+    "client": "VISAT PHARMACY",
+    "location": "LIBYA-QUARTERS",
+    "phone": null
+  },
+  {
+    "client": "VISAT PHARMACY",
+    "location": "MADINA-ZONGO",
+    "phone": null
+  },
+  {
+    "client": "VISAT PHARMACY",
+    "location": "MADINA-ZONGO",
+    "phone": null
+  },
+  {
+    "client": "VISAT PHARMACY",
+    "location": "REDCO",
+    "phone": null
+  },
+  {
+    "client": "VITAL CARE PHARMACY",
+    "location": "JBETSILE",
+    "phone": "0536889767"
+  },
+  {
+    "client": "VITALCARE / EMERGENCY HOSPITAL",
+    "location": "JBETSILE",
+    "phone": "0536889767"
+  },
+  {
+    "client": "VIVIAN TWUMWAA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VIX-WENDY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "WELLINGTON PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "WELLMART PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "WELLMART PHARMACY",
+    "location": "EAST",
+    "phone": "0596314110"
+  },
+  {
+    "client": "WELLWISE PHARMACY",
+    "location": "GBAWE",
+    "phone": null
+  },
+  {
+    "client": "WENCOL PHARMACY",
+    "location": "EAST LEGON",
+    "phone": null
+  },
+  {
+    "client": "WENCOL PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "WENCOL PHARMACY",
+    "location": "EAST-LEGON",
+    "phone": null
+  },
+  {
+    "client": "WENCOL PHARMACY",
+    "location": "EASTLEGON",
+    "phone": null
+  },
+  {
+    "client": "WORLDVIEW PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "WURUPONG HEALTH CENTRE",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "XCHANGE FAMILY CHURCH",
+    "location": "OGBOJO",
+    "phone": null
+  },
+  {
+    "client": "YAKOS PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "YAKOS PHARMACY",
+    "location": "OYARIFA",
+    "phone": null
+  },
+  {
+    "client": "YAKOS PHARMACY",
+    "location": "OYARIFA",
+    "phone": "0206900699"
+  },
+  {
+    "client": "YAKOS PHARMACY",
+    "location": "OYARIFA-KAYBEE",
+    "phone": "0206900699"
+  },
+  {
+    "client": "YAKOS PHARMACY",
+    "location": "OYARIFA-KAYBEE",
+    "phone": "0206900699"
+  },
+  {
+    "client": "YAKOS PHARMACY",
+    "location": "OYARIFA-KAYBEE",
+    "phone": null
+  },
+  {
+    "client": "YASIR",
+    "location": "BOLGATANGA",
+    "phone": "0249322346"
+  },
+  {
+    "client": "YASPHINE QUARSHIE",
+    "location": "OSU",
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": "ABILITY SQUARE",
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": "ABILITY-SQUARE",
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": "ADJIRIGANO",
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": "ADJIRIGANOR",
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": "ADJIRINGANO",
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": "ADJIRINGANOR",
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": "EASTLEGON",
+    "phone": null
+  },
+  {
+    "client": "YIM PHARMACY",
+    "location": "EASTLEGON",
+    "phone": null
+  },
+  {
+    "client": "ZAMZY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ZAMZY CHEMICAL",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ZAMZY CHEMICAL",
+    "location": "ASHALEY-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ZAMZY CHEMICAL",
+    "location": "ASHALEY-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ZAMZY CHEMICAL",
+    "location": "ASHALEYBOTWE",
+    "phone": null
+  },
+  {
+    "client": "ZAMZY CHEMICAL SHOP",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ZAMZY CHEMICAL SHOP",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ZAMZY CHEMICAL SHOP",
+    "location": "BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ZAMZY CHEMICAL-1",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ZAMZY CHEMICAL-2",
+    "location": "ASHALE-BOTWE",
+    "phone": null
+  },
+  {
+    "client": "ZODIAC PHARMACEUTICALS LIMITED",
+    "location": "DANSOMAN",
+    "phone": null
+  },
+  {
+    "client": "ZODIAC PHARMACY",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ZODIAC PHARMACY",
+    "location": "DANSOMAN",
+    "phone": null
+  },
+  {
+    "client": "ZODIAC PHARMACY",
+    "location": "MATAHEKO",
+    "phone": null
+  },
+  {
+    "client": "ZONTA INTERNATIONAL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "ZULIYA PHARMACY",
+    "location": "BOTWE SCHOOL",
+    "phone": "0246254502"
+  },
+  {
+    "client": "ZULIYA PHARMACY",
+    "location": "BOTWE",
+    "phone": "0246254502"
+  },
+  {
+    "client": "DAVID",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "DAVID RIDER-CASH",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "EMMANUEL",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "KEN -INTERPHARMA",
+    "location": null,
+    "phone": null
+  },
+  {
+    "client": "VIDA-CASH",
+    "location": null,
+    "phone": null
+  }
+]

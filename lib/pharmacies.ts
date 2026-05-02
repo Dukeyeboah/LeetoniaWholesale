@@ -96,34 +96,53 @@ export function slugifyForPharmacyDocId(name: string): string {
  * Creates a new pharmacy row when a user adds their workplace at signup.
  * Id pattern `pharm_added_*` so super admins can review the full list in Firestore.
  */
+export type CreatePharmacySignupOptions = {
+  location?: string;
+  phone?: string;
+  /** Defaults to cash (pay-as-you-go). Credit list will use `credit` later. */
+  customerBillingType?: 'cash' | 'credit';
+};
+
 export async function createPharmacyFromSignup(
   db: Firestore,
   displayName: string,
-  userId: string
+  userId: string,
+  opts?: CreatePharmacySignupOptions
 ): Promise<{ pharmacyId: string; pharmacyName: string }> {
   const trimmed = displayName.trim();
   if (!trimmed) {
     throw new Error('Pharmacy name is required');
   }
 
+  const location = opts?.location?.trim() || null;
+  const phone = opts?.phone?.trim() || null;
+  const customerBillingType = opts?.customerBillingType ?? 'cash';
+  const allowsAccountCredit = customerBillingType === 'credit';
+
   const base = slugifyForPharmacyDocId(trimmed) || 'pharmacy';
   let candidate = `pharm_added_${base}`;
   let suffix = 0;
+
+  const payload = {
+    name: trimmed,
+    location,
+    phone,
+    customerBillingType,
+    allowsAccountCredit,
+    monthlyLimitGHS: DEFAULT_MONTHLY_LIMIT_GHS,
+    monthSpendGHS: 0,
+    monthKey: currentMonthKey(),
+    updatedAt: Date.now(),
+    pendingVerification: true,
+    source: 'signup' as const,
+    createdByUserId: userId,
+  };
 
   while (suffix < 200) {
     const ref = doc(db, 'pharmacies', candidate);
     const snap = await getDoc(ref);
     if (!snap.exists()) {
-      await setDoc(ref, {
-        name: trimmed,
-        monthlyLimitGHS: DEFAULT_MONTHLY_LIMIT_GHS,
-        monthSpendGHS: 0,
-        monthKey: currentMonthKey(),
-        updatedAt: Date.now(),
-        pendingVerification: true,
-        source: 'signup',
-        createdByUserId: userId,
-      });
+      await setDoc(ref, payload);
       return { pharmacyId: candidate, pharmacyName: trimmed };
     }
     suffix += 1;
@@ -131,16 +150,7 @@ export async function createPharmacyFromSignup(
   }
 
   candidate = `pharm_added_${base}_${randomOrderSuffix(6)}`;
-  await setDoc(doc(db, 'pharmacies', candidate), {
-    name: trimmed,
-    monthlyLimitGHS: DEFAULT_MONTHLY_LIMIT_GHS,
-    monthSpendGHS: 0,
-    monthKey: currentMonthKey(),
-    updatedAt: Date.now(),
-    pendingVerification: true,
-    source: 'signup',
-    createdByUserId: userId,
-  });
+  await setDoc(doc(db, 'pharmacies', candidate), payload);
   return { pharmacyId: candidate, pharmacyName: trimmed };
 }
 

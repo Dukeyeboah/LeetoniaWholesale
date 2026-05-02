@@ -15,7 +15,8 @@
     "match-images": "tsx scripts/match-storage-files-to-products.ts",
     "verify-storage": "tsx scripts/verify-storage-files.ts",
     "replace-inventory": "tsx scripts/replace-inventory.ts",
-    "add-inventory": "tsx scripts/add-inventory.ts"
+    "add-inventory": "tsx scripts/add-inventory.ts",
+    "sync:cash-pharmacies": "tsx scripts/sync-cash-pharmacies.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -78,6 +79,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^16.4.5",
+    "firebase-admin": "^13.8.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tsx": "^4.19.2",

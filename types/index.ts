@@ -36,9 +36,23 @@ export interface Pharmacy {
   monthSpendGHS: number;
   /** Calendar month key `YYYY-MM` for which `monthSpendGHS` applies. */
   monthKey: string;
+  /** Area / branch (e.g. from cash-customers import). */
+  location?: string | null;
+  /** Contact phone for the pharmacy (e.g. from cash-customers import). */
+  phone?: string | null;
+  /**
+   * Billing segment: cash customers typically pay on order; credit customers (future) may run a balance.
+   * @see allowsAccountCredit — order flow will use this when credit-customers are imported.
+   */
+  customerBillingType?: 'cash' | 'credit';
+  /**
+   * If false, orders should not accrue unpaid balance (cash-in-hand customers).
+   * Credit customers will use true with caps enforced elsewhere.
+   */
+  allowsAccountCredit?: boolean;
   /** Set when a user adds a pharmacy at signup; super admin can clear after review. */
   pendingVerification?: boolean;
-  source?: 'seed' | 'signup';
+  source?: 'seed' | 'signup' | 'cash_import';
   createdByUserId?: string;
   verifiedAt?: number;
   /** @deprecated prefer pendingVerification */

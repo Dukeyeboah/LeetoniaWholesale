@@ -51,6 +51,8 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
+  const [phoneCooldownUntil, setPhoneCooldownUntil] = useState<number>(0);
+  const [phoneCooldownNow, setPhoneCooldownNow] = useState<number>(Date.now());
   const [showAdminPasskeyDialog, setShowAdminPasskeyDialog] = useState(false);
   const [pendingUser, setPendingUser] = useState<any>(null);
   const router = useRouter();
@@ -113,6 +115,11 @@ export default function LoginPage() {
     const recaptchaContainer = document.getElementById('recaptcha-container');
     if (recaptchaContainer) recaptchaContainer.innerHTML = '';
   };
+
+  useEffect(() => {
+    const t = setInterval(() => setPhoneCooldownNow(Date.now()), 500);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -200,6 +207,13 @@ export default function LoginPage() {
     setError('');
     setPhoneLoading(true);
 
+    if (Date.now() < phoneCooldownUntil) {
+      const secs = Math.ceil((phoneCooldownUntil - Date.now()) / 1000);
+      setError(`Please wait ${secs}s before requesting another code.`);
+      setPhoneLoading(false);
+      return;
+    }
+
     if (!auth || !db) {
       setError(
         'Authentication service unavailable. Please check your Firebase configuration.'
@@ -243,6 +257,8 @@ export default function LoginPage() {
         recaptchaVerifier
       );
       setConfirmationResult(confirmation);
+      // Prevent accidental rapid re-sends (reduces Firebase throttling).
+      setPhoneCooldownUntil(Date.now() + 60_000);
       setError('');
     } catch (err: any) {
       let errorMessage = 'Failed to send verification code.';
@@ -253,7 +269,9 @@ export default function LoginPage() {
       if (err.code === 'auth/invalid-phone-number') {
         errorMessage = 'Invalid phone number format.';
       } else if (err.code === 'auth/too-many-requests') {
-        errorMessage = 'Too many requests. Please try again later.';
+        errorMessage =
+          'Too many SMS attempts. Please wait 15–60 minutes and try again, or use a different phone number/device/network. (Firebase temporarily blocks repeated requests to prevent abuse.)';
+        setPhoneCooldownUntil(Date.now() + 15 * 60_000);
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -475,12 +493,16 @@ export default function LoginPage() {
                   <Button
                     type='submit'
                     className='w-full'
-                    disabled={phoneLoading}
+                    disabled={phoneLoading || phoneCooldownNow < phoneCooldownUntil}
                   >
                     {phoneLoading ? (
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     ) : null}
-                    Send Verification Code
+                    {phoneCooldownNow < phoneCooldownUntil
+                      ? `Try again in ${Math.ceil(
+                          (phoneCooldownUntil - phoneCooldownNow) / 1000
+                        )}s`
+                      : 'Send Verification Code'}
                   </Button>
                 </form>
               ) : (

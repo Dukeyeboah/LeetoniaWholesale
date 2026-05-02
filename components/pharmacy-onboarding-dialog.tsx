@@ -10,6 +10,7 @@ import {
   ensurePharmacyDocument,
   getSeedPharmacy,
 } from '@/lib/pharmacies';
+import { formatPharmacyPickerLabel } from '@/lib/pharmacy-display';
 import {
   Dialog,
   DialogContent,
@@ -28,23 +29,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-type PharmOption = { id: string; name: string };
+type PharmOption = {
+  id: string;
+  name: string;
+  location?: string | null;
+  phone?: string | null;
+};
 
 function seedOptionsSorted(): PharmOption[] {
-  return [...SEED_PHARMACIES].map((s) => ({ id: s.id, name: s.name })).sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+  return [...SEED_PHARMACIES].map((s) => ({ id: s.id, name: s.name }));
 }
 
 function mergePharmacyOptions(fromDb: PharmOption[]): PharmOption[] {
   const seedMissing = SEED_PHARMACIES.filter(
     (s) => !fromDb.some((x) => x.id === s.id)
   ).map((s) => ({ id: s.id, name: s.name }));
-  return [...fromDb, ...seedMissing].sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+  return [...fromDb, ...seedMissing];
 }
 
 type Props = {
@@ -57,15 +75,18 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
   const [name, setName] = useState(user?.name || '');
   const [jobRole, setJobRole] = useState('');
   const [pharmacySource, setPharmacySource] = useState<'list' | 'add'>('list');
-  /** Always seed from curated list so the UI works before/without Firestore. */
   const [pharmacyOptions, setPharmacyOptions] = useState<PharmOption[]>(
     seedOptionsSorted
   );
   const [selectedId, setSelectedId] = useState<string>(
     () => seedOptionsSorted()[0]?.id ?? ''
   );
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [newPharmacyName, setNewPharmacyName] = useState('');
+  const [newPharmacyLocation, setNewPharmacyLocation] = useState('');
+  const [newPharmacyPhone, setNewPharmacyPhone] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showCashSyncHint, setShowCashSyncHint] = useState(false);
 
   useEffect(() => {
     if (!db) return;
@@ -77,34 +98,53 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
           return {
             id: d.id,
             name: (typeof data.name === 'string' && data.name) || d.id,
+            location: data.location ?? null,
+            phone: data.phone ?? null,
           };
         });
-        const merged = mergePharmacyOptions(fromDb);
+        const merged = mergePharmacyOptions(fromDb).sort((a, b) =>
+          formatPharmacyPickerLabel(a).localeCompare(
+            formatPharmacyPickerLabel(b),
+            undefined,
+            { sensitivity: 'base' }
+          )
+        );
         setPharmacyOptions(merged);
         setSelectedId((prev) => {
           if (prev && merged.some((m) => m.id === prev)) return prev;
           return merged[0]?.id ?? '';
         });
+        const hasCashImport = snapshot.docs.some(
+          (d) => d.data().source === 'cash_import'
+        );
+        setShowCashSyncHint(!hasCashImport && snapshot.size < 500);
       },
       (err) => {
         console.error('pharmacies list', err);
-        toast.error('Could not load pharmacies from the server; showing default list.');
-        const fallback = seedOptionsSorted();
+        toast.error(
+          'Could not load pharmacies from the server; showing default list.'
+        );
+        const fallback = mergePharmacyOptions([]);
         setPharmacyOptions(fallback);
         setSelectedId((prev) =>
           prev && fallback.some((m) => m.id === prev)
             ? prev
             : fallback[0]?.id ?? ''
         );
+        setShowCashSyncHint(true);
       }
     );
     return () => unsub();
-  }, [db]);
+  }, []);
 
-  const selectedLabel = useMemo(() => {
-    const o = pharmacyOptions.find((p) => p.id === selectedId);
-    return o?.name ?? '';
-  }, [pharmacyOptions, selectedId]);
+  const selectedOption = useMemo(
+    () => pharmacyOptions.find((p) => p.id === selectedId),
+    [pharmacyOptions, selectedId]
+  );
+
+  const selectedLabel = selectedOption
+    ? formatPharmacyPickerLabel(selectedOption)
+    : '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +180,21 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
           toast.error('Enter the pharmacy name to add.');
           return;
         }
-        const created = await createPharmacyFromSignup(db, added, user.id);
+        const loc = newPharmacyLocation.trim();
+        const ph = newPharmacyPhone.trim();
+        if (!loc) {
+          toast.error('Enter the pharmacy location (area or branch).');
+          return;
+        }
+        if (!ph) {
+          toast.error('Enter the pharmacy phone number.');
+          return;
+        }
+        const created = await createPharmacyFromSignup(db, added, user.id, {
+          location: loc,
+          phone: ph,
+          customerBillingType: 'cash',
+        });
         pharmacyId = created.pharmacyId;
         pharmacyName = created.pharmacyName;
       }
@@ -174,11 +228,11 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
         showCloseButton={false}
         onPointerDownOutside={(e) => {
           const t = e.target as HTMLElement;
-          // Select dropdown is portaled outside dialog; don't steal/block those clicks.
           if (
             t.closest('[data-slot="select-content"]') ||
             t.closest('[data-radix-select-content]') ||
-            t.closest('[data-radix-popper-content-wrapper]')
+            t.closest('[data-radix-popper-content-wrapper]') ||
+            t.closest('[data-slot="popover-content"]')
           ) {
             return;
           }
@@ -189,7 +243,8 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
           if (
             t.closest('[data-slot="select-content"]') ||
             t.closest('[data-radix-select-content]') ||
-            t.closest('[data-radix-popper-content-wrapper]')
+            t.closest('[data-radix-popper-content-wrapper]') ||
+            t.closest('[data-slot="popover-content"]')
           ) {
             e.preventDefault();
           }
@@ -201,12 +256,27 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
           <DialogHeader>
             <DialogTitle>Tell us about you</DialogTitle>
             <DialogDescription>
-              Wholesale orders are tied to your pharmacy. Pick an existing
-              pharmacy or add yours so a super admin can verify it later.
+              Wholesale orders are tied to your pharmacy. Search the cash
+              customer list, or add a new pharmacy (location and phone required)
+              so a super admin can verify it.
             </DialogDescription>
           </DialogHeader>
 
           <div className='grid gap-4 py-4'>
+            {showCashSyncHint && (
+              <Alert>
+                <AlertDescription className='text-sm'>
+                  The full cash-customer directory may not be loaded yet. An
+                  admin should run{' '}
+                  <code className='text-xs bg-muted px-1 rounded'>
+                    pnpm sync:cash-pharmacies
+                  </code>{' '}
+                  once (uses <code className='text-xs bg-muted px-1 rounded'>data/cash-customers.json</code>
+                  ) to import every row into Firestore.
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className='grid gap-2'>
               <Label htmlFor='onboard-name'>Full name</Label>
               <Input
@@ -239,29 +309,66 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
                 </SelectTrigger>
                 <SelectContent className='z-[200] max-h-60'>
                   <SelectItem value='list'>Choose from list</SelectItem>
-                  <SelectItem value='add'>Add pharmacy</SelectItem>
+                  <SelectItem value='add'>Add new pharmacy</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             {pharmacySource === 'list' ? (
               <div className='grid gap-2'>
-                <Label htmlFor='onboard-pharmacy'>Pharmacy</Label>
-                <Select
-                  value={selectedId || undefined}
-                  onValueChange={setSelectedId}
-                  disabled={pharmacyOptions.length === 0}
-                >
-                  <SelectTrigger id='onboard-pharmacy' className='w-full'>
-                    <SelectValue placeholder='Select pharmacy' />
-                  </SelectTrigger>
-                  <SelectContent className='z-[200] max-h-60'>
-                    {pharmacyOptions.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Search pharmacy</Label>
+                <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      role='combobox'
+                      aria-expanded={pickerOpen}
+                      className='w-full justify-between font-normal'
+                      disabled={pharmacyOptions.length === 0}
+                    >
+                      <span className='truncate text-left'>
+                        {selectedLabel || 'Select pharmacy…'}
+                      </span>
+                      <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className='w-[var(--radix-popover-trigger-width)] p-0 z-[250]'
+                    align='start'
+                  >
+                    <Command>
+                      <CommandInput placeholder='Search name, area, phone…' />
+                      <CommandList className='max-h-72'>
+                        <CommandEmpty>No pharmacy found.</CommandEmpty>
+                        <CommandGroup>
+                          {pharmacyOptions.map((p) => {
+                            const label = formatPharmacyPickerLabel(p);
+                            return (
+                              <CommandItem
+                                key={p.id}
+                                value={`${label} ${p.id}`}
+                                onSelect={() => {
+                                  setSelectedId(p.id);
+                                  setPickerOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    'mr-2 h-4 w-4',
+                                    selectedId === p.id
+                                      ? 'opacity-100'
+                                      : 'opacity-0'
+                                  )}
+                                />
+                                <span className='truncate'>{label}</span>
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 {selectedLabel && (
                   <p className='text-xs text-muted-foreground'>
                     Selected: {selectedLabel}
@@ -269,17 +376,38 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
                 )}
               </div>
             ) : (
-              <div className='grid gap-2'>
-                <Label htmlFor='onboard-add-pharmacy'>Pharmacy name</Label>
-                <Input
-                  id='onboard-add-pharmacy'
-                  value={newPharmacyName}
-                  onChange={(e) => setNewPharmacyName(e.target.value)}
-                  placeholder='Official pharmacy name'
-                />
+              <div className='grid gap-3'>
+                <div className='grid gap-2'>
+                  <Label htmlFor='onboard-add-pharmacy'>Pharmacy name</Label>
+                  <Input
+                    id='onboard-add-pharmacy'
+                    value={newPharmacyName}
+                    onChange={(e) => setNewPharmacyName(e.target.value)}
+                    placeholder='Official pharmacy name'
+                  />
+                </div>
+                <div className='grid gap-2'>
+                  <Label htmlFor='onboard-add-location'>Location</Label>
+                  <Input
+                    id='onboard-add-location'
+                    value={newPharmacyLocation}
+                    onChange={(e) => setNewPharmacyLocation(e.target.value)}
+                    placeholder='e.g. Madina, Accra, branch name'
+                  />
+                </div>
+                <div className='grid gap-2'>
+                  <Label htmlFor='onboard-add-phone'>Phone number</Label>
+                  <Input
+                    id='onboard-add-phone'
+                    type='tel'
+                    value={newPharmacyPhone}
+                    onChange={(e) => setNewPharmacyPhone(e.target.value)}
+                    placeholder='e.g. 0244… or +233…'
+                  />
+                </div>
                 <p className='text-xs text-muted-foreground'>
-                  This will appear in the pharmacy list for review. You can place
-                  orders once saved.
+                  New entries are saved as cash customers, appear in this list
+                  for others, and stay pending until a super admin verifies them.
                 </p>
               </div>
             )}

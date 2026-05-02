@@ -692,17 +692,32 @@ export default function AdminDashboard() {
     }
   };
 
+  const MAX_INVENTORY_IMAGE_BYTES = 5 * 1024 * 1024;
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file (JPG, PNG, WebP, etc.).');
+      e.target.value = '';
+      return;
     }
+    if (file.size > MAX_INVENTORY_IMAGE_BYTES) {
+      toast.error('Image must be 5 MB or smaller.');
+      e.target.value = '';
+      return;
+    }
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearSelectedImage = () => {
+    setImageFile(null);
+    setImagePreview(productForm.imageUrl || null);
   };
 
   const handleSaveProduct = async () => {
@@ -718,24 +733,35 @@ export default function AdminDashboard() {
       if (imageFile && storage) {
         setUploadingImage(true);
         try {
-          // Sanitize product name for filename
-          const sanitizedName = (productForm.name || 'product')
+          const rawExt = (imageFile.name.split('.').pop() || 'jpg')
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '');
+          const fileExtension =
+            rawExt && ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(rawExt)
+              ? rawExt === 'jpeg'
+                ? 'jpg'
+                : rawExt
+              : 'jpg';
+          const slug = (productForm.name || 'product')
             .replace(/[^a-zA-Z0-9\s]/g, '')
             .replace(/\s+/g, '_')
-            .toUpperCase()
-            .substring(0, 50);
-          
-          // Use inventoryImages folder and product name-based filename
-          const fileExtension = imageFile.name.split('.').pop() || 'jpg';
-          const fileName = `${sanitizedName}.${fileExtension}`;
-          const imageRef = ref(storage, `inventoryImages/${fileName}`);
-          
+            .substring(0, 40);
+          const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+          const folder = editingProduct?.id || `new_${unique}`;
+          const fileName = `${slug || 'image'}_${unique}.${fileExtension}`;
+          const imageRef = ref(
+            storage,
+            `inventoryImages/products/${folder}/${fileName}`
+          );
+
           await uploadBytes(imageRef, imageFile);
           imageUrl = await getDownloadURL(imageRef);
           toast.success('Image uploaded successfully');
         } catch (error) {
           console.error('Error uploading image:', error);
-          toast.error('Failed to upload image');
+          toast.error(
+            'Failed to upload image. Deploy `storage.rules` (super_admin must be allowed) or check Storage permissions.'
+          );
           setUploadingImage(false);
           return;
         } finally {
@@ -2799,20 +2825,25 @@ export default function AdminDashboard() {
                 )}
               </div>
             </div>
-            <div className='grid grid-cols-4 items-center gap-4'>
-              <Label htmlFor='image' className='text-right'>
-                Product Image
+            <div className='grid grid-cols-4 items-start gap-4'>
+              <Label htmlFor='image' className='text-right pt-2'>
+                Product image
               </Label>
               <div className='col-span-3 space-y-2'>
                 <Input
                   id='image'
                   type='file'
-                  accept='image/*'
+                  accept='image/jpeg,image/png,image/webp,image/gif'
                   onChange={handleImageChange}
                   className='cursor-pointer'
                 />
+                <p className='text-xs text-muted-foreground'>
+                  Upload a photo for this product (max 5 MB). It is stored in
+                  Firebase Storage and the download link is saved on the
+                  product.
+                </p>
                 {(imagePreview || productForm.imageUrl) && (
-                  <div className='relative w-32 h-32 border rounded-md overflow-hidden'>
+                  <div className='relative w-36 h-36 border rounded-md overflow-hidden bg-muted/30'>
                     <img
                       src={imagePreview || productForm.imageUrl || ''}
                       alt='Preview'
@@ -2820,11 +2851,39 @@ export default function AdminDashboard() {
                     />
                   </div>
                 )}
+                {imageFile && (
+                  <div className='flex flex-wrap gap-2'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      size='sm'
+                      onClick={clearSelectedImage}
+                    >
+                      Clear new image
+                    </Button>
+                  </div>
+                )}
                 {productForm.imageUrl && !imageFile && (
-                  <p className='text-xs text-muted-foreground'>
-                    Current image URL: {productForm.imageUrl}
+                  <p className='text-xs text-muted-foreground break-all'>
+                    Current: {productForm.imageUrl}
                   </p>
                 )}
+                <div className='grid grid-cols-1 gap-1 pt-1'>
+                  <Label htmlFor='imageUrlManual' className='text-xs font-normal text-muted-foreground'>
+                    Or paste image URL (optional, if not uploading a file)
+                  </Label>
+                  <Input
+                    id='imageUrlManual'
+                    placeholder='https://…'
+                    value={productForm.imageUrl || ''}
+                    onChange={(e) =>
+                      setProductForm({
+                        ...productForm,
+                        imageUrl: e.target.value.trim(),
+                      })
+                    }
+                  />
+                </div>
               </div>
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
