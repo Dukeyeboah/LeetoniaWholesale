@@ -164,6 +164,13 @@ export async function placeOrderWithPharmacyLimit(
         }
       }
 
+      // All Firestore reads before any writes: inventory gets happen here, then writes below.
+      await transactionReserveLines(
+        db,
+        transaction,
+        orderPayload.items.map((i) => ({ productId: i.id, qty: i.quantity }))
+      );
+
       transaction.set(
         pRef,
         {
@@ -174,12 +181,6 @@ export async function placeOrderWithPharmacyLimit(
           updatedAt: Date.now(),
         },
         { merge: true }
-      );
-
-      await transactionReserveLines(
-        db,
-        transaction,
-        orderPayload.items.map((i) => ({ productId: i.id, qty: i.quantity }))
       );
 
       const oRef = doc(db, 'orders', orderId);

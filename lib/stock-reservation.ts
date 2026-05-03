@@ -5,6 +5,7 @@ import {
   runTransaction,
   writeBatch,
   type DocumentData,
+  type DocumentSnapshot,
   type Firestore,
   type Transaction,
   type UpdateData,
@@ -30,28 +31,49 @@ function aggregateQuantities(items: CartItem[]): Map<string, number> {
 
 /**
  * Inside an existing Firestore transaction: reserve line quantities (increment reservedQty).
+ * Firestore requires every `get` before any `set`/`update`: we read all inventory docs first,
+ * then apply all updates (also merges duplicate line items for the same product).
  */
 export async function transactionReserveLines(
   db: Firestore,
   tx: Transaction,
   lines: { productId: string; qty: number }[]
 ): Promise<void> {
+  const byProduct = new Map<string, number>();
   for (const line of lines) {
-    const pref = doc(db, 'inventory', line.productId);
+    byProduct.set(
+      line.productId,
+      (byProduct.get(line.productId) || 0) + line.qty
+    );
+  }
+
+  const rows: {
+    productId: string;
+    ref: ReturnType<typeof doc>;
+    snap: DocumentSnapshot;
+  }[] = [];
+
+  for (const productId of byProduct.keys()) {
+    const pref = doc(db, 'inventory', productId);
     const ps = await tx.get(pref);
-    if (!ps.exists()) {
-      throw new InsufficientStockError(`Product not found: ${line.productId}`);
+    rows.push({ productId, ref: pref, snap: ps });
+  }
+
+  for (const { productId, ref, snap } of rows) {
+    const qty = byProduct.get(productId)!;
+    if (!snap.exists()) {
+      throw new InsufficientStockError(`Product not found: ${productId}`);
     }
-    const d = ps.data()!;
-    const prod = { id: line.productId, ...d } as Product;
+    const d = snap.data()!;
+    const prod = { id: productId, ...d } as Product;
     const onHand = wholesaleOnHand(prod);
     const res = reservedForOrders(prod);
-    if (onHand - res < line.qty) {
-      const name = (d.name as string) || line.productId;
+    if (onHand - res < qty) {
+      const name = (d.name as string) || productId;
       throw new InsufficientStockError(`Insufficient stock for ${name}`);
     }
-    tx.update(pref, {
-      reservedQty: increment(line.qty),
+    tx.update(ref, {
+      reservedQty: increment(qty),
       updatedAt: Date.now(),
     });
   }
