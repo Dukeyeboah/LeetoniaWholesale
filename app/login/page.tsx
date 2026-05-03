@@ -75,8 +75,9 @@ export default function LoginPage() {
       auth,
       'recaptcha-container',
       {
-        // Visible tends to be more reliable in dev (fewer silent timeouts).
-        size: 'normal',
+        // Invisible: small badge only; challenge runs when SMS is sent. Google may
+        // still show a puzzle if risk is high — that is controlled by Firebase/Google.
+        size: 'invisible',
         callback: () => {
           // reCAPTCHA solved
         },
@@ -87,17 +88,6 @@ export default function LoginPage() {
     );
 
     window.recaptchaVerifier = recaptchaVerifier;
-    // Proactively render so the user completes the challenge before SMS send.
-    // This avoids `auth/invalid-app-credential` that can happen when the widget
-    // hasn't rendered or the token is stale.
-    void recaptchaVerifier
-      .render()
-      .then((id) => {
-        window.recaptchaWidgetId = id;
-      })
-      .catch(() => {
-        // ignore; Firebase will attempt fallback flows
-      });
     return recaptchaVerifier;
   };
 
@@ -261,6 +251,7 @@ export default function LoginPage() {
           // ignore; signInWithPhoneNumber will attempt to continue
         }
 
+        // Invisible reCAPTCHA executes as part of this call (user may see a quick overlay).
         const confirmation = await signInWithPhoneNumber(
           auth,
           formattedPhone,

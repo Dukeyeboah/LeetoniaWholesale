@@ -61,7 +61,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       auth,
       'recaptcha-container-login-dialog',
       {
-        size: 'normal',
+        size: 'invisible',
         callback: () => {},
         'expired-callback': () => {
           setError('reCAPTCHA expired. Please try again.');
@@ -324,10 +324,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               </Button>
             </TabsContent>
             <TabsContent value='phone' className='space-y-4'>
-              <div
-                id='recaptcha-container-login-dialog'
-                className='flex min-h-[78px] justify-center'
-              />
+              {/* Invisible reCAPTCHA mounts here; badge is usually bottom-right of the page */}
+              <div id='recaptcha-container-login-dialog' />
               {!confirmationResult ? (
                 <>
                   <div className='space-y-2'>
