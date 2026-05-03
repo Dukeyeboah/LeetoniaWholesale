@@ -29,6 +29,7 @@ import { AdminPasskeyDialog } from '@/components/admin-passkey-dialog';
 import { isAdminEmail } from '@/lib/admin-config';
 import { omitUndefinedFields } from '@/lib/firestore-sanitize';
 import { inferSignInProvider } from '@/lib/auth-providers';
+import { getPhoneSendVerificationErrorMessage } from '@/lib/phone-auth-errors';
 
 interface LoginDialogProps {
   open: boolean;
@@ -50,22 +51,23 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
   const setupRecaptcha = () => {
     if (typeof window === 'undefined' || !auth) return null;
-    const recaptchaContainer = document.getElementById('recaptcha-container');
+    const recaptchaContainer = document.getElementById(
+      'recaptcha-container-login-dialog'
+    );
     if (recaptchaContainer) {
       recaptchaContainer.innerHTML = '';
     }
-    const recaptchaVerifier = new RecaptchaVerifier(
+    return new RecaptchaVerifier(
       auth,
-      'recaptcha-container',
+      'recaptcha-container-login-dialog',
       {
-        size: 'invisible',
+        size: 'normal',
         callback: () => {},
         'expired-callback': () => {
           setError('reCAPTCHA expired. Please try again.');
         },
       }
     );
-    return recaptchaVerifier;
   };
 
   const ensureUserProfile = async (firebaseUser: any, phoneNumber?: string) => {
@@ -104,7 +106,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         router.refresh();
       } else {
         const userData = userDoc.data() as User;
-        if (isAdminEmail(email) && userData.role !== 'admin') {
+        const hasPrivilegedRole =
+          userData.role === 'admin' || userData.role === 'super_admin';
+        if (isAdminEmail(email) && !hasPrivilegedRole) {
           setPendingUser(firebaseUser);
           setShowAdminPasskeyDialog(true);
           return;
@@ -139,7 +143,16 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       );
       await ensureUserProfile(userCredential.user);
     } catch (err: any) {
-      setError(err.message || 'Failed to login.');
+      if (
+        err?.code === 'auth/wrong-password' ||
+        err?.code === 'auth/invalid-credential'
+      ) {
+        setError(
+          'Wrong password or this account uses Google sign-in only — try the Google button.'
+        );
+      } else {
+        setError(err.message || 'Failed to login.');
+      }
     } finally {
       setLoading(false);
     }
@@ -172,27 +185,45 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       setPhoneLoading(false);
       return;
     }
-    try {
-      const recaptchaVerifier = setupRecaptcha();
-      if (!recaptchaVerifier) {
-        setError('Failed to initialize reCAPTCHA.');
+
+    const formattedPhone = phone.startsWith('+')
+      ? phone
+      : `+233${phone.replace(/^0/, '')}`;
+
+    const maxAttempts = 2;
+    let lastErr: unknown = null;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt > 0) {
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+      try {
+        const recaptchaVerifier = setupRecaptcha();
+        if (!recaptchaVerifier) {
+          setError('Failed to initialize reCAPTCHA.');
+          setPhoneLoading(false);
+          return;
+        }
+        try {
+          await recaptchaVerifier.render();
+        } catch {
+          // continue; SDK may still proceed
+        }
+        const confirmation = await signInWithPhoneNumber(
+          auth,
+          formattedPhone,
+          recaptchaVerifier
+        );
+        setConfirmationResult(confirmation);
         setPhoneLoading(false);
         return;
+      } catch (err) {
+        lastErr = err;
       }
-      const formattedPhone = phone.startsWith('+')
-        ? phone
-        : `+233${phone.replace(/^0/, '')}`;
-      const confirmation = await signInWithPhoneNumber(
-        auth,
-        formattedPhone,
-        recaptchaVerifier
-      );
-      setConfirmationResult(confirmation);
-    } catch (err: any) {
-      setError(err.message || 'Failed to send verification code.');
-    } finally {
-      setPhoneLoading(false);
     }
+
+    setError(getPhoneSendVerificationErrorMessage(lastErr));
+    setPhoneLoading(false);
   };
 
   const handlePhoneVerifyCode = async () => {
@@ -293,7 +324,10 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               </Button>
             </TabsContent>
             <TabsContent value='phone' className='space-y-4'>
-              <div id='recaptcha-container' className='hidden' />
+              <div
+                id='recaptcha-container-login-dialog'
+                className='flex min-h-[78px] justify-center'
+              />
               {!confirmationResult ? (
                 <>
                   <div className='space-y-2'>

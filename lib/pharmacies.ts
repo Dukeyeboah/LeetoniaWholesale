@@ -129,6 +129,8 @@ export async function createPharmacyFromSignup(
     phone,
     customerBillingType,
     allowsAccountCredit,
+    creditLimitGHS: 0,
+    creditBalanceGHS: 0,
     monthlyLimitGHS: DEFAULT_MONTHLY_LIMIT_GHS,
     monthSpendGHS: 0,
     monthKey: currentMonthKey(),

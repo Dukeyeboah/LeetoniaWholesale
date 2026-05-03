@@ -33,6 +33,7 @@ import { isAdminEmail } from '@/lib/admin-config';
 import { omitUndefinedFields } from '@/lib/firestore-sanitize';
 import { normalizeGhanaPhoneToE164, isValidGhanaE164 } from '@/lib/ghana-phone';
 import { inferSignInProvider } from '@/lib/auth-providers';
+import { getPhoneSendVerificationErrorMessage } from '@/lib/phone-auth-errors';
 import { useState, useEffect } from 'react';
 
 declare global {
@@ -158,8 +159,12 @@ export default function LoginPage() {
       let errorMessage = 'Failed to login. Please check your credentials.';
       if (err.code === 'auth/user-not-found') {
         errorMessage = 'No account found with this email.';
-      } else if (err.code === 'auth/wrong-password') {
-        errorMessage = 'Incorrect password.';
+      } else if (
+        err.code === 'auth/wrong-password' ||
+        err.code === 'auth/invalid-credential'
+      ) {
+        errorMessage =
+          'Incorrect email or password — or this account may use Google sign-in only. Open the Google tab and sign in with the same email (changing role in Firestore does not set a password).';
       } else if (err.code === 'auth/invalid-email') {
         errorMessage = 'Invalid email address.';
       } else if (err.code === 'auth/too-many-requests') {
@@ -234,51 +239,49 @@ export default function LoginPage() {
       return;
     }
 
-    try {
-      // Ensure we start clean (avoid reusing an old rendered widget)
-      resetPhoneFlow();
-      const recaptchaVerifier = setupRecaptcha();
-      if (!recaptchaVerifier) {
-        setError('Failed to initialize reCAPTCHA. Please refresh the page.');
+    const maxAttempts = 2;
+    let lastErr: unknown = null;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt > 0) {
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+      try {
+        resetPhoneFlow();
+        const recaptchaVerifier = setupRecaptcha();
+        if (!recaptchaVerifier) {
+          setError('Failed to initialize reCAPTCHA. Please refresh the page.');
+          setPhoneLoading(false);
+          return;
+        }
+
+        try {
+          await recaptchaVerifier.render();
+        } catch {
+          // ignore; signInWithPhoneNumber will attempt to continue
+        }
+
+        const confirmation = await signInWithPhoneNumber(
+          auth,
+          formattedPhone,
+          recaptchaVerifier
+        );
+        setConfirmationResult(confirmation);
+        setPhoneCooldownUntil(Date.now() + 60_000);
+        setError('');
         setPhoneLoading(false);
         return;
+      } catch (err) {
+        lastErr = err;
       }
-
-      // Ensure the widget is rendered before attempting SMS send.
-      try {
-        await recaptchaVerifier.render();
-      } catch {
-        // ignore; signInWithPhoneNumber will attempt to continue
-      }
-
-      const confirmation = await signInWithPhoneNumber(
-        auth,
-        formattedPhone,
-        recaptchaVerifier
-      );
-      setConfirmationResult(confirmation);
-      // Prevent accidental rapid re-sends (reduces Firebase throttling).
-      setPhoneCooldownUntil(Date.now() + 60_000);
-      setError('');
-    } catch (err: any) {
-      let errorMessage = 'Failed to send verification code.';
-      if (err.code === 'auth/invalid-app-credential') {
-        errorMessage =
-          'reCAPTCHA verification failed for this browser/domain. Check Firebase Auth → Settings → Authorized domains, disable ad blockers, and try again.';
-      }
-      if (err.code === 'auth/invalid-phone-number') {
-        errorMessage = 'Invalid phone number format.';
-      } else if (err.code === 'auth/too-many-requests') {
-        errorMessage =
-          'Too many SMS attempts. Please wait 15–60 minutes and try again, or use a different phone number/device/network. (Firebase temporarily blocks repeated requests to prevent abuse.)';
-        setPhoneCooldownUntil(Date.now() + 15 * 60_000);
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
-    } finally {
-      setPhoneLoading(false);
     }
+
+    const errMeta = lastErr as { code?: string } | undefined;
+    if (errMeta?.code === 'auth/too-many-requests') {
+      setPhoneCooldownUntil(Date.now() + 15 * 60_000);
+    }
+    setError(getPhoneSendVerificationErrorMessage(lastErr));
+    setPhoneLoading(false);
   };
 
   const handlePhoneVerifyCode = async (e: React.FormEvent) => {
@@ -357,8 +360,11 @@ export default function LoginPage() {
       } else {
         const userData = userDoc.data() as User;
 
-        // If user is admin email but not admin role, show passkey dialog
-        if (isAdminEmail(email) && userData.role !== 'admin') {
+        // Whitelisted admin emails still on `client` need the passkey once.
+        // Firestore `super_admin` is a privileged role — do not treat like missing admin.
+        const hasPrivilegedRole =
+          userData.role === 'admin' || userData.role === 'super_admin';
+        if (isAdminEmail(email) && !hasPrivilegedRole) {
           setPendingUser(firebaseUser);
           setShowAdminPasskeyDialog(true);
           return;

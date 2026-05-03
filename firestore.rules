@@ -128,21 +128,38 @@ service cloud.firestore {
     match /pharmacies/{pharmacyId} {
       allow read: if isAuthenticated();
 
-      // Client creates: known seeds or signup-added ids (pharm_added_*).
+      // Super admin creates any id; clients create signup rows or first-touch seeds.
       allow create: if isAuthenticated() && (
-        isPrivilegedAdmin() ||
+        isSuperAdmin() ||
         (isClient() && (
           isKnownSeedPharmacy(pharmacyId) ||
           pharmacyId.matches('^pharm_added_.+')
         ))
       );
 
-      // Admins merge seed rows; clients cannot change monthly cap or name alone.
-      allow update: if isPrivilegedAdmin() || (
-        isClient() &&
-        request.resource.data.monthlyLimitGHS == resource.data.monthlyLimitGHS &&
-        request.resource.data.name == resource.data.name
-      );
+      // Client checkout: may bump month spend only (monthly limit + name unchanged; no billing/credit edits).
+      function pharmacyClientSpendUpdate() {
+        return isClient() &&
+          request.resource.data.monthlyLimitGHS == resource.data.monthlyLimitGHS &&
+          request.resource.data.name == resource.data.name &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+            'customerBillingType', 'allowsAccountCredit', 'creditLimitGHS', 'creditBalanceGHS',
+            'pendingVerification', 'verifiedAt', 'source', 'location', 'phone', 'createdByUserId'
+          ]);
+      }
+
+      // Privileged admins (not super): only automated credit balance adjustments with payments.
+      function pharmacyAdminBalanceOnlyUpdate() {
+        return isPrivilegedAdmin() &&
+          !isSuperAdmin() &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['creditBalanceGHS', 'updatedAt']);
+      }
+
+      allow update: if isSuperAdmin() ||
+        pharmacyClientSpendUpdate() ||
+        pharmacyAdminBalanceOnlyUpdate();
+
+      allow delete: if isSuperAdmin();
     }
 
     match /returns/{returnId} {

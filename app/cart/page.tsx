@@ -121,7 +121,9 @@ export default function CartPage() {
         } catch (err) {
           if (err instanceof PharmacyLimitError) {
             toast.error(
-              'This order would exceed your pharmacy’s monthly purchase limit. A super admin has been notified and can raise the cap under Pharmacies.'
+              err.code === 'CREDIT_LIMIT'
+                ? 'This order would exceed your pharmacy’s account credit limit. A super admin has been notified — you can raise credit under Admin → Pharmacies.'
+                : 'This order would exceed your pharmacy’s monthly purchase limit. A super admin has been notified and can raise the cap under Pharmacies.'
             );
             setIsSubmitting(false);
             return;

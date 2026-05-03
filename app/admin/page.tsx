@@ -9,6 +9,7 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  setDoc,
   addDoc,
   deleteDoc,
   collection,
@@ -75,9 +76,20 @@ import {
 import { useAuth } from '@/lib/auth-context';
 import type { Pharmacy } from '@/types';
 import {
+  applyCreditBalanceOnOrderCompleted,
+  applyPharmacyCreditPaymentDelta,
+  creditAvailableGHS,
+  effectiveAmountPaidGHS,
+  getCreditBalanceGHS,
+  getCreditLimitGHS,
+  pharmacyUsesCreditLine,
+} from '@/lib/pharmacy-credit';
+import {
   SEED_PHARMACIES,
   ensurePharmacyDocument,
   currentMonthKey,
+  randomOrderSuffix,
+  DEFAULT_MONTHLY_LIMIT_GHS,
 } from '@/lib/pharmacies';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
@@ -165,6 +177,41 @@ export default function AdminDashboard() {
   );
   const [pharmacyLimitInput, setPharmacyLimitInput] = useState('');
   const [pharmacySearchQuery, setPharmacySearchQuery] = useState('');
+  const [pharmacySegmentFilter, setPharmacySegmentFilter] = useState<
+    'all' | 'credit' | 'cash'
+  >('all');
+  const [pharmacySortMode, setPharmacySortMode] = useState<'default' | 'az'>(
+    'default'
+  );
+  const [pharmacyLetterFilter, setPharmacyLetterFilter] =
+    useState<string>('all');
+
+  type PharmacySuperDraft = {
+    id: string;
+    name: string;
+    location: string;
+    phone: string;
+    monthlyLimitGHS: string;
+    creditLimitGHS: string;
+    creditBalanceGHS: string;
+    customerBillingType: 'cash' | 'credit';
+    allowsAccountCredit: boolean;
+    pendingVerification: boolean;
+  };
+  const [pharmacySuperDraft, setPharmacySuperDraft] =
+    useState<PharmacySuperDraft | null>(null);
+
+  const [addPharmacyOpen, setAddPharmacyOpen] = useState(false);
+  const [addPharmName, setAddPharmName] = useState('');
+  const [addPharmLocation, setAddPharmLocation] = useState('');
+  const [addPharmPhone, setAddPharmPhone] = useState('');
+  const [addPharmMonthly, setAddPharmMonthly] = useState(
+    String(DEFAULT_MONTHLY_LIMIT_GHS)
+  );
+  const [addPharmCreditLimit, setAddPharmCreditLimit] = useState('0');
+  const [addPharmBilling, setAddPharmBilling] = useState<'cash' | 'credit'>(
+    'cash'
+  );
   const [proformaDialogOrder, setProformaDialogOrder] = useState<Order | null>(
     null
   );
@@ -294,7 +341,7 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    if (!db || activeTab !== 'pharmacies') return;
+    if (!db || activeTab !== 'pharmacies' || !isSuperAdmin) return;
     (async () => {
       for (const p of SEED_PHARMACIES) {
         try {
@@ -304,7 +351,7 @@ export default function AdminDashboard() {
         }
       }
     })();
-  }, [activeTab]);
+  }, [activeTab, isSuperAdmin]);
 
   const openOrderEditDialog = (order: Order) => {
     setEditingOrder(order);
@@ -442,6 +489,20 @@ export default function AdminDashboard() {
         ...(fullyPaid ? { paymentReceivedAt: Date.now() } : {}),
         updatedAt: Date.now(),
       });
+      if (
+        directPaymentOrder.status === 'completed' &&
+        directPaymentOrder.pharmacyId
+      ) {
+        const oldPaid = effectiveAmountPaidGHS(directPaymentOrder);
+        const delta = clamped - oldPaid;
+        if (delta > 1e-6) {
+          await applyPharmacyCreditPaymentDelta(
+            db,
+            directPaymentOrder.pharmacyId,
+            delta
+          );
+        }
+      }
       toast.success('Payment amounts updated');
       setDirectPaymentOrder(null);
       setDirectPaidInput('');
@@ -501,6 +562,20 @@ export default function AdminDashboard() {
           ? { invoiceSentAt: Date.now() }
           : {}),
       });
+
+      if (newStatus === 'completed' && order.status !== 'completed') {
+        try {
+          await applyCreditBalanceOnOrderCompleted(db, {
+            ...order,
+            status: 'completed',
+          });
+        } catch (crErr) {
+          console.error(crErr);
+          toast.error(
+            'Order completed, but pharmacy credit balance may be out of sync — check Pharmacies tab.'
+          );
+        }
+      }
 
       if (order.stockReserved) {
         try {
@@ -601,6 +676,19 @@ export default function AdminDashboard() {
         ...(fullyPaid ? { paymentReceivedAt: Date.now() } : {}),
         updatedAt: Date.now(),
       });
+      if (
+        paymentDialogOrder.status === 'completed' &&
+        paymentDialogOrder.pharmacyId
+      ) {
+        const delta = newPaid - paidSoFar;
+        if (delta > 1e-6) {
+          await applyPharmacyCreditPaymentDelta(
+            db,
+            paymentDialogOrder.pharmacyId,
+            delta
+          );
+        }
+      }
       toast.success(
         fullyPaid ? 'Order marked fully paid' : 'Partial payment recorded'
       );
@@ -976,13 +1064,169 @@ export default function AdminDashboard() {
     return user?.name || user?.email || 'Unknown User';
   };
 
-  const filteredPharmacies = pharmacies.filter((p) => {
-    const q = pharmacySearchQuery.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)
+  const filteredPharmacies = useMemo(() => {
+    let list = pharmacies.filter((p) => {
+      const q = pharmacySearchQuery.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)
+      );
+    });
+    if (pharmacySegmentFilter === 'credit') {
+      list = list.filter((p) => pharmacyUsesCreditLine(p));
+    } else if (pharmacySegmentFilter === 'cash') {
+      list = list.filter((p) => !pharmacyUsesCreditLine(p));
+    }
+    if (pharmacyLetterFilter !== 'all') {
+      list = list.filter(
+        (p) => getFirstCharacterGroup(p.name) === pharmacyLetterFilter
+      );
+    }
+    if (pharmacySortMode === 'az') {
+      list = [...list].sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+      );
+    }
+    return list;
+  }, [
+    pharmacies,
+    pharmacySearchQuery,
+    pharmacySegmentFilter,
+    pharmacyLetterFilter,
+    pharmacySortMode,
+  ]);
+
+  const openPharmacySuperEdit = (p: Pharmacy) => {
+    setPharmacySuperDraft({
+      id: p.id,
+      name: p.name,
+      location: p.location ?? '',
+      phone: p.phone ?? '',
+      monthlyLimitGHS: String(p.monthlyLimitGHS ?? 50_000),
+      creditLimitGHS: String(p.creditLimitGHS ?? 0),
+      creditBalanceGHS: String(p.creditBalanceGHS ?? 0),
+      customerBillingType:
+        p.customerBillingType === 'credit' ? 'credit' : 'cash',
+      allowsAccountCredit: p.allowsAccountCredit === true,
+      pendingVerification: p.pendingVerification === true,
+    });
+  };
+
+  const handleSavePharmacySuperEdit = async () => {
+    if (!db || !pharmacySuperDraft || !isSuperAdmin) return;
+    const name = pharmacySuperDraft.name.trim();
+    if (!name) {
+      toast.error('Name is required');
+      return;
+    }
+    const monthly = parseFloat(
+      pharmacySuperDraft.monthlyLimitGHS.replace(/,/g, '')
     );
-  });
+    const credLim = parseFloat(
+      pharmacySuperDraft.creditLimitGHS.replace(/,/g, '')
+    );
+    const credBal = parseFloat(
+      pharmacySuperDraft.creditBalanceGHS.replace(/,/g, '')
+    );
+    if ([monthly, credLim, credBal].some((n) => Number.isNaN(n) || n < 0)) {
+      toast.error('Enter valid non-negative numbers');
+      return;
+    }
+    const allowCredit =
+      pharmacySuperDraft.customerBillingType === 'credit' &&
+      pharmacySuperDraft.allowsAccountCredit;
+    const billing: 'cash' | 'credit' = allowCredit ? 'credit' : 'cash';
+    try {
+      await updateDoc(doc(db, 'pharmacies', pharmacySuperDraft.id), {
+        name,
+        location: pharmacySuperDraft.location.trim() || null,
+        phone: pharmacySuperDraft.phone.trim() || null,
+        monthlyLimitGHS: monthly,
+        customerBillingType: billing,
+        allowsAccountCredit: allowCredit,
+        creditLimitGHS: allowCredit ? credLim : 0,
+        creditBalanceGHS: allowCredit ? credBal : 0,
+        pendingVerification: pharmacySuperDraft.pendingVerification,
+        ...(!pharmacySuperDraft.pendingVerification
+          ? { verifiedAt: Date.now() }
+          : {}),
+        updatedAt: Date.now(),
+      });
+      toast.success('Pharmacy updated');
+      setPharmacySuperDraft(null);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to update pharmacy');
+    }
+  };
+
+  const handleDeletePharmacy = async (p: Pharmacy) => {
+    if (!db || !isSuperAdmin) return;
+    if (
+      !window.confirm(
+        `Delete pharmacy “${p.name}” (${p.id})? Accounts using this pharmacy id may need to be reassigned.`
+      )
+    ) {
+      return;
+    }
+    try {
+      await deleteDoc(doc(db, 'pharmacies', p.id));
+      toast.success('Pharmacy deleted');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete pharmacy');
+    }
+  };
+
+  const handleAddPharmacySubmit = async () => {
+    if (!db || !isSuperAdmin) return;
+    const name = addPharmName.trim();
+    if (!name) {
+      toast.error('Name is required');
+      return;
+    }
+    const monthly = parseFloat(addPharmMonthly.replace(/,/g, ''));
+    const credLim = parseFloat(addPharmCreditLimit.replace(/,/g, ''));
+    if (Number.isNaN(monthly) || monthly < 0) {
+      toast.error('Enter a valid monthly limit');
+      return;
+    }
+    if (addPharmBilling === 'credit' && (Number.isNaN(credLim) || credLim < 0)) {
+      toast.error('Enter a valid account credit limit');
+      return;
+    }
+    const allowCredit = addPharmBilling === 'credit';
+    try {
+      const id = `pharm_super_${randomOrderSuffix(10)}`;
+      await setDoc(doc(db, 'pharmacies', id), {
+        name,
+        location: addPharmLocation.trim() || null,
+        phone: addPharmPhone.trim() || null,
+        monthlyLimitGHS: monthly,
+        monthSpendGHS: 0,
+        monthKey: currentMonthKey(),
+        customerBillingType: addPharmBilling,
+        allowsAccountCredit: allowCredit,
+        creditLimitGHS: allowCredit ? credLim : 0,
+        creditBalanceGHS: 0,
+        pendingVerification: false,
+        verifiedAt: Date.now(),
+        source: 'admin_created',
+        updatedAt: Date.now(),
+      });
+      toast.success('Pharmacy added');
+      setAddPharmacyOpen(false);
+      setAddPharmName('');
+      setAddPharmLocation('');
+      setAddPharmPhone('');
+      setAddPharmMonthly(String(DEFAULT_MONTHLY_LIMIT_GHS));
+      setAddPharmCreditLimit('0');
+      setAddPharmBilling('cash');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to add pharmacy');
+    }
+  };
 
   const handleVerifyPharmacy = async (p: Pharmacy) => {
     if (!db || !isSuperAdmin) return;
@@ -2142,23 +2386,93 @@ export default function AdminDashboard() {
         )}
 
         <TabsContent value='pharmacies' className='mt-6 space-y-6'>
-          <div>
-            <h2 className='text-2xl font-serif font-bold'>Pharmacy limits</h2>
-            <p className='text-sm text-muted-foreground mt-1'>
-              Monthly caps apply to total order value per pharmacy (rolling calendar
-              month). Admins can view usage; only super admins can change limits or
-              mark sign-up pharmacies as verified.
-            </p>
+          <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+            <div>
+              <h2 className='text-2xl font-serif font-bold'>Pharmacies</h2>
+              <p className='text-sm text-muted-foreground mt-1 max-w-2xl'>
+                Monthly caps limit calendar-month order volume. Account credit (when
+                enabled) caps how much unpaid balance a pharmacy can carry;
+                completing a sale on credit increases balance; recording payments
+                lowers it. Super admins manage billing, limits, and pharmacy
+                records; other admins can view.
+              </p>
+            </div>
+            {isSuperAdmin && (
+              <Button
+                type='button'
+                onClick={() => setAddPharmacyOpen(true)}
+                className='shrink-0'
+              >
+                <Plus className='mr-2 h-4 w-4' />
+                Add pharmacy
+              </Button>
+            )}
           </div>
+
           <Card>
-            <CardHeader>
-              <CardTitle>Monthly purchase limits</CardTitle>
+            <CardHeader className='pb-3'>
+              <CardTitle>Directory &amp; limits</CardTitle>
               <CardDescription>
-                Current month: {currentMonthKey()} · Spend resets each calendar month
-                when the first order is placed.
+                Current month: {currentMonthKey()} · Filter by billing segment,
+                narrow by first letter, sort A–Z like inventory.
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
+              <div className='flex flex-wrap gap-2 items-center'>
+                <span className='text-sm text-muted-foreground'>Show:</span>
+                {(
+                  [
+                    ['all', 'All'],
+                    ['credit', 'Credit account'],
+                    ['cash', 'Cash / prepaid'],
+                  ] as const
+                ).map(([val, label]) => (
+                  <Button
+                    key={val}
+                    type='button'
+                    size='sm'
+                    variant={pharmacySegmentFilter === val ? 'default' : 'outline'}
+                    onClick={() => setPharmacySegmentFilter(val)}
+                  >
+                    {label}
+                  </Button>
+                ))}
+                <Select
+                  value={pharmacySortMode}
+                  onValueChange={(v) =>
+                    setPharmacySortMode(v as 'default' | 'az')
+                  }
+                >
+                  <SelectTrigger className='w-[200px]'>
+                    <SelectValue placeholder='Sort' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='default'>Default order</SelectItem>
+                    <SelectItem value='az'>Alphabetical (A–Z)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className='flex flex-wrap items-center gap-2'>
+                <span className='text-sm text-muted-foreground shrink-0'>
+                  Starts with:
+                </span>
+                <div className='flex flex-wrap gap-1.5'>
+                  {INVENTORY_LETTER_OPTIONS.map((letter) => (
+                    <Button
+                      key={letter}
+                      type='button'
+                      variant={
+                        pharmacyLetterFilter === letter ? 'default' : 'outline'
+                      }
+                      size='sm'
+                      className='min-w-[2rem] h-8 px-2 font-medium'
+                      onClick={() => setPharmacyLetterFilter(letter)}
+                    >
+                      {letter === 'all' ? 'All' : letter}
+                    </Button>
+                  ))}
+                </div>
+              </div>
               <div className='relative max-w-md'>
                 <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
                 <Input
@@ -2169,36 +2483,41 @@ export default function AdminDashboard() {
                 />
               </div>
               <div className='rounded-md border overflow-x-auto'>
-                <table className='w-full text-sm'>
+                <table className='w-full text-sm min-w-[960px]'>
                   <thead>
                     <tr className='border-b bg-muted/40 text-left'>
                       <th className='p-3 font-medium'>Pharmacy</th>
-                      <th className='p-3 font-medium'>Status</th>
-                      <th className='p-3 font-medium'>Month tracked</th>
-                      <th className='p-3 font-medium text-right'>Spent (₵)</th>
-                      <th className='p-3 font-medium text-right'>Limit (₵)</th>
-                      <th className='p-3 font-medium text-right'>Remaining</th>
-                      <th className='p-3 font-medium min-w-[9rem]'></th>
+                      <th className='p-3 font-medium'>Billing</th>
+                      <th className='p-3 font-medium'>Profile</th>
+                      <th className='p-3 font-medium'>Month</th>
+                      <th className='p-3 font-medium text-right'>Mo. spent</th>
+                      <th className='p-3 font-medium text-right'>Mo. cap</th>
+                      <th className='p-3 font-medium text-right'>Mo. left</th>
+                      <th className='p-3 font-medium text-right'>Credit cap</th>
+                      <th className='p-3 font-medium text-right'>Balance</th>
+                      <th className='p-3 font-medium text-right'>Avail.</th>
+                      <th className='p-3 font-medium'>Flags</th>
+                      <th className='p-3 font-medium min-w-[8rem]'></th>
                     </tr>
                   </thead>
                   <tbody>
                     {pharmacies.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={12}
                           className='p-8 text-center text-muted-foreground'
                         >
-                          No pharmacy records yet. Open this tab again after
-                          clients complete onboarding, or wait for sync.
+                          No pharmacy records yet. Super admins: open this tab to
+                          seed defaults, or wait for client onboarding / imports.
                         </td>
                       </tr>
                     ) : filteredPharmacies.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={12}
                           className='p-8 text-center text-muted-foreground'
                         >
-                          No pharmacies match your search.
+                          No pharmacies match filters or search.
                         </td>
                       </tr>
                     ) : (
@@ -2207,7 +2526,14 @@ export default function AdminDashboard() {
                         const spend =
                           p.monthKey === mk ? p.monthSpendGHS ?? 0 : 0;
                         const limit = p.monthlyLimitGHS ?? 50_000;
-                        const remaining = Math.max(0, limit - spend);
+                        const moRemaining = Math.max(0, limit - spend);
+                        const isCredit = pharmacyUsesCreditLine(p);
+                        const credLim = getCreditLimitGHS(p);
+                        const credBal = getCreditBalanceGHS(p);
+                        const credAvail = creditAvailableGHS(p);
+                        const overMo = spend > limit + 1e-6;
+                        const overCred =
+                          credLim > 0 && credBal > credLim + 1e-6;
                         return (
                           <tr key={p.id} className='border-b last:border-0'>
                             <td className='p-3'>
@@ -2217,8 +2543,17 @@ export default function AdminDashboard() {
                               </p>
                             </td>
                             <td className='p-3'>
+                              {isCredit ? (
+                                <Badge className='bg-violet-100 text-violet-900 hover:bg-violet-100'>
+                                  Credit
+                                </Badge>
+                              ) : (
+                                <Badge variant='secondary'>Cash</Badge>
+                              )}
+                            </td>
+                            <td className='p-3'>
                               {p.pendingVerification === true ? (
-                                <Badge variant='secondary'>Pending review</Badge>
+                                <Badge variant='outline'>Pending review</Badge>
                               ) : (
                                 <Badge
                                   variant='outline'
@@ -2244,37 +2579,95 @@ export default function AdminDashboard() {
                               })}
                             </td>
                             <td className='p-3 text-right tabular-nums'>
-                              {remaining.toLocaleString(undefined, {
+                              {moRemaining.toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                               })}
                             </td>
+                            <td className='p-3 text-right tabular-nums text-muted-foreground'>
+                              {isCredit
+                                ? credLim.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                : '—'}
+                            </td>
+                            <td className='p-3 text-right tabular-nums text-muted-foreground'>
+                              {isCredit
+                                ? credBal.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                : '—'}
+                            </td>
+                            <td className='p-3 text-right tabular-nums text-muted-foreground'>
+                              {isCredit
+                                ? credAvail.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                : '—'}
+                            </td>
+                            <td className='p-3'>
+                              <div className='flex flex-wrap gap-1'>
+                                {overMo && (
+                                  <Badge variant='destructive' className='text-xs'>
+                                    Over monthly
+                                  </Badge>
+                                )}
+                                {overCred && (
+                                  <Badge variant='destructive' className='text-xs'>
+                                    Over credit
+                                  </Badge>
+                                )}
+                              </div>
+                            </td>
                             <td className='p-3 text-right space-y-1'>
-                              {isSuperAdmin && p.pendingVerification === true && (
-                                <Button
-                                  variant='secondary'
-                                  size='sm'
-                                  className='w-full'
-                                  onClick={() => handleVerifyPharmacy(p)}
-                                >
-                                  Mark verified
-                                </Button>
+                              {isSuperAdmin && (
+                                <>
+                                  <Button
+                                    variant='default'
+                                    size='sm'
+                                    className='w-full'
+                                    onClick={() => openPharmacySuperEdit(p)}
+                                  >
+                                    Manage
+                                  </Button>
+                                  <Button
+                                    variant='outline'
+                                    size='sm'
+                                    className='w-full'
+                                    onClick={() => {
+                                      setPharmacyLimitDialog(p);
+                                      setPharmacyLimitInput(
+                                        String(p.monthlyLimitGHS ?? 50_000)
+                                      );
+                                    }}
+                                  >
+                                    Monthly cap only
+                                  </Button>
+                                  {p.pendingVerification === true && (
+                                    <Button
+                                      variant='secondary'
+                                      size='sm'
+                                      className='w-full'
+                                      onClick={() => handleVerifyPharmacy(p)}
+                                    >
+                                      Mark verified
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant='outline'
+                                    size='sm'
+                                    className='w-full text-destructive border-destructive/30 hover:bg-destructive/10'
+                                    onClick={() => handleDeletePharmacy(p)}
+                                  >
+                                    <Trash2 className='mr-1 h-3.5 w-3.5' />
+                                    Delete
+                                  </Button>
+                                </>
                               )}
-                              {isSuperAdmin ? (
-                                <Button
-                                  variant='outline'
-                                  size='sm'
-                                  className='w-full'
-                                  onClick={() => {
-                                    setPharmacyLimitDialog(p);
-                                    setPharmacyLimitInput(
-                                      String(p.monthlyLimitGHS ?? 50_000)
-                                    );
-                                  }}
-                                >
-                                  Edit limit
-                                </Button>
-                              ) : (
+                              {!isSuperAdmin && (
                                 <span className='text-xs text-muted-foreground block text-center'>
                                   View only
                                 </span>
@@ -3238,6 +3631,266 @@ export default function AdminDashboard() {
               Cancel
             </Button>
             <Button onClick={handleSavePharmacyLimit}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!pharmacySuperDraft}
+        onOpenChange={(open) => {
+          if (!open) setPharmacySuperDraft(null);
+        }}
+      >
+        <DialogContent className='max-w-lg max-h-[90vh] overflow-y-auto'>
+          <DialogHeader>
+            <DialogTitle>Manage pharmacy</DialogTitle>
+            <DialogDescription>
+              Switch a cash client to credit (set cap &amp; optional opening
+              balance), adjust limits, or revert to cash — which clears credit
+              fields.
+            </DialogDescription>
+          </DialogHeader>
+          {pharmacySuperDraft && (
+            <div className='space-y-3 py-2'>
+              <div className='space-y-1'>
+                <Label htmlFor='ph-super-name'>Name</Label>
+                <Input
+                  id='ph-super-name'
+                  value={pharmacySuperDraft.name}
+                  onChange={(e) =>
+                    setPharmacySuperDraft({
+                      ...pharmacySuperDraft,
+                      name: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className='space-y-1'>
+                <Label htmlFor='ph-super-loc'>Location</Label>
+                <Input
+                  id='ph-super-loc'
+                  value={pharmacySuperDraft.location}
+                  onChange={(e) =>
+                    setPharmacySuperDraft({
+                      ...pharmacySuperDraft,
+                      location: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className='space-y-1'>
+                <Label htmlFor='ph-super-phone'>Phone</Label>
+                <Input
+                  id='ph-super-phone'
+                  value={pharmacySuperDraft.phone}
+                  onChange={(e) =>
+                    setPharmacySuperDraft({
+                      ...pharmacySuperDraft,
+                      phone: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className='space-y-1'>
+                <Label htmlFor='ph-super-mo'>Monthly purchase cap (₵)</Label>
+                <Input
+                  id='ph-super-mo'
+                  type='number'
+                  min={0}
+                  step={100}
+                  value={pharmacySuperDraft.monthlyLimitGHS}
+                  onChange={(e) =>
+                    setPharmacySuperDraft({
+                      ...pharmacySuperDraft,
+                      monthlyLimitGHS: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className='space-y-1'>
+                <Label>Billing</Label>
+                <Select
+                  value={pharmacySuperDraft.customerBillingType}
+                  onValueChange={(v) =>
+                    setPharmacySuperDraft({
+                      ...pharmacySuperDraft,
+                      customerBillingType: v as 'cash' | 'credit',
+                      allowsAccountCredit: v === 'credit',
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='cash'>Cash / pay as you go</SelectItem>
+                    <SelectItem value='credit'>Credit account</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {pharmacySuperDraft.customerBillingType === 'credit' && (
+                <>
+                  <div className='flex items-center gap-2'>
+                    <Checkbox
+                      id='ph-super-allow'
+                      checked={pharmacySuperDraft.allowsAccountCredit}
+                      onCheckedChange={(c) =>
+                        setPharmacySuperDraft({
+                          ...pharmacySuperDraft,
+                          allowsAccountCredit: c === true,
+                        })
+                      }
+                    />
+                    <Label htmlFor='ph-super-allow' className='font-normal'>
+                      Allow purchases on account (enforce credit cap at checkout)
+                    </Label>
+                  </div>
+                  <div className='space-y-1'>
+                    <Label htmlFor='ph-super-clim'>Account credit limit (₵)</Label>
+                    <Input
+                      id='ph-super-clim'
+                      type='number'
+                      min={0}
+                      step={100}
+                      value={pharmacySuperDraft.creditLimitGHS}
+                      onChange={(e) =>
+                        setPharmacySuperDraft({
+                          ...pharmacySuperDraft,
+                          creditLimitGHS: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className='space-y-1'>
+                    <Label htmlFor='ph-super-cbal'>
+                      Outstanding balance (₵) — adjust if needed
+                    </Label>
+                    <Input
+                      id='ph-super-cbal'
+                      type='number'
+                      min={0}
+                      step={100}
+                      value={pharmacySuperDraft.creditBalanceGHS}
+                      onChange={(e) =>
+                        setPharmacySuperDraft({
+                          ...pharmacySuperDraft,
+                          creditBalanceGHS: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </>
+              )}
+              <div className='flex items-center gap-2'>
+                <Checkbox
+                  id='ph-super-pend'
+                  checked={pharmacySuperDraft.pendingVerification}
+                  onCheckedChange={(c) =>
+                    setPharmacySuperDraft({
+                      ...pharmacySuperDraft,
+                      pendingVerification: c === true,
+                    })
+                  }
+                />
+                <Label htmlFor='ph-super-pend' className='font-normal'>
+                  Pending verification (blocks treating as fully verified)
+                </Label>
+              </div>
+            </div>
+          )}
+          <DialogFooter className='gap-2 sm:gap-0'>
+            <Button
+              variant='outline'
+              onClick={() => setPharmacySuperDraft(null)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSavePharmacySuperEdit}>Save changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={addPharmacyOpen} onOpenChange={setAddPharmacyOpen}>
+        <DialogContent className='max-w-md'>
+          <DialogHeader>
+            <DialogTitle>Add pharmacy</DialogTitle>
+            <DialogDescription>
+              Creates a Firestore row clients can be linked to. Use imports for
+              bulk lists when possible.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-3 py-2'>
+            <div className='space-y-1'>
+              <Label htmlFor='add-ph-name'>Name</Label>
+              <Input
+                id='add-ph-name'
+                value={addPharmName}
+                onChange={(e) => setAddPharmName(e.target.value)}
+              />
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='add-ph-loc'>Location (optional)</Label>
+              <Input
+                id='add-ph-loc'
+                value={addPharmLocation}
+                onChange={(e) => setAddPharmLocation(e.target.value)}
+              />
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='add-ph-phone'>Phone (optional)</Label>
+              <Input
+                id='add-ph-phone'
+                value={addPharmPhone}
+                onChange={(e) => setAddPharmPhone(e.target.value)}
+              />
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='add-ph-mo'>Monthly purchase cap (₵)</Label>
+              <Input
+                id='add-ph-mo'
+                type='number'
+                min={0}
+                step={100}
+                value={addPharmMonthly}
+                onChange={(e) => setAddPharmMonthly(e.target.value)}
+              />
+            </div>
+            <div className='space-y-1'>
+              <Label>Billing</Label>
+              <Select
+                value={addPharmBilling}
+                onValueChange={(v) =>
+                  setAddPharmBilling(v as 'cash' | 'credit')
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='cash'>Cash</SelectItem>
+                  <SelectItem value='credit'>Credit account</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {addPharmBilling === 'credit' && (
+              <div className='space-y-1'>
+                <Label htmlFor='add-ph-cred'>Account credit limit (₵)</Label>
+                <Input
+                  id='add-ph-cred'
+                  type='number'
+                  min={0}
+                  step={100}
+                  value={addPharmCreditLimit}
+                  onChange={(e) => setAddPharmCreditLimit(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setAddPharmacyOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddPharmacySubmit}>Create</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

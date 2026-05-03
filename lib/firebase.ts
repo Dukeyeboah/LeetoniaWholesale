@@ -76,6 +76,7 @@ import { getStorage } from 'firebase/storage';
 import {
   initializeAppCheck,
   ReCaptchaEnterpriseProvider,
+  ReCaptchaV3Provider,
 } from 'firebase/app-check';
 
 const firebaseConfig = {
@@ -96,18 +97,39 @@ export const db = initializeFirestore(app, {
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
-// App Check (optional). Enable by setting NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY.
+/**
+ * App Check (optional).
+ * - Prefer `NEXT_PUBLIC_FIREBASE_APPCHECK_RECAPTCHA_V3_SITE_KEY` (reCAPTCHA v3) for
+ *   web App Check — it avoids stacking two reCAPTCHA Enterprise sessions on the same
+ *   page as Firebase Phone Auth (which also tries Enterprise, then v2).
+ * - If you only set `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY` (Enterprise), we defer
+ *   initialization by a few seconds so the phone SMS reCAPTCHA can finish first.
+ */
 if (typeof window !== 'undefined') {
-  const siteKey = process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY;
-  if (siteKey) {
+  const v3Key = process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_RECAPTCHA_V3_SITE_KEY;
+  const enterpriseKey = process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY;
+  const deferEnterpriseMs = Math.max(
+    0,
+    Number(process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_DEFER_MS ?? '3500')
+  );
+
+  const tryInit = (provider: ReCaptchaV3Provider | ReCaptchaEnterpriseProvider) => {
     try {
       initializeAppCheck(app, {
-        provider: new ReCaptchaEnterpriseProvider(siteKey),
+        provider,
         isTokenAutoRefreshEnabled: true,
       });
     } catch {
       // ignore double-init in fast refresh
     }
+  };
+
+  if (v3Key) {
+    tryInit(new ReCaptchaV3Provider(v3Key));
+  } else if (enterpriseKey) {
+    window.setTimeout(() => {
+      tryInit(new ReCaptchaEnterpriseProvider(enterpriseKey));
+    }, Number.isFinite(deferEnterpriseMs) ? deferEnterpriseMs : 3500);
   }
 }
 

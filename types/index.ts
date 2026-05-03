@@ -52,7 +52,14 @@ export interface Pharmacy {
   allowsAccountCredit?: boolean;
   /** Set when a user adds a pharmacy at signup; super admin can clear after review. */
   pendingVerification?: boolean;
-  source?: 'seed' | 'signup' | 'cash_import';
+  /**
+   * Approved account credit ceiling (GHS). Sales on account increase `creditBalanceGHS` until paid.
+   * Super admin sets; 0 means no credit capacity check at checkout (still monthly cap applies).
+   */
+  creditLimitGHS?: number;
+  /** Outstanding balance owed on account after completed sales (before payments). */
+  creditBalanceGHS?: number;
+  source?: 'seed' | 'signup' | 'cash_import' | 'admin_created';
   createdByUserId?: string;
   verifiedAt?: number;
   /** @deprecated prefer pendingVerification */
