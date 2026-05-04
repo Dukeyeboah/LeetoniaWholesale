@@ -6,12 +6,20 @@ import {
   orderBy,
   onSnapshot,
   doc,
+  getDoc,
   updateDoc,
   collection,
+  type DocumentData,
+  type UpdateData,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order, Product } from '@/types';
+import {
+  nextIsHiddenAfterWholesaleChange,
+  wholesaleOnHand,
+} from '@/lib/inventory-availability';
 import { formatOrderLabel } from '@/lib/order-display';
+import { paymentMethodLabel } from '@/lib/payment-method-label';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -143,10 +151,30 @@ export default function StaffDashboard() {
     }
 
     try {
-      await updateDoc(doc(db, 'inventory', productId), {
-        stock: newStock,
+      const pref = doc(db, 'inventory', productId);
+      const snap = await getDoc(pref);
+      if (!snap.exists()) {
+        toast.error('Product not found');
+        return;
+      }
+      const d = snap.data() as Omit<Product, 'id'>;
+      const prod = { ...d, id: productId } as Product;
+      const prevWs = wholesaleOnHand(prod);
+      const patch: Record<string, unknown> = {
         updatedAt: Date.now(),
-      });
+        isHidden: nextIsHiddenAfterWholesaleChange(
+          prevWs,
+          newStock,
+          !!(d.isHidden ?? false)
+        ),
+      };
+      if (d.wholesaleStock !== undefined && d.wholesaleStock !== null) {
+        patch.wholesaleStock = newStock;
+        patch.stock = newStock;
+      } else {
+        patch.stock = newStock;
+      }
+      await updateDoc(pref, patch as UpdateData<DocumentData>);
       toast.success('Stock updated successfully');
     } catch (error) {
       console.error('Error updating stock:', error);
@@ -466,7 +494,9 @@ export default function StaffDashboard() {
               {selectedOrder.paymentMethod && (
                 <div>
                   <Label className='text-sm font-medium'>Payment Method</Label>
-                  <p className='text-sm capitalize'>{selectedOrder.paymentMethod}</p>
+                  <p className='text-sm'>
+                    {paymentMethodLabel(selectedOrder.paymentMethod)}
+                  </p>
                 </div>
               )}
               <div>

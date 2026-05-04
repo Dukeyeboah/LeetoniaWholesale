@@ -6,6 +6,66 @@ export interface StaffPermissions {
   canGenerateInvoices: boolean;
 }
 
+/** Payroll / HR record (Firestore `staffMembers`); separate from app `users` role. */
+export interface StaffLoanDeduction {
+  id: string;
+  amountGHS: number;
+  appliedAt: number;
+  note?: string;
+}
+
+export interface StaffLoanPayment {
+  id: string;
+  amountGHS: number;
+  paidAt: number;
+  note?: string;
+}
+
+export interface StaffLeavePeriod {
+  id: string;
+  /** Local calendar date YYYY-MM-DD */
+  startDate: string;
+  endDate: string;
+  note?: string;
+}
+
+/** Snapshot when principal/outstanding are saved from the manage dialog (audit). */
+export interface StaffLoanManualSnapshot {
+  id: string;
+  recordedAt: number;
+  loanPrincipalGHS: number;
+  loanOutstandingGHS: number;
+  note?: string;
+}
+
+/** One named loan bucket per staff member (multiple concurrent loans). */
+export interface StaffLoanAccount {
+  id: string;
+  /** User-facing label, e.g. “Bike”, “Emergency”. */
+  name: string;
+  loanPrincipalGHS: number;
+  loanOutstandingGHS: number;
+  loanDeductions: StaffLoanDeduction[];
+  loanPayments: StaffLoanPayment[];
+  loanManualSnapshots: StaffLoanManualSnapshot[];
+  createdAt: number;
+}
+
+export interface StaffMemberHr {
+  id: string;
+  name: string;
+  /** Workplace role / title (not the app login role). */
+  role: string;
+  phone: string;
+  /** All loans for this person; migrated from legacy flat fields when missing. */
+  loanAccounts: StaffLoanAccount[];
+  leavePeriods: StaffLeavePeriod[];
+  createdAt: number;
+  updatedAt: number;
+  /** Optional link to a Firebase Auth user for dashboard access. */
+  linkedUserId?: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -40,6 +100,8 @@ export interface Pharmacy {
   location?: string | null;
   /** Contact phone for the pharmacy (e.g. from cash-customers import). */
   phone?: string | null;
+  /** Primary contact / rep name (e.g. from credit-customers import). */
+  contactPerson?: string | null;
   /**
    * Billing segment: cash customers typically pay on order; credit customers (future) may run a balance.
    * @see allowsAccountCredit — order flow will use this when credit-customers are imported.
@@ -59,7 +121,7 @@ export interface Pharmacy {
   creditLimitGHS?: number;
   /** Outstanding balance owed on account after completed sales (before payments). */
   creditBalanceGHS?: number;
-  source?: 'seed' | 'signup' | 'cash_import' | 'admin_created';
+  source?: 'seed' | 'signup' | 'cash_import' | 'credit_import' | 'admin_created';
   createdByUserId?: string;
   verifiedAt?: number;
   /** @deprecated prefer pendingVerification */
@@ -135,7 +197,7 @@ export interface Order {
   deliveryOption?: 'pickup' | 'delivery';
   deliveryAddress?: string;
   deliveryFee?: number;
-  paymentMethod?: 'momo' | 'cash';
+  paymentMethod?: 'momo' | 'cash' | 'cheque';
   /** Optional contact number for ready-to-collect / delivery coordination. */
   contactPhone?: string;
   notes?: string;

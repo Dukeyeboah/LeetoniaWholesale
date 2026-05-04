@@ -16,7 +16,8 @@
     "verify-storage": "tsx scripts/verify-storage-files.ts",
     "replace-inventory": "tsx scripts/replace-inventory.ts",
     "add-inventory": "tsx scripts/add-inventory.ts",
-    "sync:cash-pharmacies": "tsx scripts/sync-cash-pharmacies.ts"
+    "sync:cash-pharmacies": "tsx scripts/sync-cash-pharmacies.ts",
+    "sync:credit-pharmacies": "tsx scripts/sync-credit-pharmacies.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

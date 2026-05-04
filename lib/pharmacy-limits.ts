@@ -13,7 +13,6 @@ import { createNotification } from '@/lib/notifications';
 import {
   buildDisplayOrderId,
   buildFirestoreOrderId,
-  currentMonthKey,
   randomOrderSuffix,
 } from '@/lib/pharmacies';
 import { transactionReserveLines } from '@/lib/stock-reservation';
@@ -24,9 +23,9 @@ import {
 } from '@/lib/pharmacy-credit';
 
 export class PharmacyLimitError extends Error {
-  readonly code: 'MONTHLY_LIMIT' | 'CREDIT_LIMIT';
+  readonly code: 'CREDIT_LIMIT';
 
-  constructor(code: 'MONTHLY_LIMIT' | 'CREDIT_LIMIT') {
+  constructor(code: 'CREDIT_LIMIT') {
     super(code);
     this.name = 'PharmacyLimitError';
     this.code = code;
@@ -40,32 +39,6 @@ async function getSuperAdminUserIds(db: Firestore): Promise<string[]> {
   );
   const snap = await getDocs(q);
   return snap.docs.map((d) => d.id);
-}
-
-export async function notifySuperAdminsPharmacyLimitAttempt(
-  db: Firestore,
-  params: {
-    pharmacyName: string;
-    pharmacyId: string;
-    userName: string;
-    userEmail: string;
-    orderTotal: number;
-    limitGHS: number;
-    spentAfter: number;
-  }
-): Promise<void> {
-  try {
-    const ids = await getSuperAdminUserIds(db);
-    const title = 'Pharmacy monthly limit exceeded';
-    const message = `${params.pharmacyName} (${params.pharmacyId}) would exceed its monthly limit of ₵${params.limitGHS.toLocaleString()} with this ₵${params.orderTotal.toFixed(2)} order. Current month spend after this order would be ₵${params.spentAfter.toFixed(2)}. User: ${params.userName} (${params.userEmail}). You can raise the limit under Admin → Pharmacies.`;
-    await Promise.all(
-      ids.map((userId) =>
-        createNotification(userId, 'pharmacy_limit', title, message)
-      )
-    );
-  } catch (e) {
-    console.error('notifySuperAdminsPharmacyLimitAttempt', e);
-  }
 }
 
 export async function notifySuperAdminsPharmacyCreditLimitAttempt(
@@ -113,8 +86,9 @@ function isPharmacyLimitError(e: unknown): e is PharmacyLimitError {
 }
 
 /**
- * Atomically checks monthly pharmacy spend, increments spend, and creates the order.
- * Throws PharmacyLimitError if the order would exceed the monthly cap.
+ * Atomically checks account credit headroom (if the pharmacy uses a credit line),
+ * reserves inventory, creates the order, and touches the pharmacy doc for name/updatedAt.
+ * Outstanding balance is booked when the order is marked completed (unpaid portion only).
  */
 export async function placeOrderWithPharmacyLimit(
   params: PlaceOrderWithLimitParams
@@ -124,35 +98,12 @@ export async function placeOrderWithPharmacyLimit(
   const suffix = randomOrderSuffix(8);
   const displayOrderId = buildDisplayOrderId(orderPrefix, suffix);
   const orderId = buildFirestoreOrderId(orderPrefix, suffix);
-  const monthKey = currentMonthKey();
   const orderTotal = orderPayload.total;
 
   try {
     await runTransaction(db, async (transaction) => {
       const pRef = doc(db, 'pharmacies', pharmacyId);
       const pSnap = await transaction.get(pRef);
-
-      let limitGHS = 50_000;
-      let monthSpend = 0;
-
-      if (pSnap.exists()) {
-        const d = pSnap.data();
-        const raw = Number(d.monthlyLimitGHS);
-        if (!Number.isNaN(raw) && raw > 0) {
-          limitGHS = raw;
-        }
-        const docMonth = d.monthKey || monthKey;
-        if (docMonth === monthKey) {
-          monthSpend = Number(d.monthSpendGHS) || 0;
-        } else {
-          monthSpend = 0;
-        }
-      }
-
-      const newSpend = monthSpend + orderTotal;
-      if (newSpend > limitGHS) {
-        throw new PharmacyLimitError('MONTHLY_LIMIT');
-      }
 
       if (pSnap.exists() && pharmacyRequiresCreditCapacityCheck(pSnap.data())) {
         const d = pSnap.data();
@@ -175,9 +126,6 @@ export async function placeOrderWithPharmacyLimit(
         pRef,
         {
           name: pharmacyDisplayName,
-          monthlyLimitGHS: limitGHS,
-          monthSpendGHS: newSpend,
-          monthKey,
           updatedAt: Date.now(),
         },
         { merge: true }
@@ -208,30 +156,6 @@ export async function placeOrderWithPharmacyLimit(
           orderTotal,
           creditLimitGHS: credLim,
           balanceAfter: credBal + orderTotal,
-        });
-      } else if (e.code === 'MONTHLY_LIMIT') {
-        let limitGHS = 50_000;
-        let monthSpend = 0;
-        if (pSnap.exists()) {
-          const d = pSnap.data();
-          const raw = Number(d.monthlyLimitGHS);
-          if (!Number.isNaN(raw) && raw > 0) {
-            limitGHS = raw;
-          }
-          const docMonth = d.monthKey || monthKey;
-          if (docMonth === monthKey) {
-            monthSpend = Number(d.monthSpendGHS) || 0;
-          }
-        }
-        const spentAfter = monthSpend + orderTotal;
-        await notifySuperAdminsPharmacyLimitAttempt(db, {
-          pharmacyName: pharmacyDisplayName,
-          pharmacyId,
-          userName: orderPayload.userName || orderPayload.userEmail || 'User',
-          userEmail: orderPayload.userEmail || '',
-          orderTotal,
-          limitGHS,
-          spentAfter,
         });
       }
     }

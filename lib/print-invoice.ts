@@ -3,6 +3,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Order } from '@/types';
 import { formatOrderLabel } from '@/lib/order-display';
+import { paymentMethodLabel } from '@/lib/payment-method-label';
 
 /** MoMo payment details shown on invoices and checkout. */
 export const MOMO_DISPLAY_NAME = 'Leetonia Wholesale';
@@ -89,11 +90,7 @@ function buildInvoicePdf(order: Order): jsPDF {
   doc.text(`Balance: GHS ${balance.toFixed(2)}`, 14, ty);
   ty += 8;
 
-  doc.text(
-    `Payment: ${order.paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash'}`,
-    14,
-    ty
-  );
+  doc.text(`Payment: ${paymentMethodLabel(order.paymentMethod)}`, 14, ty);
   if (order.paymentMethod === 'momo') {
     ty += 6;
     doc.text(`MoMo: ${MOMO_DISPLAY_NAME} · ${MOMO_PHONE}`, 14, ty);

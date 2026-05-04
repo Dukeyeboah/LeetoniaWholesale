@@ -4,6 +4,9 @@ import type { Firestore } from 'firebase/firestore';
 /** Default monthly purchase cap (GHS total order value) for new / seeded pharmacies. */
 export const DEFAULT_MONTHLY_LIMIT_GHS = 50_000;
 
+/** Default account credit ceiling (GHS) for new credit pharmacies / imports. */
+export const DEFAULT_CREDIT_LIMIT_GHS = 20_000;
+
 export type SeedPharmacy = {
   id: string;
   name: string;

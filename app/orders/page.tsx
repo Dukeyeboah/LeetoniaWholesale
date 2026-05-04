@@ -26,6 +26,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { formatOrderLabel } from '@/lib/order-display';
+import { paymentMethodLabel } from '@/lib/payment-method-label';
 
 export default function OrdersPage() {
   const { user, isAdmin, viewMode } = useAuth();
@@ -247,9 +248,7 @@ export default function OrdersPage() {
                     {order.paymentMethod && (
                       <p className='text-muted-foreground'>
                         Payment:{' '}
-                        {order.paymentMethod === 'momo'
-                          ? 'Mobile Money (Momo)'
-                          : 'Cash'}
+                        {paymentMethodLabel(order.paymentMethod)}
                       </p>
                     )}
                   </div>

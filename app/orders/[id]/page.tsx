@@ -30,6 +30,7 @@ import {
   Store,
   CreditCard,
   Wallet,
+  FileText,
   Minus,
   Plus,
   Trash2,
@@ -47,6 +48,7 @@ import {
   MOMO_DISPLAY_NAME,
   MOMO_PHONE,
 } from '@/lib/print-invoice';
+import { paymentMethodLabel } from '@/lib/payment-method-label';
 import { notifyAdminsClientFinalizedOrder } from '@/lib/order-workflow';
 import {
   appendReservedDeltaToWriteBatch,
@@ -54,7 +56,8 @@ import {
   validateItemChangeAgainstStock,
 } from '@/lib/stock-reservation';
 
-const DELIVERY_FEE = 50; // GHS 50 delivery fee
+/** Delivery is complimentary; fee stays 0 for totals and Firestore. */
+const DELIVERY_FEE = 0;
 
 export default function OrderVerificationPage() {
   const params = useParams();
@@ -68,7 +71,9 @@ export default function OrderVerificationPage() {
     'pickup'
   );
   const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'momo' | 'cash'>('cash');
+  const [paymentMethod, setPaymentMethod] = useState<
+    NonNullable<Order['paymentMethod']>
+  >('cash');
   const [notes, setNotes] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [stockByProductId, setStockByProductId] = useState<
@@ -279,7 +284,11 @@ export default function OrderVerificationPage() {
           const adminSnapshot = await getDocs(adminUsersQuery);
 
           const paymentMethodText =
-            paymentMethod === 'momo' ? 'Mobile Money (Momo)' : 'Cash on Delivery';
+            paymentMethod === 'momo'
+              ? 'Mobile Money (Momo)'
+              : paymentMethod === 'cheque'
+                ? 'Cheque'
+                : 'Cash on delivery';
           const deliveryText =
             deliveryOption === 'delivery'
               ? `Delivery to: ${deliveryAddress}`
@@ -423,9 +432,7 @@ export default function OrderVerificationPage() {
                   <div className='flex justify-between text-sm'>
                     <span className='text-muted-foreground'>Payment</span>
                     <span className='font-medium'>
-                      {order.paymentMethod === 'momo'
-                        ? 'Mobile Money (Momo)'
-                        : 'Cash'}
+                      {paymentMethodLabel(order.paymentMethod)}
                     </span>
                   </div>
                 )}
@@ -582,14 +589,14 @@ export default function OrderVerificationPage() {
                   processing your order.
                 </p>
                 <div className='space-y-3 mt-4 pt-4 border-t border-green-200'>
-                  <div className='flex justify-between text-sm'>
-                    <span className='text-muted-foreground'>Payment</span>
-                    <span className='font-medium'>
-                      {order.paymentMethod === 'momo'
-                        ? 'Mobile Money (Momo)'
-                        : 'Cash'}
-                    </span>
-                  </div>
+                  {order.paymentMethod && (
+                    <div className='flex justify-between text-sm'>
+                      <span className='text-muted-foreground'>Payment</span>
+                      <span className='font-medium'>
+                        {paymentMethodLabel(order.paymentMethod)}
+                      </span>
+                    </div>
+                  )}
                   {order.paymentMethod === 'momo' && (
                     <div className='rounded-md border border-violet-200 bg-violet-50/80 px-3 py-2 text-sm text-violet-950'>
                       <p className='font-medium'>MoMo payment details</p>
@@ -854,7 +861,7 @@ export default function OrderVerificationPage() {
                       <Truck className='h-4 w-4' />
                       <span className='font-medium'>Delivery</span>
                       <Badge variant='secondary' className='ml-2'>
-                        +₵{DELIVERY_FEE.toFixed(2)}
+                        Free
                       </Badge>
                     </div>
                     <p className='text-sm text-muted-foreground mt-1'>
@@ -911,7 +918,7 @@ export default function OrderVerificationPage() {
             <CardContent className='space-y-4'>
               <RadioGroup
                 value={paymentMethod}
-                onValueChange={(value: 'momo' | 'cash') =>
+                onValueChange={(value: NonNullable<Order['paymentMethod']>) =>
                   setPaymentMethod(value)
                 }
               >
@@ -936,6 +943,18 @@ export default function OrderVerificationPage() {
                     </div>
                     <p className='text-sm text-muted-foreground mt-1'>
                       Pay via Mobile Money
+                    </p>
+                  </Label>
+                </div>
+                <div className='flex items-start space-x-3 space-y-0 rounded-md border p-4'>
+                  <RadioGroupItem value='cheque' id='cheque' className='mt-1' />
+                  <Label htmlFor='cheque' className='flex-1 cursor-pointer'>
+                    <div className='flex items-center gap-2'>
+                      <FileText className='h-4 w-4' />
+                      <span className='font-medium'>Cheque</span>
+                    </div>
+                    <p className='text-sm text-muted-foreground mt-1'>
+                      Pay by cheque
                     </p>
                   </Label>
                 </div>
@@ -969,8 +988,8 @@ export default function OrderVerificationPage() {
                 </div>
                 {deliveryOption === 'delivery' && (
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>Delivery fee</span>
-                    <span>₵{DELIVERY_FEE.toFixed(2)}</span>
+                    <span className='text-muted-foreground'>Delivery</span>
+                    <span>Free</span>
                   </div>
                 )}
                 <Separator />

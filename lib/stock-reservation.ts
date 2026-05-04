@@ -12,7 +12,11 @@ import {
   type WriteBatch,
 } from 'firebase/firestore';
 import type { CartItem, Product } from '@/types';
-import { wholesaleOnHand, reservedForOrders } from '@/lib/inventory-availability';
+import {
+  wholesaleOnHand,
+  reservedForOrders,
+  nextIsHiddenAfterWholesaleChange,
+} from '@/lib/inventory-availability';
 
 export class InsufficientStockError extends Error {
   constructor(message: string) {
@@ -107,9 +111,53 @@ export async function fulfillReservedForOrder(
     const snap = await getDoc(pref);
     if (!snap.exists()) continue;
     const d = snap.data()!;
+    const prod = { id: productId, ...d } as Product;
+    const prevWs = wholesaleOnHand(prod);
+    const newWs = Math.max(0, prevWs - qty);
     const patch: Record<string, unknown> = {
       reservedQty: increment(-qty),
       updatedAt: Date.now(),
+      isHidden: nextIsHiddenAfterWholesaleChange(
+        prevWs,
+        newWs,
+        !!(d as { isHidden?: boolean }).isHidden
+      ),
+    };
+    if (d.wholesaleStock !== undefined && d.wholesaleStock !== null) {
+      patch.wholesaleStock = increment(-qty);
+    } else {
+      patch.stock = increment(-qty);
+    }
+    batch.update(pref, patch as UpdateData<DocumentData>);
+  }
+  await batch.commit();
+}
+
+/**
+ * Completed sale without prior checkout reservation (legacy orders): deduct wholesale/stock only.
+ * Does not change `reservedQty`.
+ */
+export async function deductWholesaleForCompletedSale(
+  db: Firestore,
+  items: CartItem[]
+): Promise<void> {
+  const byId = aggregateQuantities(items);
+  const batch = writeBatch(db);
+  for (const [productId, qty] of byId) {
+    const pref = doc(db, 'inventory', productId);
+    const snap = await getDoc(pref);
+    if (!snap.exists()) continue;
+    const d = snap.data()!;
+    const prod = { id: productId, ...d } as Product;
+    const prevWs = wholesaleOnHand(prod);
+    const newWs = Math.max(0, prevWs - qty);
+    const patch: Record<string, unknown> = {
+      updatedAt: Date.now(),
+      isHidden: nextIsHiddenAfterWholesaleChange(
+        prevWs,
+        newWs,
+        !!(d as { isHidden?: boolean }).isHidden
+      ),
     };
     if (d.wholesaleStock !== undefined && d.wholesaleStock !== null) {
       patch.wholesaleStock = increment(-qty);

@@ -144,26 +144,24 @@ service cloud.firestore {
           request.resource.data.name == resource.data.name &&
           !request.resource.data.diff(resource.data).affectedKeys().hasAny([
             'customerBillingType', 'allowsAccountCredit', 'creditLimitGHS', 'creditBalanceGHS',
-            'pendingVerification', 'verifiedAt', 'source', 'location', 'phone', 'createdByUserId'
+            'pendingVerification', 'verifiedAt', 'source', 'location', 'phone', 'contactPerson',
+            'createdByUserId'
           ]);
       }
 
-      // Privileged admins (not super): only automated credit balance adjustments with payments.
-      function pharmacyAdminBalanceOnlyUpdate() {
-        return isPrivilegedAdmin() &&
-          !isSuperAdmin() &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['creditBalanceGHS', 'updatedAt']);
-      }
-
-      allow update: if isSuperAdmin() ||
-        pharmacyClientSpendUpdate() ||
-        pharmacyAdminBalanceOnlyUpdate();
+      allow update: if isPrivilegedAdmin() ||
+        pharmacyClientSpendUpdate();
 
       allow delete: if isSuperAdmin();
     }
 
     match /returns/{returnId} {
       allow read, create, update, delete: if isPrivilegedAdmin();
+    }
+
+    // Super-admin HR: loans, leave, payroll deductions (not client-facing).
+    match /staffMembers/{staffId} {
+      allow read, create, update, delete: if isSuperAdmin();
     }
   }
 }

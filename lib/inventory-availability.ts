@@ -13,3 +13,17 @@ export function reservedForOrders(p: Product): number {
 export function availableToSell(p: Product): number {
   return Math.max(0, wholesaleOnHand(p) - reservedForOrders(p));
 }
+
+/**
+ * Keep `isHidden` in sync with storefront (wholesale) quantity: out of stock → hidden;
+ * restocking from 0 → visible again; otherwise preserve manual hide while in stock.
+ */
+export function nextIsHiddenAfterWholesaleChange(
+  prevWholesale: number,
+  newWholesale: number,
+  currentIsHidden: boolean
+): boolean {
+  if (newWholesale <= 0) return true;
+  if (prevWholesale <= 0 && newWholesale > 0) return false;
+  return currentIsHidden;
+}

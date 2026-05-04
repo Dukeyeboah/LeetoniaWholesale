@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
   signInWithPopup,
   GoogleAuthProvider,
   signInWithPhoneNumber,
@@ -56,6 +58,11 @@ export default function LoginPage() {
   const [phoneCooldownNow, setPhoneCooldownNow] = useState<number>(Date.now());
   const [showAdminPasskeyDialog, setShowAdminPasskeyDialog] = useState(false);
   const [pendingUser, setPendingUser] = useState<any>(null);
+  const [emailAuthMode, setEmailAuthMode] = useState<'signin' | 'signup'>(
+    'signin'
+  );
+  const [signUpDisplayName, setSignUpDisplayName] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
 
   // Initialize reCAPTCHA for phone auth
@@ -141,14 +148,15 @@ export default function LoginPage() {
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        email,
+        email.trim(),
         password
       );
       await ensureUserProfile(userCredential.user);
     } catch (err: any) {
       let errorMessage = 'Failed to login. Please check your credentials.';
       if (err.code === 'auth/user-not-found') {
-        errorMessage = 'No account found with this email.';
+        errorMessage =
+          'No account with this email. Use Create account or try Google / phone.';
       } else if (
         err.code === 'auth/wrong-password' ||
         err.code === 'auth/invalid-credential'
@@ -159,6 +167,61 @@ export default function LoginPage() {
         errorMessage = 'Invalid email address.';
       } else if (err.code === 'auth/too-many-requests') {
         errorMessage = 'Too many failed attempts. Please try again later.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (!auth || !db) {
+      setError(
+        'Authentication service unavailable. Please check your Firebase configuration.'
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      setLoading(false);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+      const name = signUpDisplayName.trim();
+      if (name) {
+        await updateProfile(userCredential.user, { displayName: name });
+      }
+      await ensureUserProfile(userCredential.user);
+      setConfirmPassword('');
+      setSignUpDisplayName('');
+    } catch (err: any) {
+      let errorMessage = 'Failed to create account.';
+      if (err.code === 'auth/email-already-in-use') {
+        errorMessage =
+          'An account already exists with this email. Switch to Sign in or use Google.';
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = 'Password is too weak. Use at least 6 characters.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -400,12 +463,16 @@ export default function LoginPage() {
             Leetonia Wholesale
           </CardTitle>
           <CardDescription>
-            Sign in to access the ordering system
+            Sign in or create an account to access the ordering system
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue='email' className='w-full'>
+          <Tabs defaultValue='google' className='w-full'>
             <TabsList className='grid w-full grid-cols-3'>
+              <TabsTrigger value='google'>
+                <Chrome className='h-4 w-4 mr-2' />
+                Google
+              </TabsTrigger>
               <TabsTrigger value='email'>
                 <Mail className='h-4 w-4 mr-2' />
                 Email
@@ -413,10 +480,6 @@ export default function LoginPage() {
               <TabsTrigger value='phone'>
                 <Phone className='h-4 w-4 mr-2' />
                 Phone
-              </TabsTrigger>
-              <TabsTrigger value='google'>
-                <Chrome className='h-4 w-4 mr-2' />
-                Google
               </TabsTrigger>
             </TabsList>
 
@@ -428,38 +491,138 @@ export default function LoginPage() {
               </Alert>
             )}
 
+            <TabsContent value='google' className='space-y-4 mt-4'>
+              <Button
+                onClick={handleGoogleLogin}
+                className='w-full'
+                disabled={loading}
+                variant='outline'
+              >
+                {loading ? (
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                ) : (
+                  <Chrome className='mr-2 h-4 w-4' />
+                )}
+                Continue with Google
+              </Button>
+            </TabsContent>
+
             <TabsContent value='email' className='space-y-4 mt-4'>
-              <form onSubmit={handleEmailLogin} className='space-y-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='email'>Email</Label>
-                  <Input
-                    id='email'
-                    type='email'
-                    placeholder='name@example.com'
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className='bg-background'
-                  />
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='password'>Password</Label>
-                  <Input
-                    id='password'
-                    type='password'
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className='bg-background'
-                  />
-                </div>
-                <Button type='submit' className='w-full' disabled={loading}>
-                  {loading ? (
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                  ) : null}
-                  Sign In with Email
+              <div className='flex rounded-lg border p-1 bg-muted/40'>
+                <Button
+                  type='button'
+                  variant={emailAuthMode === 'signin' ? 'secondary' : 'ghost'}
+                  className='flex-1'
+                  size='sm'
+                  onClick={() => {
+                    setEmailAuthMode('signin');
+                    setError('');
+                  }}
+                >
+                  Sign in
                 </Button>
-              </form>
+                <Button
+                  type='button'
+                  variant={emailAuthMode === 'signup' ? 'secondary' : 'ghost'}
+                  className='flex-1'
+                  size='sm'
+                  onClick={() => {
+                    setEmailAuthMode('signup');
+                    setError('');
+                  }}
+                >
+                  Create account
+                </Button>
+              </div>
+              {emailAuthMode === 'signin' ? (
+                <form onSubmit={handleEmailLogin} className='space-y-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='email'>Email</Label>
+                    <Input
+                      id='email'
+                      type='email'
+                      placeholder='name@example.com'
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className='bg-background'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='password'>Password</Label>
+                    <Input
+                      id='password'
+                      type='password'
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className='bg-background'
+                    />
+                  </div>
+                  <Button type='submit' className='w-full' disabled={loading}>
+                    {loading ? (
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    ) : null}
+                    Sign in with email
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleEmailSignUp} className='space-y-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='signup-name'>Your name</Label>
+                    <Input
+                      id='signup-name'
+                      placeholder='e.g. Kwame Mensah'
+                      value={signUpDisplayName}
+                      onChange={(e) => setSignUpDisplayName(e.target.value)}
+                      required
+                      className='bg-background'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='signup-email'>Email</Label>
+                    <Input
+                      id='signup-email'
+                      type='email'
+                      placeholder='name@example.com'
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className='bg-background'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='signup-password'>Password</Label>
+                    <Input
+                      id='signup-password'
+                      type='password'
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      className='bg-background'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='signup-confirm'>Confirm password</Label>
+                    <Input
+                      id='signup-confirm'
+                      type='password'
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      className='bg-background'
+                    />
+                  </div>
+                  <Button type='submit' className='w-full' disabled={loading}>
+                    {loading ? (
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    ) : null}
+                    Create account
+                  </Button>
+                </form>
+              )}
             </TabsContent>
 
             <TabsContent value='phone' className='space-y-4 mt-4'>
@@ -538,22 +701,6 @@ export default function LoginPage() {
                   </Button>
                 </form>
               )}
-            </TabsContent>
-
-            <TabsContent value='google' className='space-y-4 mt-4'>
-              <Button
-                onClick={handleGoogleLogin}
-                className='w-full'
-                disabled={loading}
-                variant='outline'
-              >
-                {loading ? (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                ) : (
-                  <Chrome className='mr-2 h-4 w-4' />
-                )}
-                Sign In with Google
-              </Button>
             </TabsContent>
           </Tabs>
         </CardContent>

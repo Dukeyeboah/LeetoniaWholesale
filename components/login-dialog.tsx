@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
   signInWithPopup,
   GoogleAuthProvider,
   signInWithPhoneNumber,
@@ -47,6 +49,11 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [showAdminPasskeyDialog, setShowAdminPasskeyDialog] = useState(false);
   const [pendingUser, setPendingUser] = useState<any>(null);
+  const [emailAuthMode, setEmailAuthMode] = useState<'signin' | 'signup'>(
+    'signin'
+  );
+  const [signUpDisplayName, setSignUpDisplayName] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
 
   const setupRecaptcha = () => {
@@ -143,7 +150,11 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       );
       await ensureUserProfile(userCredential.user);
     } catch (err: any) {
-      if (
+      if (err?.code === 'auth/user-not-found') {
+        setError(
+          'No account with this email. Switch to Create account or use Google / phone.'
+        );
+      } else if (
         err?.code === 'auth/wrong-password' ||
         err?.code === 'auth/invalid-credential'
       ) {
@@ -152,6 +163,55 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         );
       } else {
         setError(err.message || 'Failed to login.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    if (!auth || !db) {
+      setError('Authentication service unavailable.');
+      setLoading(false);
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      setLoading(false);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      setLoading(false);
+      return;
+    }
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+      const name = signUpDisplayName.trim();
+      if (name) {
+        await updateProfile(userCredential.user, { displayName: name });
+      }
+      await ensureUserProfile(userCredential.user);
+      setConfirmPassword('');
+      setSignUpDisplayName('');
+    } catch (err: any) {
+      if (err?.code === 'auth/email-already-in-use') {
+        setError(
+          'An account already exists with this email. Switch to Sign in or use Google.'
+        );
+      } else if (err?.code === 'auth/weak-password') {
+        setError('Password is too weak. Use at least 6 characters.');
+      } else if (err?.code === 'auth/invalid-email') {
+        setError('Invalid email address.');
+      } else {
+        setError(err.message || 'Failed to create account.');
       }
     } finally {
       setLoading(false);
@@ -259,50 +319,21 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <Tabs defaultValue='email' className='w-full'>
+          <Tabs defaultValue='google' className='w-full'>
             <TabsList className='grid w-full grid-cols-3'>
-              <TabsTrigger value='email'>
-                <Mail className='h-4 w-4 mr-2' />
-                Email
-              </TabsTrigger>
               <TabsTrigger value='google'>
                 <Chrome className='h-4 w-4 mr-2' />
                 Google
+              </TabsTrigger>
+              <TabsTrigger value='email'>
+                <Mail className='h-4 w-4 mr-2' />
+                Email
               </TabsTrigger>
               <TabsTrigger value='phone'>
                 <Phone className='h-4 w-4 mr-2' />
                 Phone
               </TabsTrigger>
             </TabsList>
-            <TabsContent value='email' className='space-y-4'>
-              <form onSubmit={handleEmailLogin} className='space-y-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='email'>Email</Label>
-                  <Input
-                    id='email'
-                    type='email'
-                    placeholder='your@email.com'
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='password'>Password</Label>
-                  <Input
-                    id='password'
-                    type='password'
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type='submit' className='w-full' disabled={loading}>
-                  {loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-                  Sign In
-                </Button>
-              </form>
-            </TabsContent>
             <TabsContent value='google' className='space-y-4'>
               <Button
                 onClick={handleGoogleLogin}
@@ -322,6 +353,117 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   </>
                 )}
               </Button>
+            </TabsContent>
+            <TabsContent value='email' className='space-y-4'>
+              <div className='flex rounded-lg border p-1 bg-muted/40'>
+                <Button
+                  type='button'
+                  variant={emailAuthMode === 'signin' ? 'secondary' : 'ghost'}
+                  className='flex-1'
+                  size='sm'
+                  onClick={() => {
+                    setEmailAuthMode('signin');
+                    setError('');
+                  }}
+                >
+                  Sign in
+                </Button>
+                <Button
+                  type='button'
+                  variant={emailAuthMode === 'signup' ? 'secondary' : 'ghost'}
+                  className='flex-1'
+                  size='sm'
+                  onClick={() => {
+                    setEmailAuthMode('signup');
+                    setError('');
+                  }}
+                >
+                  Create account
+                </Button>
+              </div>
+              {emailAuthMode === 'signin' ? (
+                <form onSubmit={handleEmailLogin} className='space-y-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='email'>Email</Label>
+                    <Input
+                      id='email'
+                      type='email'
+                      placeholder='your@email.com'
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='password'>Password</Label>
+                    <Input
+                      id='password'
+                      type='password'
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type='submit' className='w-full' disabled={loading}>
+                    {loading && (
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    )}
+                    Sign in with email
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleEmailSignUp} className='space-y-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='signup-name'>Your name</Label>
+                    <Input
+                      id='signup-name'
+                      placeholder='e.g. Kwame Mensah'
+                      value={signUpDisplayName}
+                      onChange={(e) => setSignUpDisplayName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='signup-email'>Email</Label>
+                    <Input
+                      id='signup-email'
+                      type='email'
+                      placeholder='your@email.com'
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='signup-password'>Password</Label>
+                    <Input
+                      id='signup-password'
+                      type='password'
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='signup-confirm'>Confirm password</Label>
+                    <Input
+                      id='signup-confirm'
+                      type='password'
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <Button type='submit' className='w-full' disabled={loading}>
+                    {loading && (
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    )}
+                    Create account
+                  </Button>
+                </form>
+              )}
             </TabsContent>
             <TabsContent value='phone' className='space-y-4'>
               {/* Invisible reCAPTCHA mounts here; badge is usually bottom-right of the page */}
