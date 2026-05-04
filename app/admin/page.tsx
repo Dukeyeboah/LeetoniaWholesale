@@ -71,6 +71,7 @@ import {
   Camera,
   ChevronDown,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import type { Pharmacy } from '@/types';
@@ -102,6 +103,15 @@ import {
   INVENTORY_LETTER_OPTIONS,
   getFirstCharacterGroup,
 } from '@/lib/inventory-filters';
+import {
+  getWarehouseRows,
+  filterSortWarehouseRows,
+  indexInventoryByProductCode,
+  indexInventoryByNormalizedLabel,
+  normalizeWarehouseCode,
+  resolveWarehouseRowToProduct,
+} from '@/lib/warehouse-data';
+import { syncWarehouseToInventory } from '@/lib/sync-warehouse-to-inventory';
 import { formatOrderLabel } from '@/lib/order-display';
 import { generateInventoryProductCode } from '@/lib/product-code';
 import {
@@ -317,6 +327,7 @@ export default function AdminDashboard() {
   const [inventoryListMode, setInventoryListMode] = useState<
     'storefront' | 'storeroom'
   >('storefront');
+  const [warehouseSyncing, setWarehouseSyncing] = useState(false);
   const [paymentDialogOrder, setPaymentDialogOrder] = useState<Order | null>(
     null
   );
@@ -344,6 +355,25 @@ export default function AdminDashboard() {
       (p) => getFirstCharacterGroup(p.name || '') === inventoryLetterFilter
     );
   }, [sortedInventoryProducts, inventoryLetterFilter]);
+
+  const allWarehouseRows = useMemo(() => getWarehouseRows(), []);
+  const productsByWarehouseCode = useMemo(
+    () => indexInventoryByProductCode(products),
+    [products]
+  );
+  const productsByNormalizedLabel = useMemo(
+    () => indexInventoryByNormalizedLabel(products),
+    [products]
+  );
+  const warehouseRowsFiltered = useMemo(
+    () =>
+      filterSortWarehouseRows(
+        allWarehouseRows,
+        inventoryLetterFilter,
+        inventorySortMode
+      ),
+    [allWarehouseRows, inventoryLetterFilter, inventorySortMode]
+  );
 
   const ordersForPaymentsTab = useMemo(
     () => [...orders].sort((a, b) => b.createdAt - a.createdAt),
@@ -1317,6 +1347,32 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error('Failed to delete product');
+    }
+  };
+
+  const handleSyncWarehouseToInventory = async () => {
+    if (!db) {
+      toast.error('Database not available');
+      return;
+    }
+    setWarehouseSyncing(true);
+    try {
+      const rows = getWarehouseRows();
+      const res = await syncWarehouseToInventory(db, products, rows);
+      const parts = [
+        `${res.updated} updated` +
+          (res.updated > 0
+            ? ` (${res.updatedByCode} by code, ${res.updatedByName} by name)`
+            : ''),
+        `${res.created} added`,
+      ];
+      if (res.skipped > 0) parts.push(`${res.skipped} skipped`);
+      toast.success(`Warehouse file applied to inventory: ${parts.join(', ')}.`);
+    } catch (error) {
+      console.error('Warehouse sync:', error);
+      toast.error('Failed to apply warehouse file to inventory');
+    } finally {
+      setWarehouseSyncing(false);
     }
   };
 
@@ -3845,6 +3901,25 @@ export default function AdminDashboard() {
                 Storeroom / warehouse
               </Button>
             </div>
+            {inventoryListMode === 'storeroom' && (
+              <Button
+                type='button'
+                variant='secondary'
+                size='sm'
+                className='shrink-0'
+                disabled={warehouseSyncing || !db}
+                onClick={handleSyncWarehouseToInventory}
+              >
+                {warehouseSyncing ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Applying…
+                  </>
+                ) : (
+                  'Apply warehouse file to inventory'
+                )}
+              </Button>
+            )}
             <Select
               value={inventorySortMode}
               onValueChange={(v) =>
@@ -3864,7 +3939,7 @@ export default function AdminDashboard() {
           <p className='text-xs text-muted-foreground max-w-3xl'>
             {inventoryListMode === 'storefront'
               ? 'Same units clients see for ordering (wholesale / sellable stock).'
-              : 'Warehouse counts use each product’s storeroomStock field (matches the edit dialog). Bulk storeroom data can be imported later.'}
+              : `Storeroom list is driven by data/warehouse.json (${allWarehouseRows.length} lines). Apply sync matches the warehouse line to inventory by the same product name/description first (normalized text), then by product code only if no name match — so mismatched codes like internal “10” vs warehouse “4568” still update the correct item. Name matches also refresh name, description, and code from the file.`}
           </p>
 
           <div className='flex flex-wrap items-center gap-2'>
@@ -4006,122 +4081,202 @@ export default function AdminDashboard() {
               </>
             ) : (
               <>
-                <div className='hidden md:flex flex-row items-center gap-4 p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
-                  <div className='flex-1 min-w-0'>Product</div>
-                  <div className='w-28 text-right shrink-0'>Price</div>
-                  <div className='w-44 text-center shrink-0'>Storeroom</div>
-                  <div className='w-44 text-center shrink-0'>
-                    Wholesale (ref.)
-                  </div>
-                  <div className='w-[120px] shrink-0 text-right'>Actions</div>
+                <div className='hidden xl:grid xl:grid-cols-[5.5rem_1fr_5rem_5rem_6.5rem_7rem_7rem_6.5rem] xl:gap-3 xl:items-center p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
+                  <div>Code</div>
+                  <div className='min-w-0'>Description (file)</div>
+                  <div className='text-right'>Price</div>
+                  <div className='text-right'>Qty</div>
+                  <div className='text-right'>Line</div>
+                  <div className='text-center'>Storeroom</div>
+                  <div className='text-center'>Wholesale</div>
+                  <div className='text-right'>Actions</div>
                 </div>
-                {inventoryProductsFiltered.map((product) => {
-                  const wholesaleStock = wholesaleOnHand(product);
-                  const inProcess = reservedForOrders(product);
-                  const avail = availableToSell(product);
-                  const storeroomStock = product.storeroomStock ?? 0;
-                  const isLowStoreroom =
-                    storeroomStock > 0 && storeroomStock < 10;
-                  return (
-                    <div
-                      key={product.id}
-                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 border-b last:border-0 hover:bg-muted/5 transition-colors ${
-                        product.isHidden ? 'opacity-60 bg-muted/20' : ''
-                      }`}
-                    >
-                      <div className='flex-1 min-w-0 space-y-1'>
-                        <div className='flex items-center gap-2 flex-wrap'>
-                          {product.isHidden && (
-                            <Badge variant='secondary' className='text-xs'>
-                              Hidden (storefront)
-                            </Badge>
+                {warehouseRowsFiltered.length === 0 ? (
+                  <div className='p-8 text-center text-sm text-muted-foreground'>
+                    No warehouse rows match this letter filter.
+                  </div>
+                ) : (
+                  warehouseRowsFiltered.map((row) => {
+                    const codeKey = normalizeWarehouseCode(row.code);
+                    const resolved = resolveWarehouseRowToProduct(
+                      row,
+                      productsByWarehouseCode,
+                      productsByNormalizedLabel
+                    );
+                    const match = resolved?.product ?? null;
+                    const matchKind = resolved?.match;
+                    const fileQty = Math.max(
+                      0,
+                      Math.floor(Number(row.quantity) || 0)
+                    );
+                    const filePrice = Number(row.price) || 0;
+                    const lineFromFile =
+                      Number.isFinite(row.total) && row.total > 0
+                        ? row.total
+                        : filePrice * fileQty;
+                    const wholesaleStock = match
+                      ? wholesaleOnHand(match)
+                      : 0;
+                    const inProcess = match ? reservedForOrders(match) : 0;
+                    const avail = match ? availableToSell(match) : 0;
+                    const storeroomLive = match
+                      ? match.storeroomStock ?? 0
+                      : null;
+                    const isLowStoreroom =
+                      storeroomLive != null &&
+                      storeroomLive > 0 &&
+                      storeroomLive < 10;
+                    return (
+                      <div
+                        key={codeKey}
+                        className='flex flex-col gap-3 p-4 border-b last:border-0 hover:bg-muted/5 transition-colors xl:grid xl:grid-cols-[5.5rem_1fr_5rem_5rem_6.5rem_7rem_7rem_6.5rem] xl:gap-3 xl:items-center'
+                      >
+                        <div className='font-mono text-sm font-medium tabular-nums'>
+                          {codeKey}
+                        </div>
+                        <div className='min-w-0 space-y-1'>
+                          <div className='flex flex-wrap items-center gap-2'>
+                            <span
+                              className='font-medium text-sm leading-snug'
+                              title={row.description}
+                            >
+                              {row.description}
+                            </span>
+                            {match ? (
+                              <Badge variant='outline' className='text-xs'>
+                                {matchKind === 'name'
+                                  ? 'Matched by name / description'
+                                  : 'Matched by code'}
+                              </Badge>
+                            ) : (
+                              <Badge variant='secondary' className='text-xs'>
+                                Not in inventory
+                              </Badge>
+                            )}
+                          </div>
+                          {match && (
+                            <p className='text-xs text-muted-foreground truncate'>
+                              {match.name !== row.description.trim()
+                                ? `Listed as: ${match.name}`
+                                : match.category}
+                            </p>
                           )}
-                          <span
-                            className='font-medium truncate'
-                            title={product.name}
-                          >
-                            {product.name}
+                        </div>
+                        <div className='flex justify-between xl:block xl:text-right text-sm tabular-nums'>
+                          <span className='text-muted-foreground xl:hidden'>
+                            Price
                           </span>
+                          <span>₵{filePrice.toFixed(2)}</span>
                         </div>
-                        <p className='text-xs text-muted-foreground truncate'>
-                          {product.category}
-                          {product.code ? ` · ${product.code}` : ''}
-                        </p>
-                      </div>
-                      <div className='flex flex-row flex-wrap sm:flex-nowrap items-center gap-4 w-full sm:w-auto justify-between sm:justify-end sm:ml-auto'>
-                        <div className='w-28 text-right text-sm tabular-nums'>
-                          ₵{product.price.toFixed(2)}
+                        <div className='flex justify-between xl:block xl:text-right text-sm tabular-nums'>
+                          <span className='text-muted-foreground xl:hidden'>
+                            Qty
+                          </span>
+                          <span>{fileQty}</span>
                         </div>
-                        <div className='w-48 sm:w-44 text-center space-y-0.5'>
-                          <Badge
-                            variant={
-                              storeroomStock === 0
-                                ? 'destructive'
-                                : isLowStoreroom
-                                  ? 'secondary'
-                                  : 'outline'
-                            }
-                            className={
-                              isLowStoreroom
-                                ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-                                : ''
-                            }
-                          >
-                            {storeroomStock} in storeroom
-                          </Badge>
-                          <p className='text-[11px] text-muted-foreground leading-tight'>
-                            Same as edit dialog → Storeroom field
-                          </p>
+                        <div className='flex justify-between xl:block xl:text-right text-sm tabular-nums'>
+                          <span className='text-muted-foreground xl:hidden'>
+                            Line
+                          </span>
+                          <span>₵{lineFromFile.toFixed(2)}</span>
                         </div>
-                        <div className='w-48 sm:w-44 text-center space-y-0.5'>
-                          <Badge variant='outline'>{avail} sellable</Badge>
-                          <p className='text-[11px] text-amber-800 leading-tight'>
-                            {inProcess} in process · {wholesaleStock} wholesale
-                          </p>
+                        <div className='text-center space-y-0.5'>
+                          {storeroomLive == null ? (
+                            <span className='text-xs text-muted-foreground'>
+                              —
+                            </span>
+                          ) : (
+                            <>
+                              <Badge
+                                variant={
+                                  storeroomLive === 0
+                                    ? 'destructive'
+                                    : isLowStoreroom
+                                      ? 'secondary'
+                                      : 'outline'
+                                }
+                                className={
+                                  isLowStoreroom
+                                    ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                                    : ''
+                                }
+                              >
+                                {storeroomLive}
+                              </Badge>
+                              {fileQty !== storeroomLive && (
+                                <p className='text-[10px] text-amber-800'>
+                                  File has {fileQty}; apply sync to align
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        <div className='text-center space-y-0.5'>
+                          {match ? (
+                            <>
+                              <Badge variant='outline'>{avail} sellable</Badge>
+                              <p className='text-[11px] text-amber-800 leading-tight'>
+                                {inProcess} in process · {wholesaleStock}{' '}
+                                shelf
+                              </p>
+                            </>
+                          ) : (
+                            <span className='text-xs text-muted-foreground'>
+                              —
+                            </span>
+                          )}
                         </div>
                         <div className='flex justify-end gap-1 shrink-0'>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8'
-                            onClick={() => openProductDialog(product)}
-                            title='Edit product'
-                          >
-                            <Edit className='h-4 w-4' />
-                          </Button>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8'
-                            onClick={() =>
-                              handleToggleProductVisibility(product)
-                            }
-                            title={
-                              product.isHidden
-                                ? 'Show product'
-                                : 'Hide product'
-                            }
-                          >
-                            {product.isHidden ? (
-                              <EyeOff className='h-4 w-4' />
-                            ) : (
-                              <Eye className='h-4 w-4' />
-                            )}
-                          </Button>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                            onClick={() => handleDeleteProduct(product.id)}
-                            title='Delete product permanently'
-                          >
-                            <Trash2 className='h-4 w-4' />
-                          </Button>
+                          {match ? (
+                            <>
+                              <Button
+                                variant='ghost'
+                                size='icon'
+                                className='h-8 w-8'
+                                onClick={() => openProductDialog(match)}
+                                title='Edit product'
+                              >
+                                <Edit className='h-4 w-4' />
+                              </Button>
+                              <Button
+                                variant='ghost'
+                                size='icon'
+                                className='h-8 w-8'
+                                onClick={() =>
+                                  handleToggleProductVisibility(match)
+                                }
+                                title={
+                                  match.isHidden
+                                    ? 'Show product'
+                                    : 'Hide product'
+                                }
+                              >
+                                {match.isHidden ? (
+                                  <EyeOff className='h-4 w-4' />
+                                ) : (
+                                  <Eye className='h-4 w-4' />
+                                )}
+                              </Button>
+                              <Button
+                                variant='ghost'
+                                size='icon'
+                                className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+                                onClick={() => handleDeleteProduct(match.id)}
+                                title='Delete product permanently'
+                              >
+                                <Trash2 className='h-4 w-4' />
+                              </Button>
+                            </>
+                          ) : (
+                            <span className='text-xs text-muted-foreground px-2'>
+                              Sync to add
+                            </span>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </>
             )}
           </div>

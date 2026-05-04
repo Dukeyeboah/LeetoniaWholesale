@@ -1,0 +1,3418 @@
+[
+  {
+    "code": "4568",
+    "description": "10D GLUCOSE INF 500ML",
+    "quantity": 56,
+    "price": 11.36,
+    "total": 636.16
+  },
+  {
+    "code": "3430",
+    "description": "2B(BENZYL BENZOATE) 2% LOTION 100ML",
+    "quantity": 60,
+    "price": 26.8,
+    "total": 1608.0
+  },
+  {
+    "code": "4706",
+    "description": "3FER SYR 100",
+    "quantity": 10,
+    "price": 10.58,
+    "total": 1058.0
+  },
+  {
+    "code": "5057",
+    "description": "3P GARLIC MIXTURE",
+    "quantity": 90,
+    "price": 44.0,
+    "total": 3960.0
+  },
+  {
+    "code": "2711",
+    "description": "ACICLOVIR 200MG TABS 25'S UK",
+    "quantity": 100,
+    "price": 40.6,
+    "total": 4060.0
+  },
+  {
+    "code": "3309",
+    "description": "ACICLOVIR 400MG TABS 56'S UK",
+    "quantity": 100,
+    "price": 72.0,
+    "total": 7200.0
+  },
+  {
+    "code": "4716",
+    "description": "ACIDOM 40MG(OMEPRAZOLE) INJ",
+    "quantity": 156,
+    "price": 14.0,
+    "total": 2184.0
+  },
+  {
+    "code": "4234",
+    "description": "ACIGUARD SUSP 200ML",
+    "quantity": 150,
+    "price": 18.38,
+    "total": 2757.0
+  },
+  {
+    "code": "1429",
+    "description": "ACTILIFE",
+    "quantity": 150,
+    "price": 22.0,
+    "total": 3300.0
+  },
+  {
+    "code": "3645",
+    "description": "ACTILIFE ACTIWOMEN TABS 30'S",
+    "quantity": 32,
+    "price": 65.0,
+    "total": 2080.0
+  },
+  {
+    "code": "8383",
+    "description": "ACTILIFE WOMENS FLORA",
+    "quantity": 320,
+    "price": 60.0,
+    "total": 19200.0
+  },
+  {
+    "code": "3574",
+    "description": "ADOM KOO MIXTURE",
+    "quantity": 40,
+    "price": 22.0,
+    "total": 880.0
+  },
+  {
+    "code": "4328",
+    "description": "ADOM KOO OINT",
+    "quantity": 100,
+    "price": 19.8,
+    "total": 1980.0
+  },
+  {
+    "code": "2717",
+    "description": "AGBEVE TONIC",
+    "quantity": 90,
+    "price": 31.0,
+    "total": 2790.0
+  },
+  {
+    "code": "1431",
+    "description": "ALKA-5 SYR 100ML",
+    "quantity": 40,
+    "price": 54.0,
+    "total": 2160.0
+  },
+  {
+    "code": "7918",
+    "description": "ALPHA GARLIC 30'S",
+    "quantity": 60,
+    "price": 36.0,
+    "total": 2160.0
+  },
+  {
+    "code": "2792",
+    "description": "ALPHA GARLIC CAPS 60'S",
+    "quantity": 60,
+    "price": 54.0,
+    "total": 3240.0
+  },
+  {
+    "code": "4761",
+    "description": "AMCICLOX SUSP 100ML",
+    "quantity": 360,
+    "price": 6.9,
+    "total": 2484.0
+  },
+  {
+    "code": "3591",
+    "description": "AMCOF JUNIOR",
+    "quantity": 120,
+    "price": 13.5,
+    "total": 1620.0
+  },
+  {
+    "code": "1442",
+    "description": "AMLODIPINE BES TAB 5MG TEV 28",
+    "quantity": 480,
+    "price": 11.0,
+    "total": 5280.0
+  },
+  {
+    "code": "7689",
+    "description": "AMOKXINATE 1G TABS 14'S",
+    "quantity": 100,
+    "price": 50.95,
+    "total": 5095.0
+  },
+  {
+    "code": "8747",
+    "description": "AMOKXINATE 457MG SUSP",
+    "quantity": 100,
+    "price": 30.74,
+    "total": 3074.0
+  },
+  {
+    "code": "1448",
+    "description": "AMOVULIN 228",
+    "quantity": 100,
+    "price": 25.9,
+    "total": 2590.0
+  },
+  {
+    "code": "1449",
+    "description": "AMOVULIN 457",
+    "quantity": 40,
+    "price": 42.8,
+    "total": 1712.0
+  },
+  {
+    "code": "1450",
+    "description": "AMOVULIN 625",
+    "quantity": 180,
+    "price": 45.1,
+    "total": 8118.0
+  },
+  {
+    "code": "4547",
+    "description": "AMOXICILLIN 250MG CAPS 50X10-LETAP",
+    "quantity": 30,
+    "price": 110.0,
+    "total": 3300.0
+  },
+  {
+    "code": "3905",
+    "description": "AMOXICILLIN SUSP 100ML LETAP",
+    "quantity": 240,
+    "price": 5.0,
+    "total": 1200.0
+  },
+  {
+    "code": "4151",
+    "description": "AMPICILLIN 250MG CAPS",
+    "quantity": 20,
+    "price": 118.5,
+    "total": 2370.0
+  },
+  {
+    "code": "7729",
+    "description": "AMUZU GARLIC MIXTURE",
+    "quantity": 75,
+    "price": 38.0,
+    "total": 2850.0
+  },
+  {
+    "code": "9564",
+    "description": "AMUZU PEE HERBAL MIXTURE",
+    "quantity": 25,
+    "price": 35.0,
+    "total": 875.0
+  },
+  {
+    "code": "1459",
+    "description": "ANCIGEL O",
+    "quantity": 60,
+    "price": 28.8,
+    "total": 1728.0
+  },
+  {
+    "code": "1464",
+    "description": "APETAMIN SYRUP",
+    "quantity": 50,
+    "price": 35.0,
+    "total": 1750.0
+  },
+  {
+    "code": "5267",
+    "description": "APETATRUST SYR 100ML",
+    "quantity": 60,
+    "price": 14.5,
+    "total": 870.0
+  },
+  {
+    "code": "2580",
+    "description": "APETATRUST SYR 200ML",
+    "quantity": 75,
+    "price": 24.5,
+    "total": 1837.5
+  },
+  {
+    "code": "1465",
+    "description": "APTIZOOM SYRUP",
+    "quantity": 48,
+    "price": 60.0,
+    "total": 2880.0
+  },
+  {
+    "code": "7656",
+    "description": "AQUAFRESH MOUTH WASH 500ML",
+    "quantity": 8,
+    "price": 30.0,
+    "total": 240.0
+  },
+  {
+    "code": "7657",
+    "description": "AQUAFRESH TOOTHPASTE 100ML",
+    "quantity": 168,
+    "price": 20.0,
+    "total": 3360.0
+  },
+  {
+    "code": "3564",
+    "description": "ARFAN 20/120MG TABS 24'S",
+    "quantity": 300,
+    "price": 4.8,
+    "total": 1440.0
+  },
+  {
+    "code": "8008",
+    "description": "ARFAN SUSPENSION LETAP",
+    "quantity": 120,
+    "price": 5.0,
+    "total": 600.0
+  },
+  {
+    "code": "7704",
+    "description": "ARTENATE 30MG 1'S",
+    "quantity": 200,
+    "price": 10.0,
+    "total": 2000.0
+  },
+  {
+    "code": "4008",
+    "description": "ARZIGLOBIN SYR 200ML",
+    "quantity": 30,
+    "price": 20.99,
+    "total": 629.7
+  },
+  {
+    "code": "1473",
+    "description": "ASCORYL SYR",
+    "quantity": 60,
+    "price": 11.0,
+    "total": 660.0
+  },
+  {
+    "code": "2164",
+    "description": "ASCOVIT CEE(VITAMIN C) SYRUP 100ML",
+    "quantity": 240,
+    "price": 11.8,
+    "total": 2832.0
+  },
+  {
+    "code": "4267",
+    "description": "ASENA",
+    "quantity": 144,
+    "price": 16.5,
+    "total": 2376.0
+  },
+  {
+    "code": "1476",
+    "description": "ASMANOL TABS 100'",
+    "quantity": 32,
+    "price": 34.0,
+    "total": 1088.0
+  },
+  {
+    "code": "4529",
+    "description": "ASNAC-SR 100MG DICLOFENAC TAB",
+    "quantity": 150,
+    "price": 11.0,
+    "total": 1650.0
+  },
+  {
+    "code": "4528",
+    "description": "ASNAC-SR 75MG DICLOFENAC TAB",
+    "quantity": 150,
+    "price": 11.0,
+    "total": 1650.0
+  },
+  {
+    "code": "1494",
+    "description": "AUGMENTIN 457",
+    "quantity": 70,
+    "price": 118.0,
+    "total": 8260.0
+  },
+  {
+    "code": "1496",
+    "description": "AUNTIE MARY GRIPEWATER 150ML",
+    "quantity": 120,
+    "price": 19.8,
+    "total": 2376.0
+  },
+  {
+    "code": "1497",
+    "description": "AVAMYS NASAL SPRAY",
+    "quantity": 100,
+    "price": 179.0,
+    "total": 17900.0
+  },
+  {
+    "code": "2140",
+    "description": "B-CLAR 500MG(CLARITHROMYCIN) TABS 10'S",
+    "quantity": 450,
+    "price": 38.0,
+    "total": 17100.0
+  },
+  {
+    "code": "2132",
+    "description": "B-COMPLEX TABS (100 X 10)",
+    "quantity": 40,
+    "price": 65.94,
+    "total": 2637.6
+  },
+  {
+    "code": "5268",
+    "description": "BABYVITE SYR 100ML",
+    "quantity": 60,
+    "price": 13.5,
+    "total": 810.0
+  },
+  {
+    "code": "3568",
+    "description": "BABYVITE SYRUP 200ML",
+    "quantity": 50,
+    "price": 24.5,
+    "total": 1225.0
+  },
+  {
+    "code": "8745",
+    "description": "BACTROBAN CREAM",
+    "quantity": 15,
+    "price": 72.0,
+    "total": 1080.0
+  },
+  {
+    "code": "4036",
+    "description": "BASEBOOM ORAL JELLY 5G",
+    "quantity": 500,
+    "price": 8.1,
+    "total": 4050.0
+  },
+  {
+    "code": "4918",
+    "description": "BASECOLD SYR",
+    "quantity": 100,
+    "price": 13.3,
+    "total": 1330.0
+  },
+  {
+    "code": "1512",
+    "description": "BELLA COUGH SYR 125ML",
+    "quantity": 60,
+    "price": 15.1,
+    "total": 906.0
+  },
+  {
+    "code": "9096",
+    "description": "BELLS CHESTY COUGH SYR 200ML",
+    "quantity": 12,
+    "price": 41.25,
+    "total": 495.0
+  },
+  {
+    "code": "2159",
+    "description": "BELLS TEETHING MIXTURE 100ML",
+    "quantity": 72,
+    "price": 51.0,
+    "total": 3672.0
+  },
+  {
+    "code": "1518",
+    "description": "BENYLIN DRY COUGH SYR 100ML",
+    "quantity": 96,
+    "price": 76.68,
+    "total": 7361.28
+  },
+  {
+    "code": "3727",
+    "description": "BENYLIN ORIGINAL SYR 100ML",
+    "quantity": 240,
+    "price": 76.68,
+    "total": 18403.2
+  },
+  {
+    "code": "1519",
+    "description": "BENYLIN PAEDIATRIC SYR",
+    "quantity": 96,
+    "price": 76.68,
+    "total": 7361.28
+  },
+  {
+    "code": "9619",
+    "description": "BF DEEP CLEASING WIPES 25'S",
+    "quantity": 84,
+    "price": 18.0,
+    "total": 1512.0
+  },
+  {
+    "code": "3487",
+    "description": "BF TEA TREE CLEANSING WIPE 30'S",
+    "quantity": 72,
+    "price": 19.8,
+    "total": 1425.6
+  },
+  {
+    "code": "3488",
+    "description": "BF TEA TREE FACIAL SCRUB 150ML",
+    "quantity": 36,
+    "price": 16.13,
+    "total": 580.68
+  },
+  {
+    "code": "3472",
+    "description": "BF VITAMIN C DAILY FACIAL WASH 150ML",
+    "quantity": 84,
+    "price": 21.0,
+    "total": 1764.0
+  },
+  {
+    "code": "3475",
+    "description": "BF VITAMIN C DAILY MOISTURIZER 100ML",
+    "quantity": 84,
+    "price": 21.0,
+    "total": 1764.0
+  },
+  {
+    "code": "4485",
+    "description": "BF VITAMIN C FACIAL SCRUB 150ML",
+    "quantity": 24,
+    "price": 21.0,
+    "total": 504.0
+  },
+  {
+    "code": "3473",
+    "description": "BF VITAMIN C FACIAL TONIC 150ML",
+    "quantity": 36,
+    "price": 21.0,
+    "total": 756.0
+  },
+  {
+    "code": "4484",
+    "description": "BF VITAMIN C MAKE UP WIPES 30'S",
+    "quantity": 120,
+    "price": 18.5,
+    "total": 2220.0
+  },
+  {
+    "code": "7744",
+    "description": "BIBINI TOMA PLUS",
+    "quantity": 24,
+    "price": 38.5,
+    "total": 924.0
+  },
+  {
+    "code": "4243",
+    "description": "BLUE POLAR ICE GEL",
+    "quantity": 50,
+    "price": 32.0,
+    "total": 1600.0
+  },
+  {
+    "code": "2366",
+    "description": "BONNISAN SYRUP",
+    "quantity": 200,
+    "price": 43.52,
+    "total": 8704.0
+  },
+  {
+    "code": "7977",
+    "description": "BORGES APPLE CIDER VINEGAR 250ML",
+    "quantity": 24,
+    "price": 63.0,
+    "total": 1512.0
+  },
+  {
+    "code": "4908",
+    "description": "BORGES APPLE CIDER VINEGAR 500ML",
+    "quantity": 24,
+    "price": 120.0,
+    "total": 2880.0
+  },
+  {
+    "code": "2396",
+    "description": "BORGES OLIVE OIL 125ML",
+    "quantity": 96,
+    "price": 42.0,
+    "total": 4032.0
+  },
+  {
+    "code": "2397",
+    "description": "BORGES OLIVE OIL 250ML",
+    "quantity": 36,
+    "price": 82.0,
+    "total": 2952.0
+  },
+  {
+    "code": "2789",
+    "description": "BORGES OLIVE OIL 500ML",
+    "quantity": 24,
+    "price": 146.0,
+    "total": 3504.0
+  },
+  {
+    "code": "7726",
+    "description": "BORIC ACID 600MG VAGINA SUPP",
+    "quantity": 100,
+    "price": 132.0,
+    "total": 13200.0
+  },
+  {
+    "code": "3798",
+    "description": "CALAMINE LOTION 100MLS LOCAL",
+    "quantity": 100,
+    "price": 10.0,
+    "total": 1000.0
+  },
+  {
+    "code": "2777",
+    "description": "CALAMINE OINTMENT 40G",
+    "quantity": 80,
+    "price": 13.9,
+    "total": 1112.0
+  },
+  {
+    "code": "1534",
+    "description": "CALPOL 6 PLUS SYR",
+    "quantity": 50,
+    "price": 85.1,
+    "total": 4255.0
+  },
+  {
+    "code": "2409",
+    "description": "CALPOL INFANT SUSPENSION (2 +) 100ML",
+    "quantity": 216,
+    "price": 74.0,
+    "total": 15984.0
+  },
+  {
+    "code": "3327",
+    "description": "CANDIDERM CREAM-TRIPLE ACTION CREAM 15GM",
+    "quantity": 200,
+    "price": 17.52,
+    "total": 3504.0
+  },
+  {
+    "code": "4013",
+    "description": "CARBIROID 5MG(CARBIMAZOLE) TABS 100'S",
+    "quantity": 160,
+    "price": 105.0,
+    "total": 16800.0
+  },
+  {
+    "code": "7717",
+    "description": "CARE FREE PANTYLINERS",
+    "quantity": 36,
+    "price": 29.0,
+    "total": 1044.0
+  },
+  {
+    "code": "2258",
+    "description": "CARTEF SUSPENSION 60 ML'",
+    "quantity": 100,
+    "price": 7.35,
+    "total": 735.0
+  },
+  {
+    "code": "4012",
+    "description": "CARZEPIN 200MG(CARBAMAZEPINE) TABS 100'S",
+    "quantity": 100,
+    "price": 138.0,
+    "total": 13800.0
+  },
+  {
+    "code": "1543",
+    "description": "CEFIXIME 200MG (INOXIME)",
+    "quantity": 270,
+    "price": 20.0,
+    "total": 5400.0
+  },
+  {
+    "code": "1550",
+    "description": "CETAPOL PM",
+    "quantity": 120,
+    "price": 13.2,
+    "total": 1584.0
+  },
+  {
+    "code": "1551",
+    "description": "CETAPOL SYR",
+    "quantity": 200,
+    "price": 13.2,
+    "total": 2640.0
+  },
+  {
+    "code": "1555",
+    "description": "CETIRIZINE 10MG TABS 30'S UK",
+    "quantity": 84,
+    "price": 15.48,
+    "total": 1300.32
+  },
+  {
+    "code": "8884",
+    "description": "CETRIZINE 10MG 30'S",
+    "quantity": 132,
+    "price": 14.7,
+    "total": 1940.4
+  },
+  {
+    "code": "5486",
+    "description": "CHLORXY-G GEL",
+    "quantity": 200,
+    "price": 14.0,
+    "total": 2800.0
+  },
+  {
+    "code": "9628",
+    "description": "CIPROCOM (CIPRO SUSP) 250MG/5ML",
+    "quantity": 50,
+    "price": 50.0,
+    "total": 2500.0
+  },
+  {
+    "code": "1567",
+    "description": "CIPROLEX 500MG TAB",
+    "quantity": 32,
+    "price": 23.0,
+    "total": 736.0
+  },
+  {
+    "code": "1569",
+    "description": "CIPROLEX TZ 14'S TABS",
+    "quantity": 32,
+    "price": 48.0,
+    "total": 1536.0
+  },
+  {
+    "code": "3423",
+    "description": "CIROTAMIN TONIC",
+    "quantity": 64,
+    "price": 20.52,
+    "total": 1313.28
+  },
+  {
+    "code": "3446",
+    "description": "CITRO C SYR 100ML",
+    "quantity": 280,
+    "price": 12.1,
+    "total": 3388.0
+  },
+  {
+    "code": "4092",
+    "description": "CITY BLOOD TONIC 200ML",
+    "quantity": 50,
+    "price": 29.98,
+    "total": 1499.0
+  },
+  {
+    "code": "9631",
+    "description": "CLARITHROMYCIN SUSP 250MG/5ML (UNICOM)",
+    "quantity": 50,
+    "price": 60.0,
+    "total": 3000.0
+  },
+  {
+    "code": "5012",
+    "description": "CLAVUMED 228MG SUSP",
+    "quantity": 120,
+    "price": 29.0,
+    "total": 3480.0
+  },
+  {
+    "code": "5010",
+    "description": "CLAVUMED 625MG TABS",
+    "quantity": 400,
+    "price": 42.5,
+    "total": 17000.0
+  },
+  {
+    "code": "2137",
+    "description": "CLINDAMYCIN 150MG(DACILLIN)",
+    "quantity": 100,
+    "price": 65.0,
+    "total": 6500.0
+  },
+  {
+    "code": "2138",
+    "description": "CLINDAMYCIN 300MG(DACILIN)",
+    "quantity": 143,
+    "price": 100.0,
+    "total": 14300.0
+  },
+  {
+    "code": "9287",
+    "description": "CLINDAMYCIN SUSPENSION (AUCIN) 80ML",
+    "quantity": 50,
+    "price": 140.0,
+    "total": 7000.0
+  },
+  {
+    "code": "7804",
+    "description": "CLOPIDOGREL TABS 75MG 28'S",
+    "quantity": 150,
+    "price": 31.0,
+    "total": 4650.0
+  },
+  {
+    "code": "7733",
+    "description": "CLOXACILLIN SUSP 100ML LETAP",
+    "quantity": 60,
+    "price": 5.5,
+    "total": 330.0
+  },
+  {
+    "code": "1596",
+    "description": "COARTEM 80/480 TABLET 1X6'S",
+    "quantity": 480,
+    "price": 69.01,
+    "total": 33124.8
+  },
+  {
+    "code": "9597",
+    "description": "COLDRID SYRUP",
+    "quantity": 60,
+    "price": 11.5,
+    "total": 690.0
+  },
+  {
+    "code": "9098",
+    "description": "COLGATE MOUTHWASH 500ML ALL",
+    "quantity": 84,
+    "price": 42.0,
+    "total": 3528.0
+  },
+  {
+    "code": "1603",
+    "description": "CONTRA -72",
+    "quantity": 1080,
+    "price": 4.14,
+    "total": 4471.2
+  },
+  {
+    "code": "1604",
+    "description": "COTTON 100",
+    "quantity": 200,
+    "price": 15.0,
+    "total": 3000.0
+  },
+  {
+    "code": "1605",
+    "description": "COTTON 200",
+    "quantity": 50,
+    "price": 18.0,
+    "total": 900.0
+  },
+  {
+    "code": "8983",
+    "description": "COTTON 500GM MARIE STOPES",
+    "quantity": 40,
+    "price": 37.0,
+    "total": 1480.0
+  },
+  {
+    "code": "1608",
+    "description": "COTTON WOOL 500G(P.I)",
+    "quantity": 36,
+    "price": 35.0,
+    "total": 1260.0
+  },
+  {
+    "code": "2602",
+    "description": "COTTON WOOL 50GM",
+    "quantity": 400,
+    "price": 9.0,
+    "total": 3600.0
+  },
+  {
+    "code": "4273",
+    "description": "COVERAM 5MG/10MG TABS 30'S",
+    "quantity": 10,
+    "price": 210.0,
+    "total": 2100.0
+  },
+  {
+    "code": "9181",
+    "description": "CRANBERRY SYRUP 200ML",
+    "quantity": 120,
+    "price": 75.0,
+    "total": 9000.0
+  },
+  {
+    "code": "2273",
+    "description": "CYFEN SYR",
+    "quantity": 72,
+    "price": 27.93,
+    "total": 2010.96
+  },
+  {
+    "code": "2274",
+    "description": "CYFEN TAB",
+    "quantity": 600,
+    "price": 3.03,
+    "total": 1819.44
+  },
+  {
+    "code": "1620",
+    "description": "DANNEX ORS 25'S",
+    "quantity": 40,
+    "price": 35.5,
+    "total": 1420.0
+  },
+  {
+    "code": "1621",
+    "description": "DANNEX ORS ORANGE 25'S",
+    "quantity": 40,
+    "price": 37.93,
+    "total": 1517.2
+  },
+  {
+    "code": "2772",
+    "description": "DANRUB OINTMENT",
+    "quantity": 60,
+    "price": 14.15,
+    "total": 849.0
+  },
+  {
+    "code": "2481",
+    "description": "DEEP HEAT SPRAY 150ML",
+    "quantity": 48,
+    "price": 66.48,
+    "total": 3191.04
+  },
+  {
+    "code": "7728",
+    "description": "DEN-V DIGITAL THERMOMETER",
+    "quantity": 107,
+    "price": 30.0,
+    "total": 3210.0
+  },
+  {
+    "code": "4615",
+    "description": "DEXORANGE SYR 200ML",
+    "quantity": 30,
+    "price": 40.5,
+    "total": 1215.0
+  },
+  {
+    "code": "3548",
+    "description": "DIABETMIN 500MG TAB",
+    "quantity": 90,
+    "price": 40.0,
+    "total": 3600.0
+  },
+  {
+    "code": "2726",
+    "description": "DIAGELLATES ELIXIR 125ML",
+    "quantity": 140,
+    "price": 25.0,
+    "total": 3500.0
+  },
+  {
+    "code": "2727",
+    "description": "DIAGELLATES ELIXIR 250ML",
+    "quantity": 50,
+    "price": 41.0,
+    "total": 2050.0
+  },
+  {
+    "code": "2213",
+    "description": "DICLONOVA -100MG SUPP(2X5)",
+    "quantity": 150,
+    "price": 12.65,
+    "total": 1897.5
+  },
+  {
+    "code": "7696",
+    "description": "DIPHEX BABY COUGH SYR",
+    "quantity": 40,
+    "price": 15.0,
+    "total": 600.0
+  },
+  {
+    "code": "8278",
+    "description": "DIPHEX CHESTY COUGH SYRUP",
+    "quantity": 40,
+    "price": 13.5,
+    "total": 540.0
+  },
+  {
+    "code": "1646",
+    "description": "DIPHEX COUGH SYR",
+    "quantity": 120,
+    "price": 19.0,
+    "total": 2280.0
+  },
+  {
+    "code": "7683",
+    "description": "DIPHEX INFANT COUGH SYR",
+    "quantity": 80,
+    "price": 14.0,
+    "total": 1120.0
+  },
+  {
+    "code": "1647",
+    "description": "DIPHEX JUNIOR",
+    "quantity": 80,
+    "price": 14.5,
+    "total": 1160.0
+  },
+  {
+    "code": "2586",
+    "description": "DITHRANOL OINTMENT",
+    "quantity": 80,
+    "price": 15.75,
+    "total": 1260.0
+  },
+  {
+    "code": "3710",
+    "description": "DOPATAB 250MG(METHYLDOPA) TABS 100'S",
+    "quantity": 45,
+    "price": 175.0,
+    "total": 7875.0
+  },
+  {
+    "code": "3697",
+    "description": "DRAGON LOZENGES 1X4",
+    "quantity": 100,
+    "price": 26.9,
+    "total": 2690.0
+  },
+  {
+    "code": "3377",
+    "description": "DRAGON SPRAY",
+    "quantity": 200,
+    "price": 36.9,
+    "total": 7380.0
+  },
+  {
+    "code": "3376",
+    "description": "DRAGON TABS",
+    "quantity": 200,
+    "price": 20.9,
+    "total": 4180.0
+  },
+  {
+    "code": "2485",
+    "description": "DUREX FETHERLITE CONDOMS 3'S",
+    "quantity": 120,
+    "price": 23.98,
+    "total": 2877.6
+  },
+  {
+    "code": "1659",
+    "description": "DUROL TONIC 200ML",
+    "quantity": 180,
+    "price": 18.27,
+    "total": 3288.6
+  },
+  {
+    "code": "1660",
+    "description": "DUROL TONIC 300ML",
+    "quantity": 60,
+    "price": 24.86,
+    "total": 1491.6
+  },
+  {
+    "code": "2226",
+    "description": "DYNEWELL 200ML SYRUP",
+    "quantity": 400,
+    "price": 7.0,
+    "total": 2800.0
+  },
+  {
+    "code": "1662",
+    "description": "E-PANOL",
+    "quantity": 240,
+    "price": 10.8,
+    "total": 2592.0
+  },
+  {
+    "code": "7716",
+    "description": "EASY LIFE VITAMIN C 1000MG EFF",
+    "quantity": 144,
+    "price": 42.66,
+    "total": 6143.04
+  },
+  {
+    "code": "4098",
+    "description": "EBONY CONDOMS 3'S",
+    "quantity": 1000,
+    "price": 6.6,
+    "total": 6600.0
+  },
+  {
+    "code": "1664",
+    "description": "EFPAC TAB",
+    "quantity": 120,
+    "price": 71.5,
+    "total": 8580.0
+  },
+  {
+    "code": "1665",
+    "description": "ENACEF(CEFUROXIME) SUSP. 125MG/5ML 50ML",
+    "quantity": 180,
+    "price": 32.8,
+    "total": 5904.0
+  },
+  {
+    "code": "1671",
+    "description": "ENAFEN(IBUPROFEN) SUSPENSION 100MG/5ML 60ML",
+    "quantity": 120,
+    "price": 13.8,
+    "total": 1656.0
+  },
+  {
+    "code": "8348",
+    "description": "ESKABEN BLISTER (1X20)",
+    "quantity": 120,
+    "price": 24.89,
+    "total": 2986.8
+  },
+  {
+    "code": "3465",
+    "description": "ESKADOL NYTE BLISTER",
+    "quantity": 600,
+    "price": 3.58,
+    "total": 2145.0
+  },
+  {
+    "code": "4986",
+    "description": "ESKAGYL 200MG TABS (50X10)",
+    "quantity": 84,
+    "price": 44.77,
+    "total": 3760.68
+  },
+  {
+    "code": "1690",
+    "description": "ESKAGYL DS BLISTER 400MG(50X10)",
+    "quantity": 84,
+    "price": 88.27,
+    "total": 7414.68
+  },
+  {
+    "code": "2663",
+    "description": "ESKYZOLE (TRIPLE ACTION CREAM)30GM",
+    "quantity": 150,
+    "price": 9.21,
+    "total": 1381.5
+  },
+  {
+    "code": "4100",
+    "description": "EUSOL LOTION",
+    "quantity": 60,
+    "price": 6.5,
+    "total": 390.0
+  },
+  {
+    "code": "2786",
+    "description": "EVECARE SYRUP 200ML",
+    "quantity": 25,
+    "price": 102.3,
+    "total": 2557.5
+  },
+  {
+    "code": "2736",
+    "description": "EXAMINATION GLOVES",
+    "quantity": 70,
+    "price": 48.0,
+    "total": 3360.0
+  },
+  {
+    "code": "2286",
+    "description": "FAMACOLD SYR",
+    "quantity": 60,
+    "price": 12.47,
+    "total": 748.2
+  },
+  {
+    "code": "3620",
+    "description": "FELDENE 20MG CAPS 10'S",
+    "quantity": 11,
+    "price": 85.0,
+    "total": 935.0
+  },
+  {
+    "code": "5406",
+    "description": "FEROFIX SYR 200ML",
+    "quantity": 80,
+    "price": 9.9,
+    "total": 792.0
+  },
+  {
+    "code": "1708",
+    "description": "FEROGLOBIN B12 LIQ 200ML",
+    "quantity": 96,
+    "price": 76.63,
+    "total": 7356.48
+  },
+  {
+    "code": "1710",
+    "description": "FERRODEX CAPS",
+    "quantity": 60,
+    "price": 10.5,
+    "total": 630.0
+  },
+  {
+    "code": "1711",
+    "description": "FERRODEX SYR 200ML",
+    "quantity": 80,
+    "price": 15.6,
+    "total": 1248.0
+  },
+  {
+    "code": "8157",
+    "description": "FERROFANT BABY DROPS 30ML VEGA",
+    "quantity": 75,
+    "price": 45.0,
+    "total": 3375.0
+  },
+  {
+    "code": "3407",
+    "description": "FERROLEX SYRUP 250ML",
+    "quantity": 120,
+    "price": 36.0,
+    "total": 4320.0
+  },
+  {
+    "code": "1712",
+    "description": "FERROUS SULPHATE TAB 200MG 28'S UK",
+    "quantity": 200,
+    "price": 23.83,
+    "total": 4766.0
+  },
+  {
+    "code": "2193",
+    "description": "FERROUS SULPHATE TABS 500' ECL",
+    "quantity": 20,
+    "price": 150.0,
+    "total": 3000.0
+  },
+  {
+    "code": "1713",
+    "description": "FIESTA CONDOMS",
+    "quantity": 1920,
+    "price": 6.5,
+    "total": 12480.0
+  },
+  {
+    "code": "2549",
+    "description": "FINELIFE BLOOD TONIC",
+    "quantity": 72,
+    "price": 13.5,
+    "total": 972.0
+  },
+  {
+    "code": "9384",
+    "description": "FLAME XTACY CONDOMS 3'S",
+    "quantity": 720,
+    "price": 6.0,
+    "total": 4320.0
+  },
+  {
+    "code": "8529",
+    "description": "FLAME XTRA CONDOMS",
+    "quantity": 720,
+    "price": 6.0,
+    "total": 4320.0
+  },
+  {
+    "code": "1718",
+    "description": "FLEMEX ADULT COUGH SYR",
+    "quantity": 80,
+    "price": 16.0,
+    "total": 1280.0
+  },
+  {
+    "code": "1719",
+    "description": "FLEMEX JUNIOR COUGH SYR",
+    "quantity": 40,
+    "price": 14.25,
+    "total": 570.0
+  },
+  {
+    "code": "1724",
+    "description": "FLUCLOX SUSPENSION-ESKAY",
+    "quantity": 240,
+    "price": 9.02,
+    "total": 2164.8
+  },
+  {
+    "code": "3913",
+    "description": "FLUCLOXACILLIN SUSP 100ML LETAP",
+    "quantity": 240,
+    "price": 5.3,
+    "total": 1272.0
+  },
+  {
+    "code": "3302",
+    "description": "FLUCONADENK 150MG 1'S",
+    "quantity": 230,
+    "price": 35.75,
+    "total": 8222.5
+  },
+  {
+    "code": "1730",
+    "description": "FLUXACIN 125 SUSPENSION 100ML",
+    "quantity": 60,
+    "price": 18.0,
+    "total": 1080.0
+  },
+  {
+    "code": "2712",
+    "description": "FLUXACIN CAPS 250MG ALU 200'",
+    "quantity": 10,
+    "price": 180.0,
+    "total": 1800.0
+  },
+  {
+    "code": "3352",
+    "description": "FLUXACIN CAPS 500MG ALL",
+    "quantity": 30,
+    "price": 298.0,
+    "total": 8940.0
+  },
+  {
+    "code": "1731",
+    "description": "FLUXAMOX 500MG CAPSULES 200'",
+    "quantity": 20,
+    "price": 280.0,
+    "total": 5600.0
+  },
+  {
+    "code": "1732",
+    "description": "FLUXAMOX SUSP. 250MG/5ML 100ML",
+    "quantity": 120,
+    "price": 25.8,
+    "total": 3096.0
+  },
+  {
+    "code": "7691",
+    "description": "FOLAK SYRUP (FOLIC ACID) 200ML",
+    "quantity": 90,
+    "price": 60.0,
+    "total": 5400.0
+  },
+  {
+    "code": "1733",
+    "description": "FOLIC ACID 5MG TABS 100X10",
+    "quantity": 80,
+    "price": 59.74,
+    "total": 4779.2
+  },
+  {
+    "code": "3896",
+    "description": "FOLIGROW PLUS SYR 200ML",
+    "quantity": 120,
+    "price": 38.5,
+    "total": 4620.0
+  },
+  {
+    "code": "1737",
+    "description": "FOLIGROW SYR",
+    "quantity": 180,
+    "price": 34.9,
+    "total": 6282.0
+  },
+  {
+    "code": "2136",
+    "description": "FOXITIL 250(CEFUROXIME 250MG)",
+    "quantity": 227,
+    "price": 20.0,
+    "total": 4540.0
+  },
+  {
+    "code": "8258",
+    "description": "FUXIME 250MG (CEFUROXIME)",
+    "quantity": 80,
+    "price": 29.5,
+    "total": 2360.0
+  },
+  {
+    "code": "7887",
+    "description": "GALVARIN -300",
+    "quantity": 30,
+    "price": 179.49,
+    "total": 5384.7
+  },
+  {
+    "code": "1747",
+    "description": "GALVUS MET 50/1000 6X10",
+    "quantity": 163,
+    "price": 404.0,
+    "total": 65852.0
+  },
+  {
+    "code": "9630",
+    "description": "GARLIC 300MG CAPS 60'S UCL",
+    "quantity": 50,
+    "price": 90.0,
+    "total": 4500.0
+  },
+  {
+    "code": "3757",
+    "description": "GASTRACID SYRUP 200ML",
+    "quantity": 120,
+    "price": 15.0,
+    "total": 1800.0
+  },
+  {
+    "code": "2251",
+    "description": "GEBEDOL FORTE",
+    "quantity": 100,
+    "price": 22.05,
+    "total": 2205.0
+  },
+  {
+    "code": "2250",
+    "description": "GEBEDOL TAB",
+    "quantity": 100,
+    "price": 15.38,
+    "total": 1538.0
+  },
+  {
+    "code": "2591",
+    "description": "GEBEDOL XTRA",
+    "quantity": 120,
+    "price": 42.89,
+    "total": 5146.8
+  },
+  {
+    "code": "5101",
+    "description": "GENTA-K EYE/EAR DROPS 10ML",
+    "quantity": 240,
+    "price": 5.5,
+    "total": 1320.0
+  },
+  {
+    "code": "9629",
+    "description": "GINSENG 250MG CAPS 30'S UCL",
+    "quantity": 10,
+    "price": 90.0,
+    "total": 900.0
+  },
+  {
+    "code": "3606",
+    "description": "GIVERS KOO CAPSULES",
+    "quantity": 36,
+    "price": 57.2,
+    "total": 2059.2
+  },
+  {
+    "code": "3605",
+    "description": "GIVERS P CAPSULES",
+    "quantity": 42,
+    "price": 57.2,
+    "total": 2402.4
+  },
+  {
+    "code": "2206",
+    "description": "GLUCO NAF C-PINEAPPLE 400MG",
+    "quantity": 40,
+    "price": 31.5,
+    "total": 1260.0
+  },
+  {
+    "code": "1771",
+    "description": "GLUCO-NAF C ORANGE 400MG",
+    "quantity": 60,
+    "price": 31.5,
+    "total": 1890.0
+  },
+  {
+    "code": "1772",
+    "description": "GLUCO-NAF D 400MG",
+    "quantity": 20,
+    "price": 31.5,
+    "total": 630.0
+  },
+  {
+    "code": "2244",
+    "description": "GOGYNAX TABS 100MG 6'S",
+    "quantity": 300,
+    "price": 7.0,
+    "total": 2100.0
+  },
+  {
+    "code": "7694",
+    "description": "GR PARA SYRUP",
+    "quantity": 120,
+    "price": 5.5,
+    "total": 660.0
+  },
+  {
+    "code": "2142",
+    "description": "GRISEOFULVIN TAB (O-FULVIN 500)",
+    "quantity": 110,
+    "price": 75.0,
+    "total": 8250.0
+  },
+  {
+    "code": "5408",
+    "description": "GRMOX 500MG CAPS 15X10",
+    "quantity": 360,
+    "price": 11.5,
+    "total": 4140.0
+  },
+  {
+    "code": "5462",
+    "description": "GROFYNN HERBAL TONIC",
+    "quantity": 90,
+    "price": 19.0,
+    "total": 1710.0
+  },
+  {
+    "code": "1778",
+    "description": "GUDAPET SYR",
+    "quantity": 90,
+    "price": 18.6,
+    "total": 1674.0
+  },
+  {
+    "code": "2601",
+    "description": "GV PAINT",
+    "quantity": 400,
+    "price": 3.0,
+    "total": 1200.0
+  },
+  {
+    "code": "9126",
+    "description": "GYNICARE SYRUP",
+    "quantity": 60,
+    "price": 77.0,
+    "total": 4620.0
+  },
+  {
+    "code": "1781",
+    "description": "HAEMOGLOBIN SYR 200ML (AYRTON)",
+    "quantity": 240,
+    "price": 13.18,
+    "total": 3163.2
+  },
+  {
+    "code": "8447",
+    "description": "HALIB ORANGE +OMEGA DHA SYRUP",
+    "quantity": 42,
+    "price": 140.0,
+    "total": 5880.0
+  },
+  {
+    "code": "7700",
+    "description": "HAPPYRONA FORTE SYRUP",
+    "quantity": 50,
+    "price": 16.0,
+    "total": 800.0
+  },
+  {
+    "code": "9142",
+    "description": "HEALGEN PREGNANCY TEST MIDSTREAM",
+    "quantity": 480,
+    "price": 9.0,
+    "total": 4320.0
+  },
+  {
+    "code": "8897",
+    "description": "HEAVEN SCENT FACIAL SCRUB",
+    "quantity": 36,
+    "price": 18.4,
+    "total": 662.4
+  },
+  {
+    "code": "5248",
+    "description": "HEMOFORCE PLUS SYR 200ML",
+    "quantity": 36,
+    "price": 15.3,
+    "total": 550.8
+  },
+  {
+    "code": "4376",
+    "description": "HEPTOLIF SYR 200ML",
+    "quantity": 48,
+    "price": 21.0,
+    "total": 1008.0
+  },
+  {
+    "code": "5330",
+    "description": "HI LADY VIRGIN INTIMATE WASH",
+    "quantity": 90,
+    "price": 33.0,
+    "total": 2970.0
+  },
+  {
+    "code": "3961",
+    "description": "HOT WATER BOTTLE -PLAIN",
+    "quantity": 25,
+    "price": 46.37,
+    "total": 1159.25
+  },
+  {
+    "code": "3960",
+    "description": "HOT WATER BOTTLE-JACKET",
+    "quantity": 25,
+    "price": 55.0,
+    "total": 1375.0
+  },
+  {
+    "code": "9026",
+    "description": "HUGGIES WIPES ALL 72'S",
+    "quantity": 150,
+    "price": 23.8,
+    "total": 3570.0
+  },
+  {
+    "code": "4364",
+    "description": "HYDROCORTISONE CREAM 30G-UNICORT",
+    "quantity": 100,
+    "price": 22.0,
+    "total": 2200.0
+  },
+  {
+    "code": "1793",
+    "description": "HYDROGEN PEROXIDE 200ML ECL",
+    "quantity": 60,
+    "price": 9.8,
+    "total": 588.0
+  },
+  {
+    "code": "5127",
+    "description": "HYDROGEN PEROXIDE 200ML-EXTEM",
+    "quantity": 150,
+    "price": 6.0,
+    "total": 900.0
+  },
+  {
+    "code": "1796",
+    "description": "HYDROLYTE O.R.S.PLAIN 25'",
+    "quantity": 48,
+    "price": 42.0,
+    "total": 2016.0
+  },
+  {
+    "code": "3438",
+    "description": "IBUCAP CAPS 10C (MONOPACK)",
+    "quantity": 1200,
+    "price": 3.58,
+    "total": 4296.0
+  },
+  {
+    "code": "2773",
+    "description": "ICHTHAMMOL OINTMENT 40",
+    "quantity": 30,
+    "price": 31.85,
+    "total": 955.5
+  },
+  {
+    "code": "3303",
+    "description": "IDEOS 3.64",
+    "quantity": 216,
+    "price": 131.0,
+    "total": 28296.0
+  },
+  {
+    "code": "4535",
+    "description": "INOZITH 250MG(AZITHROMYCIN) CAPS",
+    "quantity": 200,
+    "price": 12.0,
+    "total": 2400.0
+  },
+  {
+    "code": "5216",
+    "description": "INOZITH 500MG TABS",
+    "quantity": 136,
+    "price": 15.0,
+    "total": 2040.0
+  },
+  {
+    "code": "3737",
+    "description": "JARIFAN 2 BLOOD TONIC 200ML",
+    "quantity": 120,
+    "price": 26.08,
+    "total": 3129.6
+  },
+  {
+    "code": "1804",
+    "description": "JEDITONE SYR",
+    "quantity": 60,
+    "price": 15.9,
+    "total": 954.0
+  },
+  {
+    "code": "8787",
+    "description": "JET 2 LOZENGES 150'S",
+    "quantity": 36,
+    "price": 78.0,
+    "total": 2808.0
+  },
+  {
+    "code": "9605",
+    "description": "K-BALM 9ML 1'S",
+    "quantity": 144,
+    "price": 10.0,
+    "total": 1440.0
+  },
+  {
+    "code": "5007",
+    "description": "KELCUF BABY SYR 100ML",
+    "quantity": 120,
+    "price": 9.69,
+    "total": 1162.8
+  },
+  {
+    "code": "3613",
+    "description": "KIDICARE SYRUP 200ML",
+    "quantity": 60,
+    "price": 21.0,
+    "total": 1260.0
+  },
+  {
+    "code": "5193",
+    "description": "KIDIMIN SYRUP",
+    "quantity": 48,
+    "price": 25.0,
+    "total": 1200.0
+  },
+  {
+    "code": "4009",
+    "description": "KIDIRON SYR",
+    "quantity": 30,
+    "price": 25.0,
+    "total": 750.0
+  },
+  {
+    "code": "1816",
+    "description": "KIDIVITE SYRUP 200ML",
+    "quantity": 30,
+    "price": 21.8,
+    "total": 654.0
+  },
+  {
+    "code": "3720",
+    "description": "KISS CONDOM STRAWBERRY 24'S",
+    "quantity": 1152,
+    "price": 5.5,
+    "total": 6336.0
+  },
+  {
+    "code": "8404",
+    "description": "KISS GEL 50ML",
+    "quantity": 192,
+    "price": 36.3,
+    "total": 6969.6
+  },
+  {
+    "code": "5298",
+    "description": "KLINDA-300MG CAPS 100'S",
+    "quantity": 30,
+    "price": 255.0,
+    "total": 7650.0
+  },
+  {
+    "code": "4404",
+    "description": "KLIRE 4WAY COUGH SYR",
+    "quantity": 50,
+    "price": 32.9,
+    "total": 1645.0
+  },
+  {
+    "code": "3809",
+    "description": "KLIRE ANTACID SUSP 125ML",
+    "quantity": 30,
+    "price": 24.5,
+    "total": 735.0
+  },
+  {
+    "code": "5063",
+    "description": "KLIRE IBUPROFEN SYR",
+    "quantity": 50,
+    "price": 17.5,
+    "total": 875.0
+  },
+  {
+    "code": "1820",
+    "description": "KOFFEX ADULT COUGH SYR 100ML",
+    "quantity": 250,
+    "price": 13.15,
+    "total": 3287.5
+  },
+  {
+    "code": "1821",
+    "description": "KOFFEX JUNIOR COUGH SYR 100ML",
+    "quantity": 150,
+    "price": 12.05,
+    "total": 1807.5
+  },
+  {
+    "code": "3812",
+    "description": "KOFLET LOZENGES( ALL FLAVOURS)",
+    "quantity": 100,
+    "price": 25.2,
+    "total": 2520.0
+  },
+  {
+    "code": "2369",
+    "description": "KOFLET SYRUP 100ML",
+    "quantity": 250,
+    "price": 41.98,
+    "total": 10495.0
+  },
+  {
+    "code": "1823",
+    "description": "KOFOF ADULT SYR",
+    "quantity": 60,
+    "price": 13.9,
+    "total": 834.0
+  },
+  {
+    "code": "1824",
+    "description": "KOFOF BABY SYR",
+    "quantity": 60,
+    "price": 11.2,
+    "total": 672.0
+  },
+  {
+    "code": "1825",
+    "description": "KOFOF CHILD EXP SYR",
+    "quantity": 180,
+    "price": 10.2,
+    "total": 1836.0
+  },
+  {
+    "code": "1826",
+    "description": "KOFOF FAMILY SYR 150ML",
+    "quantity": 30,
+    "price": 16.9,
+    "total": 507.0
+  },
+  {
+    "code": "2546",
+    "description": "KWIK ACTION",
+    "quantity": 42,
+    "price": 66.67,
+    "total": 2800.14
+  },
+  {
+    "code": "2296",
+    "description": "LEENA SYR",
+    "quantity": 160,
+    "price": 17.44,
+    "total": 2790.4
+  },
+  {
+    "code": "2229",
+    "description": "LETALIN EXPECTORANT 125ML",
+    "quantity": 360,
+    "price": 4.4,
+    "total": 1584.0
+  },
+  {
+    "code": "4090",
+    "description": "LEVON 2 POSTPILL",
+    "quantity": 700,
+    "price": 14.98,
+    "total": 10486.0
+  },
+  {
+    "code": "8726",
+    "description": "LEXFORMIN 500MG TABS 30'S",
+    "quantity": 35,
+    "price": 16.0,
+    "total": 560.0
+  },
+  {
+    "code": "1840",
+    "description": "LINCTUS ADULT COUGH SYR 100ML",
+    "quantity": 500,
+    "price": 9.9,
+    "total": 4950.0
+  },
+  {
+    "code": "1841",
+    "description": "LINCTUS JUNIOR COUGH SYR 100ML",
+    "quantity": 100,
+    "price": 9.7,
+    "total": 970.0
+  },
+  {
+    "code": "3746",
+    "description": "LISINOPRIL 10MG+HCTZ 12.5MG(INOPRIL)",
+    "quantity": 110,
+    "price": 18.0,
+    "total": 1980.0
+  },
+  {
+    "code": "4164",
+    "description": "LISINOPRIL 20MG TABS UK 28'S",
+    "quantity": 100,
+    "price": 22.0,
+    "total": 2200.0
+  },
+  {
+    "code": "5331",
+    "description": "LIVING BITTERS TONIC 200ML",
+    "quantity": 96,
+    "price": 40.0,
+    "total": 3840.0
+  },
+  {
+    "code": "3748",
+    "description": "LIVOPAT CAPS 30'S",
+    "quantity": 20,
+    "price": 64.1,
+    "total": 1282.0
+  },
+  {
+    "code": "1852",
+    "description": "LONART SUSP",
+    "quantity": 200,
+    "price": 21.0,
+    "total": 4200.0
+  },
+  {
+    "code": "1856",
+    "description": "LUEX ADULT CHESTY COUGH SYR",
+    "quantity": 120,
+    "price": 28.0,
+    "total": 3360.0
+  },
+  {
+    "code": "3557",
+    "description": "LUEX ADULT DRY COUGH SYR 150ML",
+    "quantity": 60,
+    "price": 28.0,
+    "total": 1680.0
+  },
+  {
+    "code": "2152",
+    "description": "LUEX BABY COUGH SYRUP 150ML",
+    "quantity": 60,
+    "price": 28.0,
+    "total": 1680.0
+  },
+  {
+    "code": "1858",
+    "description": "LUEX CHILD CHESTY COUGH SYR",
+    "quantity": 240,
+    "price": 28.0,
+    "total": 6720.0
+  },
+  {
+    "code": "1859",
+    "description": "LUEX CHILD DRY COUGH SYR",
+    "quantity": 120,
+    "price": 28.0,
+    "total": 3360.0
+  },
+  {
+    "code": "1861",
+    "description": "LUFART DS",
+    "quantity": 600,
+    "price": 25.0,
+    "total": 15000.0
+  },
+  {
+    "code": "1863",
+    "description": "LUFART SUSP",
+    "quantity": 120,
+    "price": 19.85,
+    "total": 2382.0
+  },
+  {
+    "code": "1865",
+    "description": "LYDIA POSTPILL 1 TABLET",
+    "quantity": 1920,
+    "price": 14.0,
+    "total": 26880.0
+  },
+  {
+    "code": "5123",
+    "description": "M.M.T 200ML-EXTEM",
+    "quantity": 50,
+    "price": 6.0,
+    "total": 300.0
+  },
+  {
+    "code": "1869",
+    "description": "MAALOX PLUS SUSP",
+    "quantity": 48,
+    "price": 88.0,
+    "total": 4224.0
+  },
+  {
+    "code": "1872",
+    "description": "MADAM CATHERINE",
+    "quantity": 30,
+    "price": 16.0,
+    "total": 480.0
+  },
+  {
+    "code": "2547",
+    "description": "MAGACID TAB",
+    "quantity": 72,
+    "price": 39.7,
+    "total": 2858.4
+  },
+  {
+    "code": "2263",
+    "description": "MAGNAVIT TONIC 200ML",
+    "quantity": 36,
+    "price": 15.45,
+    "total": 556.2
+  },
+  {
+    "code": "1877",
+    "description": "MALAR-2 SUSP. 60ML",
+    "quantity": 60,
+    "price": 19.8,
+    "total": 1188.0
+  },
+  {
+    "code": "2278",
+    "description": "MALIN ADULT",
+    "quantity": 180,
+    "price": 16.4,
+    "total": 2952.0
+  },
+  {
+    "code": "2280",
+    "description": "MALIN BABY",
+    "quantity": 240,
+    "price": 14.6,
+    "total": 3504.0
+  },
+  {
+    "code": "2279",
+    "description": "MALIN JNR",
+    "quantity": 120,
+    "price": 14.4,
+    "total": 1728.0
+  },
+  {
+    "code": "2281",
+    "description": "MALIN LOZENGES",
+    "quantity": 312,
+    "price": 6.17,
+    "total": 1926.6
+  },
+  {
+    "code": "2686",
+    "description": "MARK II INHALER STRIP",
+    "quantity": 200,
+    "price": 90.0,
+    "total": 18000.0
+  },
+  {
+    "code": "1882",
+    "description": "MAXMOX BLISTER 250MG (50X10)",
+    "quantity": 56,
+    "price": 128.52,
+    "total": 7197.12
+  },
+  {
+    "code": "1883",
+    "description": "MAXMOX BLISTER 500(10X15)",
+    "quantity": 360,
+    "price": 11.04,
+    "total": 3975.48
+  },
+  {
+    "code": "9575",
+    "description": "MEGAPUR OMEGA 3 FISHOIL SOFTGELS 60'S",
+    "quantity": 60,
+    "price": 94.0,
+    "total": 5640.0
+  },
+  {
+    "code": "1885",
+    "description": "MENTHODEX 100ML SYRUP",
+    "quantity": 72,
+    "price": 30.0,
+    "total": 2160.0
+  },
+  {
+    "code": "1887",
+    "description": "MENTHODEX LOZENGES 25'(SACHET) 50G",
+    "quantity": 288,
+    "price": 32.5,
+    "total": 9360.0
+  },
+  {
+    "code": "2551",
+    "description": "MENTHOX ADULT SYR",
+    "quantity": 48,
+    "price": 9.78,
+    "total": 469.44
+  },
+  {
+    "code": "2552",
+    "description": "MENTHOX JNR",
+    "quantity": 384,
+    "price": 8.2,
+    "total": 3148.8
+  },
+  {
+    "code": "2146",
+    "description": "METFORMIN 500MG(O FORMIN)",
+    "quantity": 144,
+    "price": 12.0,
+    "total": 1728.0
+  },
+  {
+    "code": "3799",
+    "description": "METHYLATED SPIRIT 200ML LOCAL",
+    "quantity": 150,
+    "price": 12.0,
+    "total": 1800.0
+  },
+  {
+    "code": "1894",
+    "description": "METHYLATED SPIRIT 60ML",
+    "quantity": 600,
+    "price": 3.5,
+    "total": 2100.0
+  },
+  {
+    "code": "1897",
+    "description": "METROLEX F SUSPENSION",
+    "quantity": 500,
+    "price": 28.5,
+    "total": 14250.0
+  },
+  {
+    "code": "4407",
+    "description": "METRONIDAZOLE SUSP 100ML LETAP",
+    "quantity": 240,
+    "price": 4.2,
+    "total": 1008.0
+  },
+  {
+    "code": "3840",
+    "description": "METRONIDAZOLE SUSP M&G 100ML",
+    "quantity": 60,
+    "price": 8.8,
+    "total": 528.0
+  },
+  {
+    "code": "1900",
+    "description": "METRONIDAZOLE SUSPENSION 100ML PHYTO-RIKER",
+    "quantity": 40,
+    "price": 9.5,
+    "total": 380.0
+  },
+  {
+    "code": "7975",
+    "description": "MIM ORANGE 200ML",
+    "quantity": 60,
+    "price": 15.0,
+    "total": 900.0
+  },
+  {
+    "code": "1904",
+    "description": "MINAVITA SYR 125ML",
+    "quantity": 60,
+    "price": 12.6,
+    "total": 756.0
+  },
+  {
+    "code": "5125",
+    "description": "MIST EXPECT SED 200ML-EXTEM",
+    "quantity": 25,
+    "price": 6.0,
+    "total": 150.0
+  },
+  {
+    "code": "3581",
+    "description": "MIST EXPECT SED-ROKMER",
+    "quantity": 30,
+    "price": 5.0,
+    "total": 150.0
+  },
+  {
+    "code": "5124",
+    "description": "MIST POT.CIT 200ML-EXTEM",
+    "quantity": 175,
+    "price": 6.0,
+    "total": 1050.0
+  },
+  {
+    "code": "5126",
+    "description": "MIST SENNACO 200ML-EXTEM",
+    "quantity": 75,
+    "price": 6.0,
+    "total": 450.0
+  },
+  {
+    "code": "1907",
+    "description": "MR. Q",
+    "quantity": 360,
+    "price": 88.0,
+    "total": 31680.0
+  },
+  {
+    "code": "5466",
+    "description": "MSP 30",
+    "quantity": 90,
+    "price": 24.0,
+    "total": 2160.0
+  },
+  {
+    "code": "2682",
+    "description": "MUCOLEX JUNIOR 150ML",
+    "quantity": 120,
+    "price": 26.5,
+    "total": 3180.0
+  },
+  {
+    "code": "4378",
+    "description": "MUCOSYL JUNIOR SYR 100ML",
+    "quantity": 60,
+    "price": 8.0,
+    "total": 480.0
+  },
+  {
+    "code": "4931",
+    "description": "MUCOTIN 2% SYR",
+    "quantity": 60,
+    "price": 15.84,
+    "total": 950.4
+  },
+  {
+    "code": "4932",
+    "description": "MUCOTIN 5% SYR",
+    "quantity": 60,
+    "price": 12.7,
+    "total": 762.0
+  },
+  {
+    "code": "2305",
+    "description": "MY BABY COUGH SYR",
+    "quantity": 90,
+    "price": 7.7,
+    "total": 693.0
+  },
+  {
+    "code": "1910",
+    "description": "MYCOLEX CREAM",
+    "quantity": 150,
+    "price": 24.0,
+    "total": 3600.0
+  },
+  {
+    "code": "2780",
+    "description": "MYCOSTAT 150MG CAPS 1'S",
+    "quantity": 150,
+    "price": 12.0,
+    "total": 1800.0
+  },
+  {
+    "code": "2203",
+    "description": "NAKLOFEN DUO CAPS 75MG 20'",
+    "quantity": 144,
+    "price": 75.0,
+    "total": 10800.0
+  },
+  {
+    "code": "8455",
+    "description": "NEOPRESOL",
+    "quantity": 216,
+    "price": 60.0,
+    "total": 12960.0
+  },
+  {
+    "code": "9209",
+    "description": "NESFERON CAPS 30'S",
+    "quantity": 30,
+    "price": 88.0,
+    "total": 2640.0
+  },
+  {
+    "code": "7763",
+    "description": "NESPRODINE (CYPROHEPTADINE) SYRUP 200ML",
+    "quantity": 30,
+    "price": 29.8,
+    "total": 894.0
+  },
+  {
+    "code": "2643",
+    "description": "NESTER RUBBING ALCOHOL PLAIN",
+    "quantity": 35,
+    "price": 35.0,
+    "total": 1225.0
+  },
+  {
+    "code": "4735",
+    "description": "NESTERIX FORTE FORTE SYR 200ML",
+    "quantity": 60,
+    "price": 25.8,
+    "total": 1548.0
+  },
+  {
+    "code": "1925",
+    "description": "NEXCOFER BLOOD TONIC 200ML",
+    "quantity": 150,
+    "price": 23.8,
+    "total": 3570.0
+  },
+  {
+    "code": "1930",
+    "description": "NIFECARD XL 30MG 30'S",
+    "quantity": 220,
+    "price": 53.97,
+    "total": 11873.4
+  },
+  {
+    "code": "7695",
+    "description": "NKAMOL PARA SYRUP",
+    "quantity": 50,
+    "price": 7.5,
+    "total": 375.0
+  },
+  {
+    "code": "1936",
+    "description": "NODIUM(LOPERAMIDE) 2MG CAPS 100'",
+    "quantity": 336,
+    "price": 26.0,
+    "total": 8736.0
+  },
+  {
+    "code": "7925",
+    "description": "NOVACEF 500 (1X10)",
+    "quantity": 360,
+    "price": 31.1,
+    "total": 11196.0
+  },
+  {
+    "code": "9174",
+    "description": "NOVAFEN SUSPENSION 60ML",
+    "quantity": 96,
+    "price": 7.42,
+    "total": 712.32
+  },
+  {
+    "code": "4231",
+    "description": "NOVAFULVIN SUSP 100ML",
+    "quantity": 200,
+    "price": 19.54,
+    "total": 3908.0
+  },
+  {
+    "code": "2216",
+    "description": "NOVAGYL SUSPENSION",
+    "quantity": 100,
+    "price": 11.27,
+    "total": 1127.0
+  },
+  {
+    "code": "1941",
+    "description": "NUGEL SUSP 200ML",
+    "quantity": 125,
+    "price": 45.72,
+    "total": 5715.0
+  },
+  {
+    "code": "1942",
+    "description": "NUGEL-O SUSP 200ML",
+    "quantity": 25,
+    "price": 47.63,
+    "total": 1190.75
+  },
+  {
+    "code": "2593",
+    "description": "NUTRACID SYRUP 200 ML",
+    "quantity": 24,
+    "price": 13.86,
+    "total": 332.64
+  },
+  {
+    "code": "8488",
+    "description": "O-DOXY (DOXYCYCLINE 100MG) 100'S",
+    "quantity": 99,
+    "price": 38.0,
+    "total": 3762.0
+  },
+  {
+    "code": "8486",
+    "description": "O-LOPERAMIDE 100'S",
+    "quantity": 60,
+    "price": 10.0,
+    "total": 600.0
+  },
+  {
+    "code": "8489",
+    "description": "ONE STEP PREGNANCY TEST KITS 25'S",
+    "quantity": 100,
+    "price": 55.0,
+    "total": 5500.0
+  },
+  {
+    "code": "3831",
+    "description": "OSTEOCARE SYRUP INDIA 200ML",
+    "quantity": 60,
+    "price": 16.0,
+    "total": 960.0
+  },
+  {
+    "code": "7756",
+    "description": "PANADOL EXTRA 10X10",
+    "quantity": 250,
+    "price": 110.0,
+    "total": 27500.0
+  },
+  {
+    "code": "1959",
+    "description": "PANADOL PLAIN TAB 10X10",
+    "quantity": 300,
+    "price": 90.0,
+    "total": 27000.0
+  },
+  {
+    "code": "2362",
+    "description": "PARA SYRUP (PHYTO-RIKER)",
+    "quantity": 80,
+    "price": 6.98,
+    "total": 558.4
+  },
+  {
+    "code": "5285",
+    "description": "PARACETAMOL ELIXIR(DANNEX)",
+    "quantity": 120,
+    "price": 8.68,
+    "total": 1041.6
+  },
+  {
+    "code": "1963",
+    "description": "PARACETAMOL 100'S EXETER",
+    "quantity": 300,
+    "price": 32.0,
+    "total": 9600.0
+  },
+  {
+    "code": "2306",
+    "description": "PARACETAMOL 125ML ELIXIR (M&G)",
+    "quantity": 90,
+    "price": 7.0,
+    "total": 630.0
+  },
+  {
+    "code": "2205",
+    "description": "PARACETAMOL 500MG TABS DAS",
+    "quantity": 30,
+    "price": 111.0,
+    "total": 3330.0
+  },
+  {
+    "code": "4024",
+    "description": "PARACETAMOL 500MG TABS 100'S UK",
+    "quantity": 480,
+    "price": 28.72,
+    "total": 13785.6
+  },
+  {
+    "code": "4250",
+    "description": "PARACETAMOL 500MG TABS 100X10-PHYTO-RIKER",
+    "quantity": 40,
+    "price": 76.0,
+    "total": 3040.0
+  },
+  {
+    "code": "3984",
+    "description": "PARACETAMOL 500MG TABS 50X10- ESKAY",
+    "quantity": 126,
+    "price": 34.29,
+    "total": 4320.54
+  },
+  {
+    "code": "7734",
+    "description": "PARACETAMOL 500MG TABS EXETER 30'S",
+    "quantity": 192,
+    "price": 13.0,
+    "total": 2496.0
+  },
+  {
+    "code": "1964",
+    "description": "PARACETAMOL CAPLETS 16S",
+    "quantity": 432,
+    "price": 9.5,
+    "total": 4104.0
+  },
+  {
+    "code": "2202",
+    "description": "PARACETAMOL INF.10MG/ML 100ML TROGE",
+    "quantity": 100,
+    "price": 19.8,
+    "total": 1980.0
+  },
+  {
+    "code": "8384",
+    "description": "PARACETAMOL SYR PHARMANOVA",
+    "quantity": 200,
+    "price": 7.92,
+    "total": 1584.0
+  },
+  {
+    "code": "1966",
+    "description": "PARACETEMOL BLISTER 500MG (100X10) ESKAY",
+    "quantity": 42,
+    "price": 68.58,
+    "total": 2880.36
+  },
+  {
+    "code": "1969",
+    "description": "PARAFENAC EXTRA",
+    "quantity": 60,
+    "price": 33.0,
+    "total": 1980.0
+  },
+  {
+    "code": "1970",
+    "description": "PARAKING SYR ALCOHOL FREE 125ML",
+    "quantity": 180,
+    "price": 13.34,
+    "total": 2401.2
+  },
+  {
+    "code": "1971",
+    "description": "PARAMOL SYR 125ML",
+    "quantity": 50,
+    "price": 8.7,
+    "total": 435.0
+  },
+  {
+    "code": "1972",
+    "description": "PARATOP",
+    "quantity": 60,
+    "price": 30.0,
+    "total": 1800.0
+  },
+  {
+    "code": "8612",
+    "description": "PENICILLIN OINTMENT",
+    "quantity": 900,
+    "price": 7.7,
+    "total": 6930.0
+  },
+  {
+    "code": "1975",
+    "description": "PERMOXYL CAPS 250MG 500'",
+    "quantity": 54,
+    "price": 180.0,
+    "total": 9720.0
+  },
+  {
+    "code": "1977",
+    "description": "PERMOXYL(AMOXYL) CAPS 500MG 500'",
+    "quantity": 30,
+    "price": 140.0,
+    "total": 4200.0
+  },
+  {
+    "code": "8271",
+    "description": "PHARMADERM HAND SANITIZER 60ML",
+    "quantity": 120,
+    "price": 6.6,
+    "total": 792.0
+  },
+  {
+    "code": "7682",
+    "description": "PHOPAIN SYRUP",
+    "quantity": 60,
+    "price": 12.0,
+    "total": 720.0
+  },
+  {
+    "code": "9555",
+    "description": "PHYTO-RIKER O.R.S FLV",
+    "quantity": 40,
+    "price": 30.5,
+    "total": 1220.0
+  },
+  {
+    "code": "7757",
+    "description": "PODOPHYLIN CREAM",
+    "quantity": 100,
+    "price": 71.5,
+    "total": 7150.0
+  },
+  {
+    "code": "2293",
+    "description": "POFAKOF ADULT",
+    "quantity": 180,
+    "price": 14.0,
+    "total": 2520.0
+  },
+  {
+    "code": "2291",
+    "description": "POFAKOF BABY",
+    "quantity": 240,
+    "price": 10.9,
+    "total": 2616.0
+  },
+  {
+    "code": "2292",
+    "description": "POFAKOF JUNIOR",
+    "quantity": 180,
+    "price": 11.33,
+    "total": 2039.4
+  },
+  {
+    "code": "3733",
+    "description": "POLYFER SYR 150ML",
+    "quantity": 50,
+    "price": 16.5,
+    "total": 825.0
+  },
+  {
+    "code": "2264",
+    "description": "POLYGEL SUSP 200ML",
+    "quantity": 40,
+    "price": 17.87,
+    "total": 714.8
+  },
+  {
+    "code": "7832",
+    "description": "POSTINOR 2 LOCAL",
+    "quantity": 900,
+    "price": 2.5,
+    "total": 2250.0
+  },
+  {
+    "code": "9554",
+    "description": "PR-NOSH SYRUP 200ML (CYPROHEPTADINE)",
+    "quantity": 30,
+    "price": 18.0,
+    "total": 540.0
+  },
+  {
+    "code": "8072",
+    "description": "PREGCAD PREGNACY TEST KIT 50'S",
+    "quantity": 11,
+    "price": 120.0,
+    "total": 1320.0
+  },
+  {
+    "code": "9574",
+    "description": "PREGNANCY TEST KIT CASSETTE 50'S",
+    "quantity": 50,
+    "price": 110.0,
+    "total": 5500.0
+  },
+  {
+    "code": "4474",
+    "description": "PRETTY COTTON BUDS 100'S",
+    "quantity": 24,
+    "price": 8.0,
+    "total": 192.0
+  },
+  {
+    "code": "3700",
+    "description": "PROMECINE SYRUP 125ML",
+    "quantity": 60,
+    "price": 4.5,
+    "total": 270.0
+  },
+  {
+    "code": "8470",
+    "description": "PROMETHAZIN INJ 10'S",
+    "quantity": 120,
+    "price": 10.0,
+    "total": 1200.0
+  },
+  {
+    "code": "7735",
+    "description": "PURE COD LIVER CAPS",
+    "quantity": 50,
+    "price": 60.0,
+    "total": 3000.0
+  },
+  {
+    "code": "2715",
+    "description": "PURE COD LIVER SYR",
+    "quantity": 216,
+    "price": 65.0,
+    "total": 14040.0
+  },
+  {
+    "code": "1998",
+    "description": "RAPINOL 25X4'S",
+    "quantity": 108,
+    "price": 25.0,
+    "total": 2700.0
+  },
+  {
+    "code": "1999",
+    "description": "REDSUN JELLY(ALL FLAVOURS)",
+    "quantity": 1600,
+    "price": 9.2,
+    "total": 14720.0
+  },
+  {
+    "code": "3715",
+    "description": "REDSUN-100MG CAPS 10X1X10",
+    "quantity": 200,
+    "price": 13.8,
+    "total": 2760.0
+  },
+  {
+    "code": "8269",
+    "description": "REFLEX MOUTHWASH 225ML COOL MINT",
+    "quantity": 72,
+    "price": 11.0,
+    "total": 792.0
+  },
+  {
+    "code": "8270",
+    "description": "REFLEX MOUTHWASH 225ML MULTI PROTECT",
+    "quantity": 72,
+    "price": 11.0,
+    "total": 792.0
+  },
+  {
+    "code": "3387",
+    "description": "RES-Q SUSP 200ML",
+    "quantity": 40,
+    "price": 17.0,
+    "total": 680.0
+  },
+  {
+    "code": "2000",
+    "description": "RESCOFER BLOOD TONIC 200ML",
+    "quantity": 45,
+    "price": 35.8,
+    "total": 1611.0
+  },
+  {
+    "code": "2001",
+    "description": "RHINATHIOL 2% INFANT SYR 125ML",
+    "quantity": 35,
+    "price": 52.13,
+    "total": 1824.55
+  },
+  {
+    "code": "2002",
+    "description": "RHINATHIOL ADULT 5% SYR 125ML",
+    "quantity": 35,
+    "price": 57.23,
+    "total": 2003.05
+  },
+  {
+    "code": "2541",
+    "description": "RHIZIN TAB",
+    "quantity": 600,
+    "price": 13.5,
+    "total": 8100.0
+  },
+  {
+    "code": "7684",
+    "description": "RIDDLES ADULT COUGH SYRUP",
+    "quantity": 120,
+    "price": 11.5,
+    "total": 1380.0
+  },
+  {
+    "code": "9596",
+    "description": "RIDDLES BABY COUGH SYR",
+    "quantity": 60,
+    "price": 10.5,
+    "total": 630.0
+  },
+  {
+    "code": "7697",
+    "description": "RIDDLES JUNIOR COUGH SYR",
+    "quantity": 120,
+    "price": 10.9,
+    "total": 1308.0
+  },
+  {
+    "code": "3596",
+    "description": "ROBB INHALER 12'S",
+    "quantity": 144,
+    "price": 66.0,
+    "total": 9504.0
+  },
+  {
+    "code": "5484",
+    "description": "ROBB JAR",
+    "quantity": 216,
+    "price": 6.6,
+    "total": 1425.6
+  },
+  {
+    "code": "8830",
+    "description": "RONAK LOZENGES",
+    "quantity": 24,
+    "price": 45.0,
+    "total": 1080.0
+  },
+  {
+    "code": "2009",
+    "description": "RONFIT FORTE CAPS 10X10",
+    "quantity": 160,
+    "price": 55.0,
+    "total": 8800.0
+  },
+  {
+    "code": "3764",
+    "description": "ROXIDOL",
+    "quantity": 60,
+    "price": 34.5,
+    "total": 2070.0
+  },
+  {
+    "code": "2014",
+    "description": "SALAMOL CFC INHALER",
+    "quantity": 30,
+    "price": 60.55,
+    "total": 1816.5
+  },
+  {
+    "code": "4939",
+    "description": "SALO C + ZINC SYR 100ML",
+    "quantity": 180,
+    "price": 9.5,
+    "total": 1710.0
+  },
+  {
+    "code": "3588",
+    "description": "SALOCOLD SYR",
+    "quantity": 60,
+    "price": 15.9,
+    "total": 954.0
+  },
+  {
+    "code": "3590",
+    "description": "SALOFULVIN SYR",
+    "quantity": 120,
+    "price": 18.5,
+    "total": 2220.0
+  },
+  {
+    "code": "4937",
+    "description": "SALOGEL O SYR 200ML",
+    "quantity": 90,
+    "price": 24.5,
+    "total": 2205.0
+  },
+  {
+    "code": "4936",
+    "description": "SALOGEL SYR 200ML",
+    "quantity": 90,
+    "price": 18.98,
+    "total": 1708.2
+  },
+  {
+    "code": "2017",
+    "description": "SAMALIN ADULT 5% N/DROWSY COUGH SYR",
+    "quantity": 120,
+    "price": 17.85,
+    "total": 2142.0
+  },
+  {
+    "code": "2018",
+    "description": "SAMALIN ADULT COUGH SYR",
+    "quantity": 240,
+    "price": 13.15,
+    "total": 3156.0
+  },
+  {
+    "code": "2020",
+    "description": "SAMALIN JUNIOR 2% N/DROWSY COUGH SYR",
+    "quantity": 120,
+    "price": 15.5,
+    "total": 1860.0
+  },
+  {
+    "code": "2021",
+    "description": "SAMALIN JUNIOR COUGH SYR",
+    "quantity": 120,
+    "price": 12.57,
+    "total": 1508.4
+  },
+  {
+    "code": "3386",
+    "description": "SAMALIN LOZENGES 2X10",
+    "quantity": 100,
+    "price": 5.39,
+    "total": 539.0
+  },
+  {
+    "code": "3344",
+    "description": "SAMOCID",
+    "quantity": 225,
+    "price": 77.0,
+    "total": 17325.0
+  },
+  {
+    "code": "4077",
+    "description": "SANA NASAL DROP 10ML",
+    "quantity": 900,
+    "price": 4.5,
+    "total": 4050.0
+  },
+  {
+    "code": "3992",
+    "description": "SAVLON ANTISEPTIC 125ML",
+    "quantity": 20,
+    "price": 27.52,
+    "total": 550.4
+  },
+  {
+    "code": "3991",
+    "description": "SAVLON ANTISEPTIC 250ML",
+    "quantity": 20,
+    "price": 43.44,
+    "total": 868.8
+  },
+  {
+    "code": "4248",
+    "description": "SAVLON ANTISEPTIC 500ML",
+    "quantity": 20,
+    "price": 80.72,
+    "total": 1614.4
+  },
+  {
+    "code": "9543",
+    "description": "SAVLON ANTISEPTIC 75ML",
+    "quantity": 70,
+    "price": 20.78,
+    "total": 1454.6
+  },
+  {
+    "code": "2141",
+    "description": "SECNIDAZOLE 1GM (T SEC)",
+    "quantity": 450,
+    "price": 8.0,
+    "total": 3600.0
+  },
+  {
+    "code": "4750",
+    "description": "SHAL'ARTEM SYR 100ML",
+    "quantity": 55,
+    "price": 14.47,
+    "total": 795.85
+  },
+  {
+    "code": "3374",
+    "description": "SHALCIP INF. 0.2% 100ML",
+    "quantity": 50,
+    "price": 6.54,
+    "total": 327.0
+  },
+  {
+    "code": "3464",
+    "description": "SHALTOUX ADULT COUGH SYRUP 100ML",
+    "quantity": 120,
+    "price": 13.25,
+    "total": 1590.0
+  },
+  {
+    "code": "3437",
+    "description": "SHALTOUX KIDS COUGH SYR 100ML",
+    "quantity": 120,
+    "price": 10.97,
+    "total": 1316.4
+  },
+  {
+    "code": "2027",
+    "description": "SKYBRU SUSPENSION 100MG/5ML",
+    "quantity": 300,
+    "price": 7.56,
+    "total": 2268.0
+  },
+  {
+    "code": "2028",
+    "description": "SKYCEF SUSPENSION 125(CEFUROXIME)-60ML",
+    "quantity": 100,
+    "price": 13.34,
+    "total": 1334.0
+  },
+  {
+    "code": "2029",
+    "description": "SKYCEF TAB 250MG (CEFUROXIME)-(1X10)",
+    "quantity": 110,
+    "price": 16.45,
+    "total": 1809.5
+  },
+  {
+    "code": "2030",
+    "description": "SKYCEF TAB 500MG (CEFUROXIME)-(1X10)",
+    "quantity": 150,
+    "price": 27.43,
+    "total": 4114.5
+  },
+  {
+    "code": "2031",
+    "description": "SKYCLAV 1000MG TAB (1X10)",
+    "quantity": 100,
+    "price": 35.0,
+    "total": 3500.0
+  },
+  {
+    "code": "2032",
+    "description": "SKYCLAV 228MG SUSPENSION",
+    "quantity": 100,
+    "price": 17.53,
+    "total": 1753.0
+  },
+  {
+    "code": "2033",
+    "description": "SKYCLAV 457MG SUSPENSION",
+    "quantity": 100,
+    "price": 20.13,
+    "total": 2013.0
+  },
+  {
+    "code": "2034",
+    "description": "SKYCLAV 625MG TAB 625MG(2X7)",
+    "quantity": 100,
+    "price": 22.86,
+    "total": 2286.0
+  },
+  {
+    "code": "2037",
+    "description": "SKYPARA SYR 100ML",
+    "quantity": 120,
+    "price": 6.41,
+    "total": 769.2
+  },
+  {
+    "code": "3452",
+    "description": "SODIUM CHLORIDE 0.9% INF.(NS) 500ML",
+    "quantity": 25,
+    "price": 10.76,
+    "total": 269.0
+  },
+  {
+    "code": "8843",
+    "description": "SPANISH FLY",
+    "quantity": 100,
+    "price": 120.0,
+    "total": 12000.0
+  },
+  {
+    "code": "3388",
+    "description": "STARWIN MILK OF MAGNESIA 120ML",
+    "quantity": 120,
+    "price": 18.0,
+    "total": 2160.0
+  },
+  {
+    "code": "3607",
+    "description": "STARWIN MILK OF MAGNESIA 360ML",
+    "quantity": 60,
+    "price": 41.11,
+    "total": 2466.6
+  },
+  {
+    "code": "2040",
+    "description": "STOPKOF ADULT SYRUP 100ML",
+    "quantity": 60,
+    "price": 15.8,
+    "total": 948.0
+  },
+  {
+    "code": "2042",
+    "description": "STOPKOF CHILDREN SYRUP 100ML",
+    "quantity": 240,
+    "price": 15.8,
+    "total": 3792.0
+  },
+  {
+    "code": "2043",
+    "description": "STOPKOF COLD & CATARRH SYRUP 100ML",
+    "quantity": 180,
+    "price": 15.8,
+    "total": 2844.0
+  },
+  {
+    "code": "2046",
+    "description": "STOPKOF EXP (CARBOCISTEINE) 2% JNR SYR 100ML",
+    "quantity": 60,
+    "price": 19.8,
+    "total": 1188.0
+  },
+  {
+    "code": "2047",
+    "description": "STOPKOF EXP (CARBOCISTEINE) 5% ADULT SYR",
+    "quantity": 60,
+    "price": 15.8,
+    "total": 948.0
+  },
+  {
+    "code": "9553",
+    "description": "STOPKOF EXPECTORANT 5% 150ML",
+    "quantity": 90,
+    "price": 20.8,
+    "total": 1872.0
+  },
+  {
+    "code": "4342",
+    "description": "STROBIN LOZ 54X6",
+    "quantity": 36,
+    "price": 141.1,
+    "total": 5079.6
+  },
+  {
+    "code": "3310",
+    "description": "STUGERON TABS 25MG 50'",
+    "quantity": 200,
+    "price": 66.0,
+    "total": 13200.0
+  },
+  {
+    "code": "2587",
+    "description": "SULPHUR OINTMENT",
+    "quantity": 20,
+    "price": 13.5,
+    "total": 270.0
+  },
+  {
+    "code": "2268",
+    "description": "SUPER APETI PLUS SYRUP",
+    "quantity": 72,
+    "price": 21.92,
+    "total": 1578.24
+  },
+  {
+    "code": "2056",
+    "description": "TADOL CAPS 100MG 30'S",
+    "quantity": 108,
+    "price": 210.0,
+    "total": 22680.0
+  },
+  {
+    "code": "4079",
+    "description": "TALGENTIS 5MG(TADALAFIL) 30'S",
+    "quantity": 150,
+    "price": 60.0,
+    "total": 9000.0
+  },
+  {
+    "code": "2063",
+    "description": "TEEDAR SYR 125ML",
+    "quantity": 300,
+    "price": 14.38,
+    "total": 4314.0
+  },
+  {
+    "code": "2065",
+    "description": "TEETHING MIXTURE 125ML ECL",
+    "quantity": 240,
+    "price": 12.8,
+    "total": 3072.0
+  },
+  {
+    "code": "5290",
+    "description": "TETMOSOL ADULT SOAP",
+    "quantity": 216,
+    "price": 8.0,
+    "total": 1728.0
+  },
+  {
+    "code": "7698",
+    "description": "TETMOSOL BABY SOAP",
+    "quantity": 144,
+    "price": 7.5,
+    "total": 1080.0
+  },
+  {
+    "code": "4845",
+    "description": "TONICA",
+    "quantity": 76,
+    "price": 15.0,
+    "total": 1140.0
+  },
+  {
+    "code": "8305",
+    "description": "TOP TONIC MIXTURE",
+    "quantity": 24,
+    "price": 21.0,
+    "total": 504.0
+  },
+  {
+    "code": "2075",
+    "description": "TOTHEMA BOX OF 20 BULBS",
+    "quantity": 96,
+    "price": 125.0,
+    "total": 12000.0
+  },
+  {
+    "code": "8074",
+    "description": "TOUCH AND GO",
+    "quantity": 108,
+    "price": 45.1,
+    "total": 4870.8
+  },
+  {
+    "code": "2225",
+    "description": "TRES ORIX FORTE 100ML",
+    "quantity": 225,
+    "price": 24.69,
+    "total": 5555.25
+  },
+  {
+    "code": "2224",
+    "description": "TRES ORIX FORTE SYRUP 250ML",
+    "quantity": 100,
+    "price": 49.0,
+    "total": 4900.0
+  },
+  {
+    "code": "3383",
+    "description": "TRETINON CREAM",
+    "quantity": 10,
+    "price": 77.0,
+    "total": 770.0
+  },
+  {
+    "code": "4010",
+    "description": "ULCIRON SUSP 200ML",
+    "quantity": 60,
+    "price": 16.5,
+    "total": 990.0
+  },
+  {
+    "code": "9286",
+    "description": "UNICORD (CHLORHEXIDINE GEL 25G)",
+    "quantity": 150,
+    "price": 12.0,
+    "total": 1800.0
+  },
+  {
+    "code": "5296",
+    "description": "UNICORT CREAM(HYDROCORTISONE ) 15G",
+    "quantity": 200,
+    "price": 16.5,
+    "total": 3300.0
+  },
+  {
+    "code": "2535",
+    "description": "VALUPAK EVENING PRIMROSE OIL 500MG 30'S",
+    "quantity": 100,
+    "price": 41.0,
+    "total": 4100.0
+  },
+  {
+    "code": "2532",
+    "description": "VALUPAK FOLIC ACID 400MG 90'S",
+    "quantity": 150,
+    "price": 26.59,
+    "total": 3988.5
+  },
+  {
+    "code": "2079",
+    "description": "VERMOX SUSP",
+    "quantity": 30,
+    "price": 47.39,
+    "total": 1421.7
+  },
+  {
+    "code": "2080",
+    "description": "VERMOX TAB",
+    "quantity": 100,
+    "price": 17.7,
+    "total": 1770.0
+  },
+  {
+    "code": "5439",
+    "description": "VIFEX SYR",
+    "quantity": 50,
+    "price": 29.73,
+    "total": 1486.5
+  },
+  {
+    "code": "2081",
+    "description": "VIKIL 20",
+    "quantity": 210,
+    "price": 28.6,
+    "total": 6006.0
+  },
+  {
+    "code": "9572",
+    "description": "VIN C TABS 100MG",
+    "quantity": 40,
+    "price": 50.0,
+    "total": 2000.0
+  },
+  {
+    "code": "9094",
+    "description": "VIN-C SYRUP 100ML",
+    "quantity": 240,
+    "price": 8.9,
+    "total": 2136.0
+  },
+  {
+    "code": "2083",
+    "description": "VIROL BLOOD TONIC 200ML",
+    "quantity": 200,
+    "price": 19.19,
+    "total": 3838.0
+  },
+  {
+    "code": "2084",
+    "description": "VISCOF SYRUP (PLAIN) 100ML",
+    "quantity": 425,
+    "price": 26.92,
+    "total": 11441.0
+  },
+  {
+    "code": "3755",
+    "description": "VITAFOL",
+    "quantity": 72,
+    "price": 27.5,
+    "total": 1980.0
+  },
+  {
+    "code": "3413",
+    "description": "VITAFORCE SYRUP 250ML",
+    "quantity": 40,
+    "price": 48.0,
+    "total": 1920.0
+  },
+  {
+    "code": "5171",
+    "description": "VITAMIN B-CO INJ 50'S",
+    "quantity": 4400,
+    "price": 7.2,
+    "total": 31680.0
+  },
+  {
+    "code": "9591",
+    "description": "VITARONAK-C SYRUP",
+    "quantity": 100,
+    "price": 7.0,
+    "total": 700.0
+  },
+  {
+    "code": "4919",
+    "description": "WORMBASE TABS",
+    "quantity": 40,
+    "price": 28.0,
+    "total": 1120.0
+  },
+  {
+    "code": "2394",
+    "description": "WORMPLEX SUSP",
+    "quantity": 250,
+    "price": 15.0,
+    "total": 3750.0
+  },
+  {
+    "code": "2393",
+    "description": "WORMPLEX TAB",
+    "quantity": 2000,
+    "price": 13.0,
+    "total": 26000.0
+  },
+  {
+    "code": "5041",
+    "description": "X'ZOLE F SUSP",
+    "quantity": 60,
+    "price": 10.1,
+    "total": 606.0
+  },
+  {
+    "code": "5329",
+    "description": "ZAHARA GEE HERBAL MIXTURE",
+    "quantity": 25,
+    "price": 25.0,
+    "total": 625.0
+  },
+  {
+    "code": "3631",
+    "description": "ZEROCID PLUS SUSP 200ML",
+    "quantity": 24,
+    "price": 12.0,
+    "total": 288.0
+  },
+  {
+    "code": "3630",
+    "description": "ZEROCID SUSP 200ML",
+    "quantity": 72,
+    "price": 11.2,
+    "total": 806.4
+  },
+  {
+    "code": "2108",
+    "description": "ZET(ALBENDAZOLE) WORM TABS 200MG 2'",
+    "quantity": 420,
+    "price": 3.0,
+    "total": 1260.0
+  },
+  {
+    "code": "2776",
+    "description": "ZINC OXIDE OINTMENT 40G",
+    "quantity": 80,
+    "price": 13.5,
+    "total": 1080.0
+  },
+  {
+    "code": "2114",
+    "description": "ZINCOVIT DROPS 15ML",
+    "quantity": 100,
+    "price": 21.34,
+    "total": 2134.0
+  },
+  {
+    "code": "2120",
+    "description": "ZITHROMAX CAPS 250MG",
+    "quantity": 90,
+    "price": 128.0,
+    "total": 11520.0
+  },
+  {
+    "code": "3517",
+    "description": "ZOLEVOX 500MG(LEVOFLOXACIN 500MG)",
+    "quantity": 15,
+    "price": 22.0,
+    "total": 330.0
+  },
+  {
+    "code": "2122",
+    "description": "ZUBES COUGH CHILDREN 60ML",
+    "quantity": 48,
+    "price": 21.3,
+    "total": 1022.4
+  },
+  {
+    "code": "2123",
+    "description": "ZUBES COUGH EXPECTORANT 125ML",
+    "quantity": 120,
+    "price": 24.5,
+    "total": 2940.0
+  },
+  {
+    "code": "2129",
+    "description": "ZULU 100MG TABS 10'S",
+    "quantity": 1800,
+    "price": 7.0,
+    "total": 12600.0
+  },
+  {
+    "code": "2135",
+    "description": "ZULU EXTRA",
+    "quantity": 400,
+    "price": 7.0,
+    "total": 2800.0
+  },
+  {
+    "code": "7707",
+    "description": "ZULU PLUS TABS",
+    "quantity": 1370,
+    "price": 7.5,
+    "total": 10275.0
+  },
+  {
+    "code": "2134",
+    "description": "ZULU-MR",
+    "quantity": 1460,
+    "price": 10.0,
+    "total": 14600.0
+  },
+  {
+    "code": "2126",
+    "description": "ZYMAX 200 SUSP. 200MG/5ML 15ML",
+    "quantity": 30,
+    "price": 22.8,
+    "total": 684.0
+  }
+]
