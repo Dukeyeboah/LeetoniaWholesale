@@ -16,9 +16,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         }`}
       >
         <div
-          className={`w-full py-8 md:py-10 px-4 md:px-8 mt-12 md:mt-0 ${
-            isCollapsed ? 'max-w-full' : 'container max-w-6xl'
-          }`}
+          className='w-full py-8 md:py-10 px-4 md:px-8 mt-12 md:mt-0'
         >
           {children}
         </div>

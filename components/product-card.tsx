@@ -103,7 +103,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </div>
       </CardHeader>
       <CardContent className='p-3 pt-0 flex-shrink-0'>
-        <div className='flex items-center gap-2 text-xs'>
+        <div className='flex items-center gap-2 text-sm'>
           <div
             className={`h-2 w-2 rounded-full flex-shrink-0 ${
               isOutOfStock
@@ -173,8 +173,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             </div>
             {/* Add to Order button on the right */}
             <Button
-              className='w-40 ml-auto mr-auto'
+              className='ml-auto mr-1 w-36'
               variant='default'
+              size='sm'
               onClick={handleAddToCart}
             >
               <Plus className='mr-2 h-4 w-4' />

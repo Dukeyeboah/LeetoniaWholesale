@@ -175,7 +175,7 @@ export default function InventoryPage() {
       </div>
 
       {loading ? (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7'>
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Skeleton key={i} className='h-[320px] w-full rounded-lg' />
           ))}
@@ -203,7 +203,7 @@ export default function InventoryPage() {
         </div>
       ) : (
         <div className='space-y-6'>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7'>
             {productsToShow.map((product) => (
               <ProductCard
                 key={product.id}
