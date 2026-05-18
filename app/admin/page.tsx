@@ -112,6 +112,8 @@ import {
   resolveWarehouseRowToProduct,
 } from '@/lib/warehouse-data';
 import { syncWarehouseToInventory } from '@/lib/sync-warehouse-to-inventory';
+import { getStorefrontStockRows } from '@/lib/storefront-stock-data';
+import { syncStorefrontStockToInventory } from '@/lib/sync-storefront-stock-to-inventory';
 import { formatOrderLabel } from '@/lib/order-display';
 import { generateInventoryProductCode } from '@/lib/product-code';
 import {
@@ -328,6 +330,11 @@ export default function AdminDashboard() {
     'storefront' | 'storeroom'
   >('storefront');
   const [warehouseSyncing, setWarehouseSyncing] = useState(false);
+  const [storefrontSyncing, setStorefrontSyncing] = useState(false);
+  const [showInventoryBulkImport, setShowInventoryBulkImport] = useState(false);
+  const [productCountView, setProductCountView] = useState<
+    'wholesale' | 'storeroom'
+  >('wholesale');
   const [paymentDialogOrder, setPaymentDialogOrder] = useState<Order | null>(
     null
   );
@@ -357,6 +364,7 @@ export default function AdminDashboard() {
   }, [sortedInventoryProducts, inventoryLetterFilter]);
 
   const allWarehouseRows = useMemo(() => getWarehouseRows(), []);
+  const allStorefrontStockRows = useMemo(() => getStorefrontStockRows(), []);
   const productsByWarehouseCode = useMemo(
     () => indexInventoryByProductCode(products),
     [products]
@@ -373,6 +381,15 @@ export default function AdminDashboard() {
         inventorySortMode
       ),
     [allWarehouseRows, inventoryLetterFilter, inventorySortMode]
+  );
+
+  const wholesaleProductCount = useMemo(
+    () => products.filter((p) => !p.isHidden).length,
+    [products]
+  );
+  const storeroomProductCount = useMemo(
+    () => products.filter((p) => (p.storeroomStock ?? 0) > 0).length,
+    [products]
   );
 
   const ordersForPaymentsTab = useMemo(
@@ -1376,6 +1393,30 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSyncStorefrontStockToInventory = async () => {
+    if (!db) {
+      toast.error('Database not available');
+      return;
+    }
+    setStorefrontSyncing(true);
+    try {
+      const rows = getStorefrontStockRows();
+      const res = await syncStorefrontStockToInventory(db, products, rows);
+      const parts = [
+        `${res.updated} storefront rows updated`,
+        `${res.created} new products added`,
+        `${res.hidden} hidden (not on list, wholesale qty 0)`,
+      ];
+      if (res.skipped > 0) parts.push(`${res.skipped} skipped`);
+      toast.success(`updatedStock.json applied: ${parts.join(', ')}.`);
+    } catch (error) {
+      console.error('Storefront stock sync:', error);
+      toast.error('Failed to apply updatedStock.json to storefront inventory');
+    } finally {
+      setStorefrontSyncing(false);
+    }
+  };
+
   const handleToggleProductVisibility = async (product: Product) => {
     if (!db) {
       toast.error('Database not available');
@@ -1921,9 +1962,42 @@ export default function AdminDashboard() {
             <CardTitle className='text-sm font-medium text-muted-foreground'>
               Total Products
             </CardTitle>
+            <div className='flex gap-1 pt-1'>
+              <Button
+                type='button'
+                size='sm'
+                variant={
+                  productCountView === 'wholesale' ? 'default' : 'outline'
+                }
+                className='h-7 px-2 text-xs'
+                onClick={() => setProductCountView('wholesale')}
+              >
+                Wholesale
+              </Button>
+              <Button
+                type='button'
+                size='sm'
+                variant={
+                  productCountView === 'storeroom' ? 'default' : 'outline'
+                }
+                className='h-7 px-2 text-xs'
+                onClick={() => setProductCountView('storeroom')}
+              >
+                Storeroom
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{products.length}</div>
+            <div className='text-2xl font-bold'>
+              {productCountView === 'wholesale'
+                ? wholesaleProductCount
+                : storeroomProductCount}
+            </div>
+            <p className='text-xs text-muted-foreground mt-1'>
+              {productCountView === 'wholesale'
+                ? 'Visible on storefront (not hidden)'
+                : 'With storeroom / warehouse stock on hand'}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -3901,7 +3975,35 @@ export default function AdminDashboard() {
                 Storeroom / warehouse
               </Button>
             </div>
-            {inventoryListMode === 'storeroom' && (
+            <Button
+              type='button'
+              variant='ghost'
+              size='sm'
+              className='shrink-0 text-muted-foreground'
+              onClick={() => setShowInventoryBulkImport((v) => !v)}
+            >
+              {showInventoryBulkImport ? 'Hide bulk import' : 'Bulk import from JSON…'}
+            </Button>
+            {showInventoryBulkImport && inventoryListMode === 'storefront' && (
+              <Button
+                type='button'
+                variant='secondary'
+                size='sm'
+                className='shrink-0'
+                disabled={storefrontSyncing || !db}
+                onClick={handleSyncStorefrontStockToInventory}
+              >
+                {storefrontSyncing ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Applying…
+                  </>
+                ) : (
+                  'Apply updatedStock.json to storefront'
+                )}
+              </Button>
+            )}
+            {showInventoryBulkImport && inventoryListMode === 'storeroom' && (
               <Button
                 type='button'
                 variant='secondary'
@@ -3938,8 +4040,12 @@ export default function AdminDashboard() {
           </div>
           <p className='text-xs text-muted-foreground max-w-3xl'>
             {inventoryListMode === 'storefront'
-              ? 'Same units clients see for ordering (wholesale / sellable stock).'
-              : `Storeroom list is driven by data/warehouse.json (${allWarehouseRows.length} lines). Apply sync matches the warehouse line to inventory by the same product name/description first (normalized text), then by product code only if no name match — so mismatched codes like internal “10” vs warehouse “4568” still update the correct item. Name matches also refresh name, description, and code from the file.`}
+              ? showInventoryBulkImport
+                ? `Bulk import: “Apply updatedStock.json” updates wholesale price, quantity, and visibility from data/updatedStock.json (${allStorefrontStockRows.length} drugs, matched by name). Storeroom counts are not changed.`
+                : 'Wholesale / sellable stock clients see when ordering. Use “Bulk import from JSON…” when you need to refresh from updatedStock.json.'
+              : showInventoryBulkImport
+                ? `Bulk import: warehouse file (${allWarehouseRows.length} lines) updates storeroom price and quantity by product name (not wholesale shelf stock).`
+                : `Storeroom list is driven by data/warehouse.json (${allWarehouseRows.length} lines). Use “Bulk import from JSON…” to apply the warehouse file.`}
           </p>
 
           <div className='flex flex-wrap items-center gap-2'>
