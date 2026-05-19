@@ -20,10 +20,42 @@ const playfair = Playfair_Display({
   variable: '--font-serif',
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
+  'https://leetoniawholesale.com';
+
 export const metadata: Metadata = {
-  title: 'Leetonia Wholesale',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Leetonia Wholesale',
+    template: '%s | Leetonia Wholesale',
+  },
   description: 'Wholesale Pharmacy Ordering System for Leetonia Wholesale',
-  generator: 'Next.js',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      {
+        url: '/icon-light-32x32.png',
+        type: 'image/png',
+        sizes: '32x32',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        url: '/icon-dark-32x32.png',
+        type: 'image/png',
+        sizes: '32x32',
+        media: '(prefers-color-scheme: dark)',
+      },
+    ],
+    shortcut: '/favicon.ico',
+    apple: [
+      {
+        url: '/apple-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
