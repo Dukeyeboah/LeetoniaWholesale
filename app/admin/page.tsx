@@ -1252,13 +1252,28 @@ export default function AdminDashboard() {
             `inventoryImages/products/${folder}/${fileName}`
           );
 
-          await uploadBytes(imageRef, imageFile);
+          const contentType =
+            imageFile.type ||
+            (fileExtension === 'png'
+              ? 'image/png'
+              : fileExtension === 'gif'
+                ? 'image/gif'
+                : fileExtension === 'webp'
+                  ? 'image/webp'
+                  : 'image/jpeg');
+          await uploadBytes(imageRef, imageFile, { contentType });
           imageUrl = await getDownloadURL(imageRef);
           toast.success('Image uploaded successfully');
         } catch (error) {
           console.error('Error uploading image:', error);
+          const code =
+            error && typeof error === 'object' && 'code' in error
+              ? String((error as { code?: string }).code)
+              : '';
           toast.error(
-            'Failed to upload image. Deploy `storage.rules` (super_admin must be allowed) or check Storage permissions.'
+            code === 'storage/unauthorized'
+              ? 'Storage denied this upload. Sign in as admin/super_admin and ensure storage.rules are published (firebase deploy --only storage).'
+              : `Failed to upload image${code ? ` (${code})` : ''}. Check Storage rules and your connection.`
           );
           setUploadingImage(false);
           return;

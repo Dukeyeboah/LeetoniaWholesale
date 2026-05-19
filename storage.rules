@@ -2,67 +2,77 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Helper function to check if user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Admin or super_admin (matches Firestore `isPrivilegedAdmin`)
-    function isAdmin() {
-      return isAuthenticated() && (
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'super_admin'
-      );
+    function userPath() {
+      return /databases/(default)/documents/users/$(request.auth.uid);
     }
 
-    // Helper function to check if user is staff with inventory management permission
+    function userExists() {
+      return isAuthenticated() && firestore.exists(userPath());
+    }
+
+    function userData() {
+      return firestore.get(userPath()).data;
+    }
+
+    function userRole() {
+      return userData().role;
+    }
+
+    // Matches Firestore `isPrivilegedAdmin` (admin + super_admin)
+    function isPrivilegedAdmin() {
+      return userExists() &&
+        (userRole() == 'admin' || userRole() == 'super_admin');
+    }
+
     function staffCanManageInventory() {
-      return isAuthenticated() && 
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'staff' &&
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.permissions.canManageInventory == true;
+      return userExists() &&
+        userRole() == 'staff' &&
+        'permissions' in userData() &&
+        userData().permissions.canManageInventory == true;
     }
 
-    // Product images
+    function canManageInventoryImages() {
+      return isPrivilegedAdmin() || staffCanManageInventory();
+    }
+
+    function isImageUpload() {
+      return request.resource != null &&
+        request.resource.size < 15 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
+    // Product images (legacy path)
     match /products/{productId}/{allPaths=**} {
-      // Anyone can read product images (authenticated or not) - for browsing
       allow read: if true;
-      
-      // Admins and staff with inventory management permission can upload/update/delete product images
-      allow write: if isAdmin() || staffCanManageInventory();
+      allow write: if canManageInventoryImages() && isImageUpload();
     }
 
-    // Inventory images (drug/product images)
+    // Inventory images (admin uploads: inventoryImages/products/...)
     match /inventoryImages/{allPaths=**} {
-      // Anyone can read inventory images (authenticated or not) - for browsing
       allow read: if true;
-      
-      // Admins and staff with inventory management permission can upload/update/delete inventory images
-      allow write: if isAdmin() || staffCanManageInventory();
+      allow write: if canManageInventoryImages() && isImageUpload();
     }
 
     // User avatars
     match /avatars/{userId}/{allPaths=**} {
-      // Users can read any avatar
       allow read: if isAuthenticated();
-      
-      // Users can upload their own avatar, admins can upload any avatar
       allow write: if isAuthenticated() && (
-        request.auth.uid == userId || 
-        isAdmin()
-      );
+        request.auth.uid == userId ||
+        isPrivilegedAdmin()
+      ) && isImageUpload();
     }
 
     // Order documents (invoices, receipts, etc.)
     match /orders/{orderId}/{allPaths=**} {
-      // Users can read documents for their own orders, admins can read all
       allow read: if isAuthenticated() && (
         firestore.get(/databases/(default)/documents/orders/$(orderId)).data.userId == request.auth.uid ||
-        isAdmin()
+        isPrivilegedAdmin()
       );
-      
-      // Only admins can upload order documents
-      allow write: if isAdmin();
+      allow write: if isPrivilegedAdmin();
     }
   }
 }
-
