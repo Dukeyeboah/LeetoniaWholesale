@@ -82,6 +82,10 @@ export interface User {
   pharmacyId?: string;
   /** Display name of the pharmacy. */
   pharmacyName?: string;
+  /** Pharmacy area / branch (from onboarding; editable on profile). */
+  pharmacyLocation?: string;
+  /** Pharmacy business phone line (from onboarding; editable on profile). */
+  pharmacyPhone?: string;
   /** Set after post-auth onboarding (name, job role, pharmacy). */
   pharmacyProfileComplete?: boolean;
   // Staff-specific permissions (only for staff role)

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { doc, updateDoc, type UpdateData } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, type UpdateData } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,8 @@ export default function ProfilePage() {
   const [jobRole, setJobRole] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [pharmacyLocation, setPharmacyLocation] = useState('');
+  const [pharmacyPhone, setPharmacyPhone] = useState('');
   const [saving, setSaving] = useState(false);
 
   const provider: SignInProvider =
@@ -66,6 +68,8 @@ export default function ProfilePage() {
     setJobRole(user.jobRole || '');
     setEmail(user.email || '');
     setPhone(user.phone || '');
+    setPharmacyLocation(user.pharmacyLocation || '');
+    setPharmacyPhone(user.pharmacyPhone || '');
   }, [user]);
 
   const handleSave = async () => {
@@ -73,6 +77,25 @@ export default function ProfilePage() {
     const nameTrim = name.trim();
     const jobTrim = jobRole.trim();
     const emailTrim = email.trim().toLowerCase();
+    const locTrim = pharmacyLocation.trim();
+    const pharmPhTrim = pharmacyPhone.trim();
+
+    if (!nameTrim) {
+      toast.error('Please enter your name.');
+      return;
+    }
+    if (!jobTrim) {
+      toast.error('Please enter your role.');
+      return;
+    }
+    if (!locTrim) {
+      toast.error('Please enter your pharmacy location.');
+      return;
+    }
+    if (!pharmPhTrim) {
+      toast.error('Please enter your pharmacy phone.');
+      return;
+    }
 
     if (canEditEmail) {
       if (!emailTrim) {
@@ -95,29 +118,64 @@ export default function ProfilePage() {
         return;
       }
     }
+    if (!phoneOut) {
+      toast.error('Please enter your contact phone number.');
+      return;
+    }
+
+    const normalizedPharmPhone = normalizeGhanaPhoneToE164(pharmPhTrim);
+    if (!isValidGhanaE164(normalizedPharmPhone)) {
+      toast.error('Please enter a valid pharmacy phone number.');
+      return;
+    }
 
     setSaving(true);
     try {
       const patch: Record<string, unknown> = {
         name: nameTrim,
         jobRole: jobTrim,
+        pharmacyLocation: locTrim,
+        pharmacyPhone: normalizedPharmPhone,
+        phone: phoneOut,
       };
       if (canEditEmail) {
         patch.email = emailTrim;
-      }
-      if (canEditPhone) {
-        patch.phone = phoneOut ? phoneOut : '';
       }
 
       await updateDoc(
         doc(db, 'users', user.id),
         omitUndefinedFields(patch) as UpdateData<Record<string, unknown>>
       );
+
+      if (user.pharmacyId) {
+        const pharmRef = doc(db, 'pharmacies', user.pharmacyId);
+        const pharmSnap = await getDoc(pharmRef);
+        if (pharmSnap.exists()) {
+          await setDoc(
+            pharmRef,
+            {
+              location: locTrim,
+              phone: normalizedPharmPhone,
+              updatedAt: Date.now(),
+            },
+            { merge: true }
+          );
+        }
+      }
+
       await refreshUser();
       toast.success('Profile updated');
     } catch (e) {
       console.error(e);
-      toast.error('Could not save profile. Please try again.');
+      const code =
+        e && typeof e === 'object' && 'code' in e
+          ? String((e as { code: string }).code)
+          : '';
+      toast.error(
+        code === 'permission-denied'
+          ? 'Could not save — Firestore rules may need to be deployed.'
+          : 'Could not save profile. Please try again.'
+      );
     } finally {
       setSaving(false);
     }
@@ -159,23 +217,23 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent className='space-y-4'>
           <div className='space-y-2'>
-            <Label htmlFor='profile-name'>Name</Label>
+            <Label htmlFor='profile-name'>Your name</Label>
             <Input
               id='profile-name'
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder='Your name'
+              placeholder='Full name'
               autoComplete='name'
             />
           </div>
 
           <div className='space-y-2'>
-            <Label htmlFor='profile-job'>Job role (optional)</Label>
+            <Label htmlFor='profile-job'>Your role</Label>
             <Input
               id='profile-job'
               value={jobRole}
               onChange={(e) => setJobRole(e.target.value)}
-              placeholder='e.g. Pharmacist, Owner'
+              placeholder='e.g. Pharmacist, Owner, Buyer'
             />
           </div>
 
@@ -199,40 +257,61 @@ export default function ProfilePage() {
           </div>
 
           <div className='space-y-2'>
-            <Label htmlFor='profile-phone'>Phone</Label>
+            <Label htmlFor='profile-phone'>Your contact phone</Label>
             <Input
               id='profile-phone'
               type='tel'
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               onBlur={() => {
-                if (!canEditPhone || !phone.trim()) return;
+                if (!phone.trim()) return;
                 const n = normalizeGhanaPhoneToE164(phone);
                 if (n !== phone) setPhone(n);
               }}
-              disabled={!canEditPhone}
-              placeholder={
-                canEditPhone ? '+233243569981' : 'Sign-in phone (fixed)'
-              }
-              className={!canEditPhone ? 'bg-muted' : ''}
+              placeholder='+233243569981'
+              autoComplete='tel'
             />
-            {!canEditPhone && (
-              <p className='text-xs text-muted-foreground'>
-                You sign in with this number. To use a different number, create
-                a new account or contact support.
-              </p>
-            )}
+            <p className='text-xs text-muted-foreground'>
+              Number we can reach you on for orders and updates.
+            </p>
           </div>
 
-          {user.pharmacyName && (
-            <div className='rounded-md border bg-muted/30 px-3 py-2 text-sm'>
-              <p className='font-medium'>Pharmacy</p>
-              <p className='text-muted-foreground'>{user.pharmacyName}</p>
+          <div className='rounded-md border bg-muted/30 px-3 py-3 space-y-4'>
+            <div>
+              <p className='text-sm font-medium'>Pharmacy</p>
+              <p className='text-sm text-muted-foreground'>
+                {user.pharmacyName || 'Not set'}
+              </p>
               <p className='text-xs text-muted-foreground mt-1'>
-                To change pharmacy affiliation, contact Leetonia Wholesale.
+                To change which pharmacy you are linked to, contact Leetonia
+                Wholesale.
               </p>
             </div>
-          )}
+            <div className='space-y-2'>
+              <Label htmlFor='profile-pharm-location'>Pharmacy location</Label>
+              <Input
+                id='profile-pharm-location'
+                value={pharmacyLocation}
+                onChange={(e) => setPharmacyLocation(e.target.value)}
+                placeholder='e.g. Madina, Accra'
+              />
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='profile-pharm-phone'>Pharmacy phone</Label>
+              <Input
+                id='profile-pharm-phone'
+                type='tel'
+                value={pharmacyPhone}
+                onChange={(e) => setPharmacyPhone(e.target.value)}
+                onBlur={() => {
+                  if (!pharmacyPhone.trim()) return;
+                  const n = normalizeGhanaPhoneToE164(pharmacyPhone);
+                  if (n !== pharmacyPhone) setPharmacyPhone(n);
+                }}
+                placeholder='Pharmacy business line'
+              />
+            </div>
+          </div>
 
           <Button
             className='w-full sm:w-auto'

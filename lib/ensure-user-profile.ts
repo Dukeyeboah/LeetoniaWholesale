@@ -97,17 +97,32 @@ async function createNewUserProfile(
     createdAt: Date.now(),
   };
 
-  if (needsAdminPasskey) {
+  try {
     await setDoc(
       userDocRef,
       omitUndefinedFields(newUser as unknown as Record<string, unknown>)
     );
+  } catch (e) {
+    console.error('createNewUserProfile', e);
+    await signOut(auth);
+    const code =
+      e && typeof e === 'object' && 'code' in e
+        ? String((e as { code: string }).code)
+        : '';
+    if (code === 'permission-denied') {
+      return {
+        outcome: 'rejected',
+        message:
+          'Could not create your account (Firestore permissions). Deploy the latest firestore.rules and try again.',
+      };
+    }
+    return {
+      outcome: 'rejected',
+      message: 'Could not create your account. Please try again.',
+    };
+  }
+  if (needsAdminPasskey) {
     return { outcome: 'admin_passkey' };
   }
-
-  await setDoc(
-    userDocRef,
-    omitUndefinedFields(newUser as unknown as Record<string, unknown>)
-  );
   return { outcome: 'success' };
 }

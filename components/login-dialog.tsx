@@ -304,7 +304,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <Tabs defaultValue='email' className='w-full'>
+          <Tabs defaultValue='google' className='w-full'>
             <TabsList className='grid w-full grid-cols-3'>
               <TabsTrigger value='google'>
                 <Chrome className='h-4 w-4 mr-2' />

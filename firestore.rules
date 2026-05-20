@@ -149,8 +149,19 @@ service cloud.firestore {
           ]);
       }
 
+      // Onboarding / profile: confirm or correct pharmacy location and phone only.
+      function pharmacyClientContactUpdate() {
+        return isClient() &&
+          request.resource.data.name == resource.data.name &&
+          request.resource.data.monthlyLimitGHS == resource.data.monthlyLimitGHS &&
+          request.resource.data.monthSpendGHS == resource.data.monthSpendGHS &&
+          request.resource.data.monthKey == resource.data.monthKey &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['location', 'phone', 'updatedAt']);
+      }
+
       allow update: if isPrivilegedAdmin() ||
-        pharmacyClientSpendUpdate();
+        pharmacyClientSpendUpdate() ||
+        pharmacyClientContactUpdate();
 
       allow delete: if isSuperAdmin();
     }

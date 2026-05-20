@@ -169,17 +169,17 @@ export async function ensurePharmacyDocument(
   name: string
 ): Promise<void> {
   const ref = doc(db, 'pharmacies', pharmacyId);
-  await setDoc(
-    ref,
-    {
-      name,
-      monthlyLimitGHS: DEFAULT_MONTHLY_LIMIT_GHS,
-      monthSpendGHS: 0,
-      monthKey: currentMonthKey(),
-      updatedAt: Date.now(),
-      source: 'seed',
-      pendingVerification: false,
-    },
-    { merge: true }
-  );
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    return;
+  }
+  await setDoc(ref, {
+    name,
+    monthlyLimitGHS: DEFAULT_MONTHLY_LIMIT_GHS,
+    monthSpendGHS: 0,
+    monthKey: currentMonthKey(),
+    updatedAt: Date.now(),
+    source: 'seed',
+    pendingVerification: false,
+  });
 }

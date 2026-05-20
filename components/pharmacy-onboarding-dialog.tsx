@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 import {
@@ -176,12 +176,11 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
         if (seed) {
           await ensurePharmacyDocument(db, pharmacyId, pharmacyName);
         }
-        if (
-          loc !== (fromList.location?.trim() || '') ||
-          pharmPh !== (fromList.phone?.trim() || '')
-        ) {
+        const pharmRef = doc(db, 'pharmacies', pharmacyId);
+        const pharmSnap = await getDoc(pharmRef);
+        if (pharmSnap.exists()) {
           await setDoc(
-            doc(db, 'pharmacies', pharmacyId),
+            pharmRef,
             { location: loc, phone: pharmPh, updatedAt: Date.now() },
             { merge: true }
           );
@@ -209,6 +208,8 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
           phone: contact,
           pharmacyId,
           pharmacyName,
+          pharmacyLocation: loc,
+          pharmacyPhone: pharmPh,
           pharmacyProfileComplete: true,
         },
         { merge: true }
@@ -219,7 +220,11 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
       onComplete();
     } catch (err) {
       console.error(err);
-      toast.error('Could not save your profile. Please try again.');
+      const msg =
+        err && typeof err === 'object' && 'code' in err && err.code === 'permission-denied'
+          ? 'Permission denied saving your profile. Ask an admin to deploy the latest Firestore rules.'
+          : 'Could not save your profile. Please try again.';
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
