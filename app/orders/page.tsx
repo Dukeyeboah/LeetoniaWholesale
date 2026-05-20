@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import {
   collection,
@@ -11,7 +11,12 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import {
@@ -79,6 +84,17 @@ export default function OrdersPage() {
 
     return () => unsubscribe();
   }, [user]);
+
+  const defaultOpenOrderIds = useMemo(() => {
+    const needsAttention = orders.filter(
+      (o) =>
+        o.status === 'proforma_sent' || o.status === 'pharmacy_confirmed'
+    );
+    if (needsAttention.length > 0) {
+      return needsAttention.map((o) => o.id);
+    }
+    return orders[0] ? [orders[0].id] : [];
+  }, [orders]);
 
   const getStatusBadge = (status: Order['status']) => {
     switch (status) {
@@ -191,125 +207,154 @@ export default function OrdersPage() {
 
   return (
     <div className='space-y-8'>
-      <h1 className='text-3xl font-serif font-bold text-primary'>My Orders</h1>
+      <div className='flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2'>
+        <h1 className='text-3xl font-serif font-bold text-primary'>
+          My Orders
+        </h1>
+        <p className='text-sm text-muted-foreground'>
+          {orders.length} order{orders.length === 1 ? '' : 's'} — tap to expand
+          or collapse
+        </p>
+      </div>
 
-      <div className='space-y-4'>
-        {orders.map((order) => (
-          <Card key={order.id} className='overflow-hidden'>
-            <CardHeader className='bg-secondary/30 flex flex-row items-center justify-between py-4'>
-              <div className='space-y-1'>
-                <CardTitle className='text-base font-mono'>
-                  {formatOrderLabel(order)}
-                </CardTitle>
-                <p className='text-xs text-muted-foreground'>
-                  {format(order.createdAt, 'MMM d, yyyy • h:mm a')}
-                </p>
-              </div>
-              <div className='flex items-center gap-4'>
-                {showPrice && (
-                  <span className='font-bold hidden sm:inline-block'>
-                    ₵{(order.total + (order.deliveryFee || 0)).toFixed(2)}
-                  </span>
-                )}
-                {getStatusBadge(order.status)}
-              </div>
-            </CardHeader>
-            <CardContent className='p-6'>
-              <div className='space-y-4'>
-                <div className='space-y-2'>
-                  {order.items.map((item) => (
-                    <div key={item.id} className='flex justify-between text-sm'>
-                      <span>
-                        <span className='font-medium'>{item.quantity}x</span>{' '}
-                        {item.name}
+      <Accordion
+        type='multiple'
+        defaultValue={defaultOpenOrderIds}
+        className='space-y-3'
+      >
+        {orders.map((order) => {
+          const itemCount = order.items.reduce(
+            (sum, i) => sum + i.quantity,
+            0
+          );
+          const grand = order.total + (order.deliveryFee || 0);
+          return (
+            <AccordionItem
+              key={order.id}
+              value={order.id}
+              className='border rounded-lg bg-card overflow-hidden px-0 last:border-b'
+            >
+              <AccordionTrigger className='px-4 py-4 hover:no-underline bg-secondary/30 data-[state=open]:border-b [&>svg]:ml-2'>
+                <div className='flex flex-1 flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-left min-w-0 pr-2'>
+                  <div className='space-y-1 min-w-0'>
+                    <p className='text-base font-mono font-semibold leading-tight truncate'>
+                      {formatOrderLabel(order)}
+                    </p>
+                    <p className='text-xs text-muted-foreground font-normal'>
+                      {format(order.createdAt, 'MMM d, yyyy • h:mm a')}
+                      {' · '}
+                      {itemCount} item{itemCount === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                  <div className='flex flex-wrap items-center gap-2 sm:gap-4 shrink-0'>
+                    {showPrice && (
+                      <span className='font-bold text-sm tabular-nums'>
+                        ₵{grand.toFixed(2)}
                       </span>
-                      {showPrice && (
-                        <span className='text-muted-foreground hidden sm:inline-block'>
-                          ₵{(item.price * item.quantity).toFixed(2)}
+                    )}
+                    {getStatusBadge(order.status)}
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className='px-6 pb-6 pt-4'>
+                <div className='space-y-4'>
+                  <div className='space-y-2'>
+                    {order.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className='flex justify-between text-sm gap-4'
+                      >
+                        <span className='min-w-0'>
+                          <span className='font-medium'>{item.quantity}x</span>{' '}
+                          {item.name}
                         </span>
+                        {showPrice && (
+                          <span className='text-muted-foreground shrink-0 tabular-nums'>
+                            ₵{(item.price * item.quantity).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {order.deliveryOption && (
+                    <div className='pt-2 border-t text-sm space-y-1'>
+                      <p className='text-muted-foreground'>
+                        Delivery:{' '}
+                        {order.deliveryOption === 'delivery'
+                          ? 'Home Delivery'
+                          : 'Store Pickup'}
+                      </p>
+                      {order.deliveryFee && order.deliveryFee > 0 && (
+                        <p className='text-muted-foreground'>
+                          Delivery Fee: ₵{order.deliveryFee.toFixed(2)}
+                        </p>
+                      )}
+                      {order.paymentMethod && (
+                        <p className='text-muted-foreground'>
+                          Payment:{' '}
+                          {paymentMethodLabel(order.paymentMethod)}
+                        </p>
                       )}
                     </div>
-                  ))}
-                </div>
+                  )}
 
-                {order.deliveryOption && (
-                  <div className='pt-2 border-t text-sm'>
-                    <p className='text-muted-foreground'>
-                      Delivery:{' '}
-                      {order.deliveryOption === 'delivery'
-                        ? 'Home Delivery'
-                        : 'Store Pickup'}
-                    </p>
-                    {order.deliveryFee && order.deliveryFee > 0 && (
-                      <p className='text-muted-foreground'>
-                        Delivery Fee: ₵{order.deliveryFee.toFixed(2)}
-                      </p>
-                    )}
-                    {order.paymentMethod && (
-                      <p className='text-muted-foreground'>
-                        Payment:{' '}
-                        {paymentMethodLabel(order.paymentMethod)}
-                      </p>
-                    )}
+                  <div className='pt-2 border-t space-y-2 text-sm'>
+                    {(() => {
+                      const paid =
+                        order.accountingStatus === 'paid' &&
+                        (order.amountPaidGHS == null ||
+                          order.amountPaidGHS === undefined)
+                          ? grand
+                          : (order.amountPaidGHS ?? 0);
+                      const bal = Math.max(0, grand - paid);
+                      return (
+                        <>
+                          <div className='flex justify-between font-semibold'>
+                            <span>Order total</span>
+                            <span className='tabular-nums'>
+                              ₵{grand.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className='flex justify-between font-medium text-emerald-700'>
+                            <span>Paid (debit)</span>
+                            <span className='tabular-nums'>
+                              ₵{paid.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className='flex justify-between font-medium text-amber-800'>
+                            <span>Balance (credit)</span>
+                            <span className='tabular-nums'>
+                              ₵{bal.toFixed(2)}
+                            </span>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
-                )}
 
-                <div className='pt-2 border-t space-y-2 text-sm'>
-                  {(() => {
-                    const grand = order.total + (order.deliveryFee || 0);
-                    const paid =
-                      order.accountingStatus === 'paid' &&
-                      (order.amountPaidGHS == null ||
-                        order.amountPaidGHS === undefined)
-                        ? grand
-                        : (order.amountPaidGHS ?? 0);
-                    const bal = Math.max(0, grand - paid);
-                    return (
-                      <>
-                        <div className='flex justify-between font-semibold'>
-                          <span>Order total</span>
-                          <span className='tabular-nums'>
-                            ₵{grand.toFixed(2)}
-                          </span>
-                        </div>
-                        <div className='flex justify-between font-medium text-emerald-700'>
-                          <span>Paid (debit)</span>
-                          <span className='tabular-nums'>
-                            ₵{paid.toFixed(2)}
-                          </span>
-                        </div>
-                        <div className='flex justify-between font-medium text-amber-800'>
-                          <span>Balance (credit)</span>
-                          <span className='tabular-nums'>
-                            ₵{bal.toFixed(2)}
-                          </span>
-                        </div>
-                      </>
-                    );
-                  })()}
+                  {order.status === 'proforma_sent' && (
+                    <Link href={`/orders/${order.id}`}>
+                      <Button className='w-full mt-2'>
+                        Review proforma & confirm
+                        <ArrowRight className='ml-2 h-4 w-4' />
+                      </Button>
+                    </Link>
+                  )}
+                  {order.status === 'pharmacy_confirmed' && (
+                    <Link href={`/orders/${order.id}`}>
+                      <Button className='w-full mt-2'>
+                        Verify & confirm order
+                        <ArrowRight className='ml-2 h-4 w-4' />
+                      </Button>
+                    </Link>
+                  )}
                 </div>
-
-                {order.status === 'proforma_sent' && (
-                  <Link href={`/orders/${order.id}`}>
-                    <Button className='w-full mt-4'>
-                      Review proforma & confirm
-                      <ArrowRight className='ml-2 h-4 w-4' />
-                    </Button>
-                  </Link>
-                )}
-                {order.status === 'pharmacy_confirmed' && (
-                  <Link href={`/orders/${order.id}`}>
-                    <Button className='w-full mt-4'>
-                      Verify & confirm order
-                      <ArrowRight className='ml-2 h-4 w-4' />
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
     </div>
   );
 }

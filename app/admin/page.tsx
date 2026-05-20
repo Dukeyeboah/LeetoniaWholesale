@@ -65,8 +65,6 @@ import {
   Download,
   Printer,
   Calendar,
-  Eye,
-  EyeOff,
   Building2,
   Camera,
   ChevronDown,
@@ -74,6 +72,8 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { AdminLoadingPanel } from '@/components/admin-loading-panel';
+import { AdminInventoryRowActions } from '@/components/admin-inventory-row-actions';
 import type { Pharmacy } from '@/types';
 import {
   applyCreditBalanceOnOrderCompleted,
@@ -188,7 +188,8 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [inventoryLoading, setInventoryLoading] = useState(true);
+  const [pharmaciesLoading, setPharmaciesLoading] = useState(true);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -399,7 +400,8 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!db) {
-      setLoading(false);
+      setInventoryLoading(false);
+      setPharmaciesLoading(false);
       return;
     }
 
@@ -424,12 +426,22 @@ export default function AdminDashboard() {
     // Listen to Inventory
     // const inventoryQuery = query(collection(db, 'inventory'), orderBy('name'));
     const inventoryQuery = query(collection(db, 'inventory'))
-    const unsubInventory = onSnapshot(inventoryQuery, (snapshot) => {
-      setProducts(
-        snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Product))
-      );
-      setLoading(false);
-    });
+    const unsubInventory = onSnapshot(
+      inventoryQuery,
+      (snapshot) => {
+        setProducts(
+          snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Product))
+        );
+        setInventoryLoading(false);
+      },
+      (err) => {
+        console.error('inventory listener', err);
+        setInventoryLoading(false);
+        toast.error(
+          'Could not load inventory. Check Firestore rules and your connection.'
+        );
+      }
+    );
 
     // Fetch users once
     const fetchUsers = async () => {
@@ -453,8 +465,13 @@ export default function AdminDashboard() {
             (d) => ({ id: d.id, ...d.data() } as Pharmacy)
           )
         );
+        setPharmaciesLoading(false);
       },
-      (err) => console.error('pharmacies snapshot', err)
+      (err) => {
+        console.error('pharmacies snapshot', err);
+        setPharmaciesLoading(false);
+        toast.error('Could not load pharmacies.');
+      }
     );
 
     return () => {
@@ -3694,7 +3711,16 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {pharmacies.length === 0 ? (
+                      {pharmaciesLoading ? (
+                        <tr>
+                          <td colSpan={6}>
+                            <AdminLoadingPanel
+                              title='Loading pharmacies…'
+                              subtitle='Please wait while pharmacy records are loaded.'
+                            />
+                          </td>
+                        </tr>
+                      ) : pharmacies.length === 0 ? (
                         <tr>
                           <td
                             colSpan={6}
@@ -3809,7 +3835,16 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {pharmacies.length === 0 ? (
+                      {pharmaciesLoading ? (
+                        <tr>
+                          <td colSpan={8}>
+                            <AdminLoadingPanel
+                              title='Loading pharmacies…'
+                              subtitle='Please wait while pharmacy records are loaded.'
+                            />
+                          </td>
+                        </tr>
+                      ) : pharmacies.length === 0 ? (
                         <tr>
                           <td
                             colSpan={8}
@@ -4057,7 +4092,7 @@ export default function AdminDashboard() {
             {inventoryListMode === 'storefront'
               ? showInventoryBulkImport
                 ? `Bulk import: “Apply updatedStock.json” updates wholesale price, quantity, and visibility from data/updatedStock.json (${allStorefrontStockRows.length} drugs, matched by name). Storeroom counts are not changed.`
-                : 'Wholesale / sellable stock clients see when ordering. Use “Bulk import from JSON…” when you need to refresh from updatedStock.json.'
+                : 'Wholesale storefront — what clients see when ordering (not storeroom/warehouse). Stock and hide/show apply to sellable shelf only. Use “Bulk import from JSON…” to refresh from updatedStock.json.'
               : showInventoryBulkImport
                 ? `Bulk import: warehouse file (${allWarehouseRows.length} lines) updates storeroom price and quantity by product name (not wholesale shelf stock).`
                 : `Storeroom list is driven by data/warehouse.json (${allWarehouseRows.length} lines). Use “Bulk import from JSON…” to apply the warehouse file.`}
@@ -4085,7 +4120,19 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className='rounded-md border bg-card'>
+          <div className='rounded-md border bg-card relative min-h-[12rem]'>
+            {inventoryLoading && (
+              <div
+                className='absolute inset-0 z-20 flex items-center justify-center bg-background/85 backdrop-blur-[2px] rounded-md'
+                role='status'
+                aria-live='polite'
+              >
+                <AdminLoadingPanel
+                  title='Loading products…'
+                  subtitle='Please wait while inventory is loaded — this can take a moment with thousands of items.'
+                />
+              </div>
+            )}
             {inventoryListMode === 'storefront' ? (
               <>
                 <div className='hidden md:flex flex-row items-center gap-4 p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
@@ -4100,8 +4147,7 @@ export default function AdminDashboard() {
                   const inProcess = reservedForOrders(product);
                   const avail = availableToSell(product);
                   const storeroomStock = product.storeroomStock ?? 0;
-                  const totalStock = wholesaleStock + storeroomStock;
-                  const isLow = totalStock > 0 && totalStock < 10;
+                  const isLow = avail > 0 && avail < 10;
                   return (
                     <div
                       key={product.id}
@@ -4156,49 +4202,23 @@ export default function AdminDashboard() {
                         <div className='w-16 flex justify-center'>
                           <Badge variant='outline'>{storeroomStock}</Badge>
                         </div>
-                        <div className='flex justify-end gap-1 shrink-0'>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8'
-                            onClick={() => openProductDialog(product)}
-                            title='Edit product'
-                          >
-                            <Edit className='h-4 w-4' />
-                          </Button>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8'
-                            onClick={() =>
-                              handleToggleProductVisibility(product)
-                            }
-                            title={
-                              product.isHidden
-                                ? 'Show product'
-                                : 'Hide product'
-                            }
-                          >
-                            {product.isHidden ? (
-                              <EyeOff className='h-4 w-4' />
-                            ) : (
-                              <Eye className='h-4 w-4' />
-                            )}
-                          </Button>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                            onClick={() => handleDeleteProduct(product.id)}
-                            title='Delete product permanently'
-                          >
-                            <Trash2 className='h-4 w-4' />
-                          </Button>
-                        </div>
+                        <AdminInventoryRowActions
+                          product={product}
+                          onEdit={openProductDialog}
+                          onToggleVisibility={handleToggleProductVisibility}
+                          onDelete={handleDeleteProduct}
+                          showVisibilityToggle
+                        />
                       </div>
                     </div>
                   );
                 })}
+                {!inventoryLoading &&
+                  inventoryProductsFiltered.length === 0 && (
+                    <div className='p-8 text-center text-sm text-muted-foreground'>
+                      No products match this letter filter.
+                    </div>
+                  )}
               </>
             ) : (
               <>
@@ -4349,45 +4369,13 @@ export default function AdminDashboard() {
                         </div>
                         <div className='flex justify-end gap-1 shrink-0'>
                           {match ? (
-                            <>
-                              <Button
-                                variant='ghost'
-                                size='icon'
-                                className='h-8 w-8'
-                                onClick={() => openProductDialog(match)}
-                                title='Edit product'
-                              >
-                                <Edit className='h-4 w-4' />
-                              </Button>
-                              <Button
-                                variant='ghost'
-                                size='icon'
-                                className='h-8 w-8'
-                                onClick={() =>
-                                  handleToggleProductVisibility(match)
-                                }
-                                title={
-                                  match.isHidden
-                                    ? 'Show product'
-                                    : 'Hide product'
-                                }
-                              >
-                                {match.isHidden ? (
-                                  <EyeOff className='h-4 w-4' />
-                                ) : (
-                                  <Eye className='h-4 w-4' />
-                                )}
-                              </Button>
-                              <Button
-                                variant='ghost'
-                                size='icon'
-                                className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                                onClick={() => handleDeleteProduct(match.id)}
-                                title='Delete product permanently'
-                              >
-                                <Trash2 className='h-4 w-4' />
-                              </Button>
-                            </>
+                            <AdminInventoryRowActions
+                              product={match}
+                              onEdit={openProductDialog}
+                              onToggleVisibility={handleToggleProductVisibility}
+                              onDelete={handleDeleteProduct}
+                              showVisibilityToggle={false}
+                            />
                           ) : (
                             <span className='text-xs text-muted-foreground px-2'>
                               Sync to add

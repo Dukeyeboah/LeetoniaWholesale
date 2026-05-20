@@ -5,7 +5,7 @@ import { useInventory } from '@/hooks/use-inventory';
 import { useCart } from '@/hooks/use-cart'; // Import useCart
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, WifiOff, ChevronDown } from 'lucide-react';
+import { Search, Filter, WifiOff, ChevronDown, Loader2 } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -99,7 +99,8 @@ export default function InventoryPage() {
             Inventory
           </h1>
           <p className='text-muted-foreground mt-1'>
-            Browse available stock for order.
+            Wholesale storefront — prices and stock for ordering (not
+            storeroom/warehouse).
           </p>
         </div>
         {offline && products.length === 0 && (
@@ -175,10 +176,26 @@ export default function InventoryPage() {
       </div>
 
       {loading ? (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7'>
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className='h-[320px] w-full rounded-lg' />
-          ))}
+        <div
+          className='relative rounded-lg border bg-card/50 min-h-[280px] flex flex-col items-center justify-center gap-4 py-16 px-6'
+          role='status'
+          aria-live='polite'
+        >
+          <Loader2 className='h-10 w-10 animate-spin text-primary' />
+          <div className='text-center space-y-2 max-w-md'>
+            <p className='font-medium text-foreground'>
+              Loading products…
+            </p>
+            <p className='text-sm text-muted-foreground animate-pulse'>
+              Please wait while we load the wholesale catalog. With thousands of
+              items this may take a moment.
+            </p>
+          </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7 w-full mt-4 opacity-40 pointer-events-none'>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className='h-[280px] w-full rounded-lg' />
+            ))}
+          </div>
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className='text-center py-20'>
