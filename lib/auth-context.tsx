@@ -3,12 +3,11 @@
 import type React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import type { User } from '@/types';
 import { useRouter } from 'next/navigation';
-import { omitUndefinedFields } from '@/lib/firestore-sanitize';
 import { inferSignInProvider } from '@/lib/auth-providers';
 
 interface AuthContextType {
@@ -115,42 +114,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
             applyFirebaseUser(firebaseUser, userData);
           } else {
-            const provider = inferSignInProvider(firebaseUser);
-            if (provider === 'google') {
-              // Google sign-in never auto-registers; /login creates profiles after email sign-up.
-              setLoading(false);
-              return;
-            }
-
-            const email = firebaseUser.email || '';
-
-            // New profiles always start as `client`. Whitelisted admin emails must
-            // complete the passkey step on /login (or login dialog) before role is promoted.
-            const newUser: User = {
-              id: firebaseUser.uid,
-              email: email,
-              role: 'client',
-              name: firebaseUser.displayName || '',
-              phone: firebaseUser.phoneNumber || '',
-              signInProvider: inferSignInProvider(firebaseUser),
-              ...(firebaseUser.photoURL ? { photoURL: firebaseUser.photoURL } : {}),
-              createdAt: Date.now(),
-            };
-
-            // Try to save to Firestore
-            try {
-              await setDoc(
-                doc(db, 'users', firebaseUser.uid),
-                omitUndefinedFields(newUser as unknown as Record<string, unknown>)
-              );
-            } catch (error) {
-              console.error('Error creating user profile:', error);
-            }
-
-            setUser(newUser);
-            if (newUser.role === 'staff') {
-              setViewMode('staff');
-            }
+            // Profiles are created only via explicit sign-up on /login (not here).
+            setUser(null);
           }
         } catch (error) {
           console.error('Error fetching user profile:', error);

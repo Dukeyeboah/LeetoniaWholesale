@@ -13,7 +13,6 @@ import {
   signInWithPhoneNumber,
   RecaptchaVerifier,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,14 +28,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, AlertCircle, Mail, Phone, Chrome } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import type { User } from '@/types';
 import { AdminPasskeyDialog } from '@/components/admin-passkey-dialog';
-import { isAdminEmail } from '@/lib/admin-config';
-import { omitUndefinedFields } from '@/lib/firestore-sanitize';
 import { normalizeGhanaPhoneToE164, isValidGhanaE164 } from '@/lib/ghana-phone';
-import { inferSignInProvider } from '@/lib/auth-providers';
 import { getPhoneSendVerificationErrorMessage } from '@/lib/phone-auth-errors';
-import { rejectGoogleSignInWithoutProfile } from '@/lib/google-sign-in-policy';
+import {
+  ensureUserProfileAfterAuth,
+  type AuthIntent,
+} from '@/lib/ensure-user-profile';
+import { AuthIntentToggle } from '@/components/auth-intent-toggle';
+import { useAuth } from '@/lib/auth-context';
 import { useState, useEffect } from 'react';
 
 declare global {
@@ -59,12 +59,11 @@ export default function LoginPage() {
   const [phoneCooldownNow, setPhoneCooldownNow] = useState<number>(Date.now());
   const [showAdminPasskeyDialog, setShowAdminPasskeyDialog] = useState(false);
   const [pendingUser, setPendingUser] = useState<any>(null);
-  const [emailAuthMode, setEmailAuthMode] = useState<'signin' | 'signup'>(
-    'signin'
-  );
+  const [authIntent, setAuthIntent] = useState<AuthIntent>('signin');
   const [signUpDisplayName, setSignUpDisplayName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
+  const { refreshUser } = useAuth();
 
   // Initialize reCAPTCHA for phone auth
   const setupRecaptcha = () => {
@@ -152,12 +151,12 @@ export default function LoginPage() {
         email.trim(),
         password
       );
-      await ensureUserProfile(userCredential.user);
+      await finishAuth(userCredential.user, 'signin');
     } catch (err: any) {
       let errorMessage = 'Failed to login. Please check your credentials.';
       if (err.code === 'auth/user-not-found') {
         errorMessage =
-          'No account with this email. Use Create account or try Google / phone.';
+          'No account with this email. Switch to Create account to register.';
       } else if (
         err.code === 'auth/wrong-password' ||
         err.code === 'auth/invalid-credential'
@@ -211,7 +210,7 @@ export default function LoginPage() {
       if (name) {
         await updateProfile(userCredential.user, { displayName: name });
       }
-      await ensureUserProfile(userCredential.user);
+      await finishAuth(userCredential.user, 'signup');
       setConfirmPassword('');
       setSignUpDisplayName('');
     } catch (err: any) {
@@ -232,7 +231,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleAuth = async () => {
     setError('');
     setLoading(true);
 
@@ -247,11 +246,14 @@ export default function LoginPage() {
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
-      await ensureUserProfile(userCredential.user);
+      await finishAuth(userCredential.user, authIntent);
     } catch (err: any) {
-      let errorMessage = 'Failed to sign in with Google.';
+      let errorMessage =
+        authIntent === 'signup'
+          ? 'Failed to sign up with Google.'
+          : 'Failed to sign in with Google.';
       if (err.code === 'auth/popup-closed-by-user') {
-        errorMessage = 'Sign-in popup was closed.';
+        errorMessage = 'Google popup was closed.';
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -352,7 +354,8 @@ export default function LoginPage() {
 
     try {
       const userCredential = await confirmationResult.confirm(verificationCode);
-      await ensureUserProfile(userCredential.user);
+      const formattedPhone = normalizeGhanaPhoneToE164(phone);
+      await finishAuth(userCredential.user, authIntent, formattedPhone);
     } catch (err: any) {
       let errorMessage = 'Invalid verification code. Please try again.';
       if (err.code === 'auth/invalid-verification-code') {
@@ -368,83 +371,29 @@ export default function LoginPage() {
     }
   };
 
-  // Ensure user profile exists in Firestore
-  const ensureUserProfile = async (firebaseUser: any) => {
-    if (!db) return;
-
+  const finishAuth = async (
+    firebaseUser: Parameters<typeof ensureUserProfileAfterAuth>[0],
+    intent: AuthIntent,
+    phoneE164?: string
+  ) => {
     try {
-      const userDocRef = doc(db, 'users', firebaseUser.uid);
-      const userDoc = await getDoc(userDocRef);
-      const email = firebaseUser.email || '';
-      const phoneE164 = firebaseUser.phoneNumber || '';
-
-      if (!userDoc.exists()) {
-        const googleDenied = await rejectGoogleSignInWithoutProfile(
-          auth!,
-          firebaseUser,
-          false
-        );
-        if (googleDenied) {
-          setError(googleDenied);
-          return;
-        }
-
-        const shouldBeAdmin = isAdminEmail(email);
-
-        // Create new user profile
-        const newUser: User = {
-          id: firebaseUser.uid,
-          email: email,
-          phone: phoneE164,
-          role: shouldBeAdmin ? 'admin' : 'client',
-          name: firebaseUser.displayName || phoneE164 || '',
-          signInProvider: inferSignInProvider(firebaseUser),
-          ...(firebaseUser.photoURL ? { photoURL: firebaseUser.photoURL } : {}),
-          createdAt: Date.now(),
-        };
-
-        // If admin email, don't set role yet - require passkey
-        if (shouldBeAdmin) {
-          const userWithoutRole = { ...newUser, role: 'client' as const };
-          await setDoc(
-            userDocRef,
-            omitUndefinedFields(userWithoutRole as unknown as Record<string, unknown>)
-          );
-          // Show passkey dialog
-          setPendingUser(firebaseUser);
-          setShowAdminPasskeyDialog(true);
-          return;
-        }
-
-        await setDoc(
-          userDocRef,
-          omitUndefinedFields(newUser as unknown as Record<string, unknown>)
-        );
-        router.push('/inventory');
-      } else {
-        const userData = userDoc.data() as User;
-
-        // Whitelisted admin emails still on `client` need the passkey once.
-        // Firestore `super_admin` is a privileged role — do not treat like missing admin.
-        const hasPrivilegedRole =
-          userData.role === 'admin' || userData.role === 'super_admin';
-        if (isAdminEmail(email) && !hasPrivilegedRole) {
-          setPendingUser(firebaseUser);
-          setShowAdminPasskeyDialog(true);
-          return;
-        }
-
-        // Sync phone from Firebase (e.g. first phone sign-in)
-        if (phoneE164 && !userData.phone) {
-          await setDoc(userDocRef, { phone: phoneE164 }, { merge: true });
-        }
-
-        router.push('/inventory');
+      const result = await ensureUserProfileAfterAuth(firebaseUser, intent, {
+        phoneE164,
+      });
+      if (result.outcome === 'rejected') {
+        setError(result.message);
+        return;
       }
+      if (result.outcome === 'admin_passkey') {
+        setPendingUser(firebaseUser);
+        setShowAdminPasskeyDialog(true);
+        return;
+      }
+      await refreshUser();
+      router.push('/inventory');
     } catch (error) {
       console.error('Error ensuring user profile:', error);
-      // Don't block login if profile creation fails
-      router.push('/inventory');
+      setError('Could not complete sign-in. Please try again.');
     }
   };
 
@@ -476,7 +425,12 @@ export default function LoginPage() {
             Sign in or create an account to access the ordering system
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className='space-y-4'>
+          <AuthIntentToggle
+            value={authIntent}
+            onChange={setAuthIntent}
+            onClearError={() => setError('')}
+          />
           <Tabs defaultValue='email' className='w-full'>
             <TabsList className='grid w-full grid-cols-3'>
               <TabsTrigger value='google'>
@@ -502,12 +456,8 @@ export default function LoginPage() {
             )}
 
             <TabsContent value='google' className='space-y-4 mt-4'>
-              <p className='text-sm text-muted-foreground'>
-                For existing accounts only. New users must create an account on
-                the Email tab first.
-              </p>
               <Button
-                onClick={handleGoogleLogin}
+                onClick={handleGoogleAuth}
                 className='w-full'
                 disabled={loading}
                 variant='outline'
@@ -517,38 +467,14 @@ export default function LoginPage() {
                 ) : (
                   <Chrome className='mr-2 h-4 w-4' />
                 )}
-                Sign in with Google
+                {authIntent === 'signup'
+                  ? 'Sign up with Google'
+                  : 'Sign in with Google'}
               </Button>
             </TabsContent>
 
             <TabsContent value='email' className='space-y-4 mt-4'>
-              <div className='flex rounded-lg border p-1 bg-muted/40'>
-                <Button
-                  type='button'
-                  variant={emailAuthMode === 'signin' ? 'secondary' : 'ghost'}
-                  className='flex-1'
-                  size='sm'
-                  onClick={() => {
-                    setEmailAuthMode('signin');
-                    setError('');
-                  }}
-                >
-                  Sign in
-                </Button>
-                <Button
-                  type='button'
-                  variant={emailAuthMode === 'signup' ? 'secondary' : 'ghost'}
-                  className='flex-1'
-                  size='sm'
-                  onClick={() => {
-                    setEmailAuthMode('signup');
-                    setError('');
-                  }}
-                >
-                  Create account
-                </Button>
-              </div>
-              {emailAuthMode === 'signin' ? (
+              {authIntent === 'signin' ? (
                 <form onSubmit={handleEmailLogin} className='space-y-4'>
                   <div className='space-y-2'>
                     <Label htmlFor='email'>Email</Label>
@@ -676,7 +602,9 @@ export default function LoginPage() {
                       ? `Try again in ${Math.ceil(
                           (phoneCooldownUntil - phoneCooldownNow) / 1000
                         )}s`
-                      : 'Send Verification Code'}
+                      : authIntent === 'signup'
+                        ? 'Send code to create account'
+                        : 'Send code to sign in'}
                   </Button>
                 </form>
               ) : (
@@ -701,7 +629,9 @@ export default function LoginPage() {
                     {loading ? (
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     ) : null}
-                    Verify Code
+                    {authIntent === 'signup'
+                      ? 'Verify and create account'
+                      : 'Verify and sign in'}
                   </Button>
                   <Button
                     type='button'

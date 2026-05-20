@@ -11,7 +11,6 @@ import {
   signInWithPhoneNumber,
   RecaptchaVerifier,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,13 +25,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Mail, Phone, Chrome } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { User } from '@/types';
 import { AdminPasskeyDialog } from '@/components/admin-passkey-dialog';
-import { isAdminEmail } from '@/lib/admin-config';
-import { omitUndefinedFields } from '@/lib/firestore-sanitize';
-import { inferSignInProvider } from '@/lib/auth-providers';
 import { getPhoneSendVerificationErrorMessage } from '@/lib/phone-auth-errors';
-import { rejectGoogleSignInWithoutProfile } from '@/lib/google-sign-in-policy';
+import {
+  ensureUserProfileAfterAuth,
+  type AuthIntent,
+} from '@/lib/ensure-user-profile';
+import { AuthIntentToggle } from '@/components/auth-intent-toggle';
+import { useAuth } from '@/lib/auth-context';
+import { normalizeGhanaPhoneToE164 } from '@/lib/ghana-phone';
 
 interface LoginDialogProps {
   open: boolean;
@@ -50,12 +51,11 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [showAdminPasskeyDialog, setShowAdminPasskeyDialog] = useState(false);
   const [pendingUser, setPendingUser] = useState<any>(null);
-  const [emailAuthMode, setEmailAuthMode] = useState<'signin' | 'signup'>(
-    'signin'
-  );
+  const [authIntent, setAuthIntent] = useState<AuthIntent>('signin');
   const [signUpDisplayName, setSignUpDisplayName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
+  const { refreshUser } = useAuth();
 
   const setupRecaptcha = () => {
     if (typeof window === 'undefined' || !auth) return null;
@@ -78,70 +78,30 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     );
   };
 
-  const ensureUserProfile = async (firebaseUser: any, phoneNumber?: string) => {
-    if (!db) return;
+  const finishAuth = async (
+    firebaseUser: Parameters<typeof ensureUserProfileAfterAuth>[0],
+    intent: AuthIntent,
+    phoneE164?: string
+  ) => {
     try {
-      const userDocRef = doc(db, 'users', firebaseUser.uid);
-      const userDoc = await getDoc(userDocRef);
-      const email = firebaseUser.email || '';
-      if (!userDoc.exists()) {
-        if (auth) {
-          const googleDenied = await rejectGoogleSignInWithoutProfile(
-            auth,
-            firebaseUser,
-            false
-          );
-          if (googleDenied) {
-            setError(googleDenied);
-            return;
-          }
-        }
-        const shouldBeAdmin = isAdminEmail(email);
-        const newUser: User = {
-          id: firebaseUser.uid,
-          email: email,
-          phone: phoneNumber || firebaseUser.phoneNumber || '',
-          role: shouldBeAdmin ? 'admin' : 'client',
-          name: firebaseUser.displayName || '',
-          signInProvider: inferSignInProvider(firebaseUser),
-          ...(firebaseUser.photoURL ? { photoURL: firebaseUser.photoURL } : {}),
-          createdAt: Date.now(),
-        };
-        if (shouldBeAdmin) {
-          const userWithoutRole = { ...newUser, role: 'client' as const };
-          await setDoc(
-            userDocRef,
-            omitUndefinedFields(userWithoutRole as unknown as Record<string, unknown>)
-          );
-          setPendingUser(firebaseUser);
-          setShowAdminPasskeyDialog(true);
-          return;
-        }
-        await setDoc(
-          userDocRef,
-          omitUndefinedFields(newUser as unknown as Record<string, unknown>)
-        );
-        onOpenChange(false);
-        router.refresh();
-      } else {
-        const userData = userDoc.data() as User;
-        const hasPrivilegedRole =
-          userData.role === 'admin' || userData.role === 'super_admin';
-        if (isAdminEmail(email) && !hasPrivilegedRole) {
-          setPendingUser(firebaseUser);
-          setShowAdminPasskeyDialog(true);
-          return;
-        }
-        if (phoneNumber && !userData.phone) {
-          await setDoc(userDocRef, { phone: phoneNumber }, { merge: true });
-        }
-        onOpenChange(false);
-        router.refresh();
+      const result = await ensureUserProfileAfterAuth(firebaseUser, intent, {
+        phoneE164,
+      });
+      if (result.outcome === 'rejected') {
+        setError(result.message);
+        return;
       }
-    } catch (error) {
-      console.error('Error ensuring user profile:', error);
+      if (result.outcome === 'admin_passkey') {
+        setPendingUser(firebaseUser);
+        setShowAdminPasskeyDialog(true);
+        return;
+      }
+      await refreshUser();
       onOpenChange(false);
       router.refresh();
+    } catch (error) {
+      console.error('Error ensuring user profile:', error);
+      setError('Could not complete sign-in. Please try again.');
     }
   };
 
@@ -160,11 +120,11 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         email,
         password
       );
-      await ensureUserProfile(userCredential.user);
+      await finishAuth(userCredential.user, 'signin');
     } catch (err: any) {
       if (err?.code === 'auth/user-not-found') {
         setError(
-          'No account with this email. Switch to Create account or use Google / phone.'
+          'No account with this email. Switch to Create account to register.'
         );
       } else if (
         err?.code === 'auth/wrong-password' ||
@@ -210,7 +170,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       if (name) {
         await updateProfile(userCredential.user, { displayName: name });
       }
-      await ensureUserProfile(userCredential.user);
+      await finishAuth(userCredential.user, 'signup');
       setConfirmPassword('');
       setSignUpDisplayName('');
     } catch (err: any) {
@@ -230,7 +190,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleAuth = async () => {
     setError('');
     setLoading(true);
     if (!auth) {
@@ -241,9 +201,14 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
-      await ensureUserProfile(userCredential.user);
+      await finishAuth(userCredential.user, authIntent);
     } catch (err: any) {
-      setError(err.message || 'Failed to login with Google.');
+      setError(
+        err.message ||
+          (authIntent === 'signup'
+            ? 'Failed to sign up with Google.'
+            : 'Failed to sign in with Google.')
+      );
     } finally {
       setLoading(false);
     }
@@ -308,7 +273,10 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     }
     try {
       const userCredential = await confirmationResult.confirm(verificationCode);
-      await ensureUserProfile(userCredential.user, phone);
+      const formattedPhone = normalizeGhanaPhoneToE164(
+        phone.startsWith('+') ? phone : `+233${phone.replace(/^0/, '')}`
+      );
+      await finishAuth(userCredential.user, authIntent, formattedPhone);
     } catch (err: any) {
       setError(err.message || 'Invalid verification code.');
     } finally {
@@ -321,11 +289,16 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className='sm:max-w-md'>
           <DialogHeader>
-            <DialogTitle>Sign In Required</DialogTitle>
+            <DialogTitle>Sign in or create account</DialogTitle>
             <DialogDescription>
-              Please sign in to add items to your cart and place orders.
+              Sign in if you already have an account, or create one to order.
             </DialogDescription>
           </DialogHeader>
+          <AuthIntentToggle
+            value={authIntent}
+            onChange={setAuthIntent}
+            onClearError={() => setError('')}
+          />
           {error && (
             <Alert variant='destructive'>
               <AlertDescription>{error}</AlertDescription>
@@ -347,12 +320,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               </TabsTrigger>
             </TabsList>
             <TabsContent value='google' className='space-y-4'>
-              <p className='text-sm text-muted-foreground'>
-                For existing accounts only. New users must sign up on the Email
-                tab first.
-              </p>
               <Button
-                onClick={handleGoogleLogin}
+                onClick={handleGoogleAuth}
                 className='w-full'
                 variant='outline'
                 disabled={loading}
@@ -360,44 +329,20 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                 {loading ? (
                   <>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Signing in...
+                    Please wait…
                   </>
                 ) : (
                   <>
                     <Chrome className='mr-2 h-4 w-4' />
-                    Sign in with Google
+                    {authIntent === 'signup'
+                      ? 'Sign up with Google'
+                      : 'Sign in with Google'}
                   </>
                 )}
               </Button>
             </TabsContent>
             <TabsContent value='email' className='space-y-4'>
-              <div className='flex rounded-lg border p-1 bg-muted/40'>
-                <Button
-                  type='button'
-                  variant={emailAuthMode === 'signin' ? 'secondary' : 'ghost'}
-                  className='flex-1'
-                  size='sm'
-                  onClick={() => {
-                    setEmailAuthMode('signin');
-                    setError('');
-                  }}
-                >
-                  Sign in
-                </Button>
-                <Button
-                  type='button'
-                  variant={emailAuthMode === 'signup' ? 'secondary' : 'ghost'}
-                  className='flex-1'
-                  size='sm'
-                  onClick={() => {
-                    setEmailAuthMode('signup');
-                    setError('');
-                  }}
-                >
-                  Create account
-                </Button>
-              </div>
-              {emailAuthMode === 'signin' ? (
+              {authIntent === 'signin' ? (
                 <form onSubmit={handleEmailLogin} className='space-y-4'>
                   <div className='space-y-2'>
                     <Label htmlFor='email'>Email</Label>
@@ -508,7 +453,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                     {phoneLoading && (
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     )}
-                    Send Verification Code
+                    {authIntent === 'signup'
+                      ? 'Send code to create account'
+                      : 'Send code to sign in'}
                   </Button>
                 </>
               ) : (
@@ -532,7 +479,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                     {loading && (
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                     )}
-                    Verify Code
+                    {authIntent === 'signup'
+                      ? 'Verify and create account'
+                      : 'Verify and sign in'}
                   </Button>
                   <Button
                     variant='outline'
