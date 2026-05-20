@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import {
   collection,
@@ -84,17 +84,6 @@ export default function OrdersPage() {
 
     return () => unsubscribe();
   }, [user]);
-
-  const defaultOpenOrderIds = useMemo(() => {
-    const needsAttention = orders.filter(
-      (o) =>
-        o.status === 'proforma_sent' || o.status === 'pharmacy_confirmed'
-    );
-    if (needsAttention.length > 0) {
-      return needsAttention.map((o) => o.id);
-    }
-    return orders[0] ? [orders[0].id] : [];
-  }, [orders]);
 
   const getStatusBadge = (status: Order['status']) => {
     switch (status) {
@@ -217,11 +206,7 @@ export default function OrdersPage() {
         </p>
       </div>
 
-      <Accordion
-        type='multiple'
-        defaultValue={defaultOpenOrderIds}
-        className='space-y-3'
-      >
+      <Accordion type='multiple' className='space-y-3'>
         {orders.map((order) => {
           const itemCount = order.items.reduce(
             (sum, i) => sum + i.quantity,

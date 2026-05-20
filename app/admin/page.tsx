@@ -2418,7 +2418,7 @@ export default function AdminDashboard() {
                               updateOrderStatus(order.id, 'invoice_sent')
                             }
                           >
-                            Record invoice sent
+                            Send invoice
                           </Button>
                         )}
                         {order.status === 'invoice_sent' && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useNotifications } from '@/hooks/use-notifications';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
@@ -49,9 +49,6 @@ export default function NotificationsPage() {
   const [expandedOrderKeys, setExpandedOrderKeys] = useState<Set<string>>(
     () => new Set()
   );
-  const prevNotificationIdsRef = useRef<Set<string>>(new Set());
-  const isFirstNotificationSyncRef = useRef(true);
-
   const groupedNotifications = useMemo(() => {
     const map = new Map<string, Notification[]>();
     for (const n of notifications) {
@@ -71,27 +68,6 @@ export default function NotificationsPage() {
         unreadCount: items.filter((i) => !i.read).length,
       }))
       .sort((a, b) => b.latestAt - a.latestAt);
-  }, [notifications]);
-
-  useEffect(() => {
-    const ids = new Set(notifications.map((n) => n.id));
-    if (isFirstNotificationSyncRef.current) {
-      isFirstNotificationSyncRef.current = false;
-      prevNotificationIdsRef.current = ids;
-      return;
-    }
-    const newOnes = notifications.filter(
-      (n) => !prevNotificationIdsRef.current.has(n.id)
-    );
-    prevNotificationIdsRef.current = ids;
-    if (newOnes.length === 0) return;
-    setExpandedOrderKeys((prev) => {
-      const next = new Set(prev);
-      for (const n of newOnes) {
-        next.add(n.orderId || '__general__');
-      }
-      return next;
-    });
   }, [notifications]);
 
   const markAsRead = async (notification: Notification) => {
@@ -167,7 +143,7 @@ export default function NotificationsPage() {
             userId: orderData.userId,
             displayOrderId: orderData.displayOrderId,
           });
-          toast.success('Recorded invoice sent. Customer notified.');
+          toast.success('Invoice sent. Customer notified.');
         } else if (orderData.status === 'pharmacy_confirmed') {
           await updateDoc(doc(db, 'orders', oid), {
             status: 'customer_confirmed',
@@ -380,9 +356,8 @@ export default function NotificationsPage() {
           <DialogHeader>
             <DialogTitle>Customer finalized order</DialogTitle>
             <DialogDescription>
-              For new orders: record that you have sent the invoice so packing can
-              begin. Legacy orders in the old &quot;verify&quot; step can still be
-              approved here.
+              Send the invoice to the customer so packing can begin. Legacy orders
+              in the old &quot;verify&quot; step can still be approved here.
             </DialogDescription>
           </DialogHeader>
           {pendingNotification && (
@@ -403,7 +378,7 @@ export default function NotificationsPage() {
               Review Later
             </Button>
             <Button onClick={handleConfirmOrderApproval}>
-              Record invoice sent / next step
+              Send invoice
             </Button>
           </DialogFooter>
         </DialogContent>
