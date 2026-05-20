@@ -13,6 +13,7 @@ import {
   MoreVertical,
   MoreHorizontal,
   LogOut,
+  LogIn,
   Bell,
   User,
 } from 'lucide-react';
@@ -158,6 +159,28 @@ export function AppSidebar() {
           )}
         </nav>
       </div>
+      {!user && (
+        <div
+          className={`mt-auto border-t p-4 ${
+            collapsed ? 'flex justify-center' : ''
+          }`}
+        >
+          <Button
+            asChild
+            variant='default'
+            className={collapsed ? 'h-10 w-10 px-0' : 'w-full'}
+            size={collapsed ? 'icon' : 'default'}
+          >
+            <Link
+              href='/login'
+              title={collapsed ? 'Log in / Sign up' : undefined}
+            >
+              <LogIn className='h-4 w-4 shrink-0' />
+              {!collapsed && <span className='ml-2'>Log in / Sign up</span>}
+            </Link>
+          </Button>
+        </div>
+      )}
       {user && (
         <div className='border-t p-4'>
           <div

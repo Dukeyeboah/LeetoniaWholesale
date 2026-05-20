@@ -36,6 +36,7 @@ import { omitUndefinedFields } from '@/lib/firestore-sanitize';
 import { normalizeGhanaPhoneToE164, isValidGhanaE164 } from '@/lib/ghana-phone';
 import { inferSignInProvider } from '@/lib/auth-providers';
 import { getPhoneSendVerificationErrorMessage } from '@/lib/phone-auth-errors';
+import { rejectGoogleSignInWithoutProfile } from '@/lib/google-sign-in-policy';
 import { useState, useEffect } from 'react';
 
 declare global {
@@ -378,7 +379,16 @@ export default function LoginPage() {
       const phoneE164 = firebaseUser.phoneNumber || '';
 
       if (!userDoc.exists()) {
-        // Check if email is in admin whitelist
+        const googleDenied = await rejectGoogleSignInWithoutProfile(
+          auth!,
+          firebaseUser,
+          false
+        );
+        if (googleDenied) {
+          setError(googleDenied);
+          return;
+        }
+
         const shouldBeAdmin = isAdminEmail(email);
 
         // Create new user profile
@@ -467,7 +477,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue='google' className='w-full'>
+          <Tabs defaultValue='email' className='w-full'>
             <TabsList className='grid w-full grid-cols-3'>
               <TabsTrigger value='google'>
                 <Chrome className='h-4 w-4 mr-2' />
@@ -492,6 +502,10 @@ export default function LoginPage() {
             )}
 
             <TabsContent value='google' className='space-y-4 mt-4'>
+              <p className='text-sm text-muted-foreground'>
+                For existing accounts only. New users must create an account on
+                the Email tab first.
+              </p>
               <Button
                 onClick={handleGoogleLogin}
                 className='w-full'
@@ -503,7 +517,7 @@ export default function LoginPage() {
                 ) : (
                   <Chrome className='mr-2 h-4 w-4' />
                 )}
-                Continue with Google
+                Sign in with Google
               </Button>
             </TabsContent>
 

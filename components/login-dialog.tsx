@@ -32,6 +32,7 @@ import { isAdminEmail } from '@/lib/admin-config';
 import { omitUndefinedFields } from '@/lib/firestore-sanitize';
 import { inferSignInProvider } from '@/lib/auth-providers';
 import { getPhoneSendVerificationErrorMessage } from '@/lib/phone-auth-errors';
+import { rejectGoogleSignInWithoutProfile } from '@/lib/google-sign-in-policy';
 
 interface LoginDialogProps {
   open: boolean;
@@ -84,6 +85,17 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       const userDoc = await getDoc(userDocRef);
       const email = firebaseUser.email || '';
       if (!userDoc.exists()) {
+        if (auth) {
+          const googleDenied = await rejectGoogleSignInWithoutProfile(
+            auth,
+            firebaseUser,
+            false
+          );
+          if (googleDenied) {
+            setError(googleDenied);
+            return;
+          }
+        }
         const shouldBeAdmin = isAdminEmail(email);
         const newUser: User = {
           id: firebaseUser.uid,
@@ -319,7 +331,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <Tabs defaultValue='google' className='w-full'>
+          <Tabs defaultValue='email' className='w-full'>
             <TabsList className='grid w-full grid-cols-3'>
               <TabsTrigger value='google'>
                 <Chrome className='h-4 w-4 mr-2' />
@@ -335,6 +347,10 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               </TabsTrigger>
             </TabsList>
             <TabsContent value='google' className='space-y-4'>
+              <p className='text-sm text-muted-foreground'>
+                For existing accounts only. New users must sign up on the Email
+                tab first.
+              </p>
               <Button
                 onClick={handleGoogleLogin}
                 className='w-full'

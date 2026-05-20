@@ -22,29 +22,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type PharmOption = {
@@ -81,12 +61,12 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
   const [selectedId, setSelectedId] = useState<string>(
     () => seedOptionsSorted()[0]?.id ?? ''
   );
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [listSearch, setListSearch] = useState('');
   const [newPharmacyName, setNewPharmacyName] = useState('');
-  const [newPharmacyLocation, setNewPharmacyLocation] = useState('');
-  const [newPharmacyPhone, setNewPharmacyPhone] = useState('');
+  const [pharmacyLocation, setPharmacyLocation] = useState('');
+  const [pharmacyPhone, setPharmacyPhone] = useState('');
+  const [contactPhone, setContactPhone] = useState(user?.phone || '');
   const [saving, setSaving] = useState(false);
-  const [showCashSyncHint, setShowCashSyncHint] = useState(false);
 
   useEffect(() => {
     if (!db) return;
@@ -114,10 +94,6 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
           if (prev && merged.some((m) => m.id === prev)) return prev;
           return merged[0]?.id ?? '';
         });
-        const hasCashImport = snapshot.docs.some(
-          (d) => d.data().source === 'cash_import'
-        );
-        setShowCashSyncHint(!hasCashImport && snapshot.size < 500);
       },
       (err) => {
         console.error('pharmacies list', err);
@@ -131,7 +107,6 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
             ? prev
             : fallback[0]?.id ?? ''
         );
-        setShowCashSyncHint(true);
       }
     );
     return () => unsub();
@@ -142,9 +117,20 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
     [pharmacyOptions, selectedId]
   );
 
-  const selectedLabel = selectedOption
-    ? formatPharmacyPickerLabel(selectedOption)
-    : '';
+  const filteredOptions = useMemo(() => {
+    const q = listSearch.trim().toLowerCase();
+    if (!q) return pharmacyOptions;
+    return pharmacyOptions.filter((p) => {
+      const label = formatPharmacyPickerLabel(p).toLowerCase();
+      return label.includes(q) || p.id.toLowerCase().includes(q);
+    });
+  }, [pharmacyOptions, listSearch]);
+
+  useEffect(() => {
+    if (pharmacySource !== 'list' || !selectedOption) return;
+    setPharmacyLocation(selectedOption.location?.trim() || '');
+    setPharmacyPhone(selectedOption.phone?.trim() || '');
+  }, [pharmacySource, selectedOption?.id, selectedOption?.location, selectedOption?.phone]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,8 +138,24 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
 
     const trimmedName = name.trim();
     const trimmedRole = jobRole.trim();
+    const loc = pharmacyLocation.trim();
+    const pharmPh = pharmacyPhone.trim();
+    const contact = contactPhone.trim();
+
     if (!trimmedName || !trimmedRole) {
       toast.error('Please enter your name and role.');
+      return;
+    }
+    if (!loc) {
+      toast.error('Enter the pharmacy location.');
+      return;
+    }
+    if (!pharmPh) {
+      toast.error('Enter the pharmacy phone number.');
+      return;
+    }
+    if (!contact) {
+      toast.error('Enter your contact phone number.');
       return;
     }
 
@@ -174,25 +176,25 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
         if (seed) {
           await ensurePharmacyDocument(db, pharmacyId, pharmacyName);
         }
+        if (
+          loc !== (fromList.location?.trim() || '') ||
+          pharmPh !== (fromList.phone?.trim() || '')
+        ) {
+          await setDoc(
+            doc(db, 'pharmacies', pharmacyId),
+            { location: loc, phone: pharmPh, updatedAt: Date.now() },
+            { merge: true }
+          );
+        }
       } else {
         const added = newPharmacyName.trim();
         if (!added) {
-          toast.error('Enter the pharmacy name to add.');
-          return;
-        }
-        const loc = newPharmacyLocation.trim();
-        const ph = newPharmacyPhone.trim();
-        if (!loc) {
-          toast.error('Enter the pharmacy location (area or branch).');
-          return;
-        }
-        if (!ph) {
-          toast.error('Enter the pharmacy phone number.');
+          toast.error('Enter the pharmacy name.');
           return;
         }
         const created = await createPharmacyFromSignup(db, added, user.id, {
           location: loc,
-          phone: ph,
+          phone: pharmPh,
           customerBillingType: 'cash',
         });
         pharmacyId = created.pharmacyId;
@@ -204,6 +206,7 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
         {
           name: trimmedName,
           jobRole: trimmedRole,
+          phone: contact,
           pharmacyId,
           pharmacyName,
           pharmacyProfileComplete: true,
@@ -226,64 +229,28 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent
         showCloseButton={false}
-        onPointerDownOutside={(e) => {
-          const t = e.target as HTMLElement;
-          if (
-            t.closest('[data-slot="select-content"]') ||
-            t.closest('[data-radix-select-content]') ||
-            t.closest('[data-radix-popper-content-wrapper]') ||
-            t.closest('[data-slot="popover-content"]')
-          ) {
-            return;
-          }
-          e.preventDefault();
-        }}
-        onInteractOutside={(e) => {
-          const t = e.target as HTMLElement;
-          if (
-            t.closest('[data-slot="select-content"]') ||
-            t.closest('[data-radix-select-content]') ||
-            t.closest('[data-radix-popper-content-wrapper]') ||
-            t.closest('[data-slot="popover-content"]')
-          ) {
-            e.preventDefault();
-          }
-        }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
         className='sm:max-w-md max-h-[90vh] overflow-y-auto'
       >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Tell us about you</DialogTitle>
+            <DialogTitle>Set up your profile</DialogTitle>
             <DialogDescription>
-              Wholesale orders are tied to your pharmacy. Search the cash
-              customer list, or add a new pharmacy (location and phone required)
-              so a super admin can verify it.
+              Wholesale orders are tied to your pharmacy. Enter your name and
+              the pharmacy you represent.
             </DialogDescription>
           </DialogHeader>
 
           <div className='grid gap-4 py-4'>
-            {showCashSyncHint && (
-              <Alert>
-                <AlertDescription className='text-sm'>
-                  The full cash-customer directory may not be loaded yet. An
-                  admin should run{' '}
-                  <code className='text-xs bg-muted px-1 rounded'>
-                    pnpm sync:cash-pharmacies
-                  </code>{' '}
-                  once (uses <code className='text-xs bg-muted px-1 rounded'>data/cash-customers.json</code>
-                  ) to import every row into Firestore.
-                </AlertDescription>
-              </Alert>
-            )}
-
             <div className='grid gap-2'>
-              <Label htmlFor='onboard-name'>Full name</Label>
+              <Label htmlFor='onboard-name'>Your name</Label>
               <Input
                 id='onboard-name'
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder='Your name'
+                placeholder='Full name'
                 required
                 autoComplete='name'
               />
@@ -298,119 +265,137 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
                 required
               />
             </div>
-            <div className='grid gap-2'>
+
+            <div className='grid gap-3'>
               <Label>Pharmacy</Label>
-              <Select
+              <RadioGroup
                 value={pharmacySource}
                 onValueChange={(v) => setPharmacySource(v as 'list' | 'add')}
+                className='gap-3'
               >
-                <SelectTrigger className='w-full'>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className='z-[200] max-h-60'>
-                  <SelectItem value='list'>Choose from list</SelectItem>
-                  <SelectItem value='add'>Add new pharmacy</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {pharmacySource === 'list' ? (
-              <div className='grid gap-2'>
-                <Label>Search pharmacy</Label>
-                <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      role='combobox'
-                      aria-expanded={pickerOpen}
-                      className='w-full justify-between font-normal'
-                      disabled={pharmacyOptions.length === 0}
-                    >
-                      <span className='truncate text-left'>
-                        {selectedLabel || 'Select pharmacy…'}
-                      </span>
-                      <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className='w-[var(--radix-popover-trigger-width)] p-0 z-[250]'
-                    align='start'
+                <div className='flex items-center gap-2'>
+                  <RadioGroupItem value='list' id='pharm-source-list' />
+                  <Label
+                    htmlFor='pharm-source-list'
+                    className='font-normal cursor-pointer'
                   >
-                    <Command>
-                      <CommandInput placeholder='Search name, area, phone…' />
-                      <CommandList className='max-h-72'>
-                        <CommandEmpty>No pharmacy found.</CommandEmpty>
-                        <CommandGroup>
-                          {pharmacyOptions.map((p) => {
-                            const label = formatPharmacyPickerLabel(p);
-                            return (
-                              <CommandItem
-                                key={p.id}
-                                value={`${label} ${p.id}`}
-                                onSelect={() => {
-                                  setSelectedId(p.id);
-                                  setPickerOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    'mr-2 h-4 w-4',
-                                    selectedId === p.id
-                                      ? 'opacity-100'
-                                      : 'opacity-0'
-                                  )}
-                                />
-                                <span className='truncate'>{label}</span>
-                              </CommandItem>
-                            );
-                          })}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                {selectedLabel && (
-                  <p className='text-xs text-muted-foreground'>
-                    Selected: {selectedLabel}
-                  </p>
-                )}
+                    Choose from list
+                  </Label>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <RadioGroupItem value='add' id='pharm-source-add' />
+                  <Label
+                    htmlFor='pharm-source-add'
+                    className='font-normal cursor-pointer'
+                  >
+                    Add new pharmacy
+                  </Label>
+                </div>
+              </RadioGroup>
+
+              {pharmacySource === 'list' ? (
+                <div className='grid gap-3 pl-1 border-l-2 border-muted ml-1'>
+                  <div className='grid gap-2'>
+                    <Label htmlFor='onboard-search'>Find your pharmacy</Label>
+                    <div className='relative'>
+                      <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                      <Input
+                        id='onboard-search'
+                        value={listSearch}
+                        onChange={(e) => setListSearch(e.target.value)}
+                        placeholder='Search by name, area, or phone…'
+                        className='pl-9'
+                        autoComplete='off'
+                      />
+                    </div>
+                    <div
+                      role='listbox'
+                      aria-label='Pharmacy list'
+                      className='max-h-56 overflow-y-auto overscroll-y-contain rounded-md border bg-background'
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      {filteredOptions.length === 0 ? (
+                        <p className='p-3 text-sm text-muted-foreground text-center'>
+                          No pharmacy found.
+                        </p>
+                      ) : (
+                        filteredOptions.map((p) => {
+                          const label = formatPharmacyPickerLabel(p);
+                          const isSelected = selectedId === p.id;
+                          return (
+                            <button
+                              key={p.id}
+                              type='button'
+                              role='option'
+                              aria-selected={isSelected}
+                              className={cn(
+                                'flex w-full items-start gap-2 px-3 py-2.5 text-left text-sm hover:bg-accent transition-colors border-b last:border-b-0',
+                                isSelected && 'bg-accent'
+                              )}
+                              onClick={() => setSelectedId(p.id)}
+                            >
+                              <Check
+                                className={cn(
+                                  'mt-0.5 h-4 w-4 shrink-0',
+                                  isSelected ? 'opacity-100' : 'opacity-0'
+                                )}
+                              />
+                              <span className='truncate'>{label}</span>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className='grid gap-3 pl-1 border-l-2 border-muted ml-1'>
+                  <div className='grid gap-2'>
+                    <Label htmlFor='onboard-add-pharmacy'>Pharmacy name</Label>
+                    <Input
+                      id='onboard-add-pharmacy'
+                      value={newPharmacyName}
+                      onChange={(e) => setNewPharmacyName(e.target.value)}
+                      placeholder='Official pharmacy name'
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className='grid gap-2'>
+                <Label htmlFor='onboard-location'>Pharmacy location</Label>
+                <Input
+                  id='onboard-location'
+                  value={pharmacyLocation}
+                  onChange={(e) => setPharmacyLocation(e.target.value)}
+                  placeholder='e.g. Madina, Accra, branch name'
+                  required
+                />
               </div>
-            ) : (
-              <div className='grid gap-3'>
-                <div className='grid gap-2'>
-                  <Label htmlFor='onboard-add-pharmacy'>Pharmacy name</Label>
-                  <Input
-                    id='onboard-add-pharmacy'
-                    value={newPharmacyName}
-                    onChange={(e) => setNewPharmacyName(e.target.value)}
-                    placeholder='Official pharmacy name'
-                  />
-                </div>
-                <div className='grid gap-2'>
-                  <Label htmlFor='onboard-add-location'>Location</Label>
-                  <Input
-                    id='onboard-add-location'
-                    value={newPharmacyLocation}
-                    onChange={(e) => setNewPharmacyLocation(e.target.value)}
-                    placeholder='e.g. Madina, Accra, branch name'
-                  />
-                </div>
-                <div className='grid gap-2'>
-                  <Label htmlFor='onboard-add-phone'>Phone number</Label>
-                  <Input
-                    id='onboard-add-phone'
-                    type='tel'
-                    value={newPharmacyPhone}
-                    onChange={(e) => setNewPharmacyPhone(e.target.value)}
-                    placeholder='e.g. 0244… or +233…'
-                  />
-                </div>
-                <p className='text-xs text-muted-foreground'>
-                  New entries are saved as cash customers, appear in this list
-                  for others, and stay pending until a super admin verifies them.
-                </p>
+              <div className='grid gap-2'>
+                <Label htmlFor='onboard-pharm-phone'>Pharmacy phone</Label>
+                <Input
+                  id='onboard-pharm-phone'
+                  type='tel'
+                  value={pharmacyPhone}
+                  onChange={(e) => setPharmacyPhone(e.target.value)}
+                  placeholder='Pharmacy line (e.g. 0244…)'
+                  required
+                />
               </div>
-            )}
+              <div className='grid gap-2'>
+                <Label htmlFor='onboard-contact-phone'>Your contact phone</Label>
+                <Input
+                  id='onboard-contact-phone'
+                  type='tel'
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  placeholder='Number we can reach you on'
+                  required
+                  autoComplete='tel'
+                />
+              </div>
+            </div>
           </div>
 
           <DialogFooter>

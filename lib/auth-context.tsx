@@ -8,7 +8,6 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import type { User } from '@/types';
 import { useRouter } from 'next/navigation';
-import { isAdminEmail } from '@/lib/admin-config';
 import { omitUndefinedFields } from '@/lib/firestore-sanitize';
 import { inferSignInProvider } from '@/lib/auth-providers';
 
@@ -116,15 +115,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
             applyFirebaseUser(firebaseUser, userData);
           } else {
-            // Check if email is in admin whitelist
-            const email = firebaseUser.email || '';
-            const shouldBeAdmin = isAdminEmail(email);
+            const provider = inferSignInProvider(firebaseUser);
+            if (provider === 'google') {
+              // Google sign-in never auto-registers; /login creates profiles after email sign-up.
+              setLoading(false);
+              return;
+            }
 
-            // Create new user profile
+            const email = firebaseUser.email || '';
+
+            // New profiles always start as `client`. Whitelisted admin emails must
+            // complete the passkey step on /login (or login dialog) before role is promoted.
             const newUser: User = {
               id: firebaseUser.uid,
               email: email,
-              role: shouldBeAdmin ? 'admin' : 'client',
+              role: 'client',
               name: firebaseUser.displayName || '',
               phone: firebaseUser.phoneNumber || '',
               signInProvider: inferSignInProvider(firebaseUser),
@@ -143,9 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             setUser(newUser);
-            if (shouldBeAdmin) {
-              setViewMode('admin');
-            } else if (newUser.role === 'staff') {
+            if (newUser.role === 'staff') {
               setViewMode('staff');
             }
           }
