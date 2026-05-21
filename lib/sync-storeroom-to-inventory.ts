@@ -1,6 +1,5 @@
 import { writeBatch, doc, type Firestore } from 'firebase/firestore';
 import type { Product } from '@/types';
-import { nextIsHiddenAfterWholesaleChange } from '@/lib/inventory-availability';
 import {
   indexInventoryByProductCode,
   indexInventoryByNormalizedLabel,
@@ -20,34 +19,38 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
-export type WarehouseSyncResult = {
+export type StoreroomSyncResult = {
   updated: number;
   updatedByCode: number;
   updatedByName: number;
   created: number;
+  cleared: number;
   skipped: number;
 };
 
 /**
- * @deprecated Use `syncStoreroomToInventory` — this legacy sync also overwrote wholesale
- * `price`, `stock`, and `wholesaleStock`. Kept for reference only.
+ * Apply `data/storeroom.json` to **storeroom only** (`storeroomStock`, `storeroomPrice`, `code`).
+ * Does not change wholesale `price`, `stock`, `wholesaleStock`, or `isHidden`.
  */
-export async function syncWarehouseToInventory(
+export async function syncStoreroomToInventory(
   db: Firestore,
   products: Product[],
   rows: readonly WarehouseRow[]
-): Promise<WarehouseSyncResult> {
+): Promise<StoreroomSyncResult> {
   const byCode = indexInventoryByProductCode(products);
   const byLabel = indexInventoryByNormalizedLabel(products);
+  const matchedIds = new Set<string>();
   let updated = 0;
   let updatedByCode = 0;
   let updatedByName = 0;
   let created = 0;
+  let cleared = 0;
   let skipped = 0;
 
   for (const part of chunk([...rows], BATCH_SIZE)) {
     const batch = writeBatch(db);
     const touchedDocIds = new Set<string>();
+
     for (const row of part) {
       const code = normalizeWarehouseCode(row.code);
       if (!code) {
@@ -70,63 +73,56 @@ export async function syncWarehouseToInventory(
       if (resolved) {
         const { product: existing, match } = resolved;
         touchedDocIds.add(existing.id);
-        const ref = doc(db, 'inventory', existing.id);
-        const prevWs = Math.max(
-          0,
-          Number(existing.wholesaleStock ?? existing.stock ?? 0)
-        );
-        const reserved = Math.max(
-          0,
-          Number(existing.reservedQty ?? 0)
-        );
-        const wholesaleSynced = Math.max(qty, reserved);
-        const nextHidden = nextIsHiddenAfterWholesaleChange(
-          prevWs,
-          wholesaleSynced,
-          existing.isHidden ?? false
-        );
-        const desc = (row.description || '').trim();
-        batch.update(ref, {
-          price,
+        matchedIds.add(existing.id);
+        batch.update(doc(db, 'inventory', existing.id), {
           storeroomStock: qty,
-          wholesaleStock: wholesaleSynced,
-          stock: wholesaleSynced,
-          isHidden: nextHidden,
+          storeroomPrice: price,
+          code,
           updatedAt: Date.now(),
-          ...(match === 'name' && desc
-            ? {
-                code,
-                name: desc,
-                description: desc,
-              }
-            : {}),
         });
         updated += 1;
         if (match === 'code') updatedByCode += 1;
         else updatedByName += 1;
       } else {
         const ref = doc(db, 'inventory', `w_${code}`);
-        const nextHidden = nextIsHiddenAfterWholesaleChange(0, qty, true);
+        matchedIds.add(`w_${code}`);
         batch.set(
           ref,
           {
             name: (row.description || '').trim() || `Item ${code}`,
             category: UNCATEGORIZED,
-            price,
-            stock: qty,
-            wholesaleStock: qty,
+            price: 0,
+            stock: 0,
+            wholesaleStock: 0,
             storeroomStock: qty,
+            storeroomPrice: price,
             reservedQty: 0,
             unit: 'unit',
             code,
             description: (row.description || '').trim(),
-            isHidden: nextHidden,
+            isHidden: true,
             updatedAt: Date.now(),
           },
           { merge: true }
         );
         created += 1;
       }
+    }
+
+    await batch.commit();
+  }
+
+  const toClear = products.filter(
+    (p) => (p.storeroomStock ?? 0) > 0 && !matchedIds.has(p.id)
+  );
+  for (const part of chunk(toClear, BATCH_SIZE)) {
+    const batch = writeBatch(db);
+    for (const p of part) {
+      batch.update(doc(db, 'inventory', p.id), {
+        storeroomStock: 0,
+        updatedAt: Date.now(),
+      });
+      cleared += 1;
     }
     await batch.commit();
   }
@@ -136,6 +132,7 @@ export async function syncWarehouseToInventory(
     updatedByCode,
     updatedByName,
     created,
+    cleared,
     skipped,
   };
 }

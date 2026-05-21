@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type Props = {
   product: Product;
@@ -16,6 +17,7 @@ type Props = {
   onDelete: (productId: string) => void;
   /** Hide/show applies to wholesale storefront only — not shown on storeroom rows. */
   showVisibilityToggle?: boolean;
+  className?: string;
 };
 
 export function AdminInventoryRowActions({
@@ -24,11 +26,12 @@ export function AdminInventoryRowActions({
   onToggleVisibility,
   onDelete,
   showVisibilityToggle = true,
+  className,
 }: Props) {
   const hidden = product.isHidden ?? false;
 
   return (
-    <div className='flex justify-end gap-1 shrink-0'>
+    <div className={cn('flex justify-end gap-1 shrink-0', className)}>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

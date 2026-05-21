@@ -48,6 +48,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import {
@@ -70,10 +75,13 @@ import {
   ChevronDown,
   Sparkles,
   Loader2,
+  LayoutGrid,
+  LayoutList,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
-import { AdminInventoryRowActions } from '@/components/admin-inventory-row-actions';
+import { AdminStorefrontInventoryItem } from '@/components/admin-storefront-inventory-item';
+import { AdminStoreroomInventoryItem } from '@/components/admin-storeroom-inventory-item';
 import type { Pharmacy } from '@/types';
 import {
   applyCreditBalanceOnOrderCompleted,
@@ -104,16 +112,13 @@ import {
   getFirstCharacterGroup,
 } from '@/lib/inventory-filters';
 import {
-  getWarehouseRows,
+  getStoreroomRows,
   filterSortWarehouseRows,
   indexInventoryByProductCode,
   indexInventoryByNormalizedLabel,
   normalizeWarehouseCode,
   resolveWarehouseRowToProduct,
 } from '@/lib/warehouse-data';
-import { syncWarehouseToInventory } from '@/lib/sync-warehouse-to-inventory';
-import { getStorefrontStockRows } from '@/lib/storefront-stock-data';
-import { syncStorefrontStockToInventory } from '@/lib/sync-storefront-stock-to-inventory';
 import { formatOrderLabel } from '@/lib/order-display';
 import { generateInventoryProductCode } from '@/lib/product-code';
 import {
@@ -196,7 +201,7 @@ export default function AdminDashboard() {
   const [userFilter, setUserFilter] = useState<string>('all');
   const [productFilter, setProductFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<string>('orders');
+  const [activeTab, setActiveTab] = useState<string>('inventory');
   const [manageOrdersPaymentsOpen, setManageOrdersPaymentsOpen] =
     useState(false);
   const [expandedManageOrderIds, setExpandedManageOrderIds] = useState<
@@ -330,9 +335,9 @@ export default function AdminDashboard() {
   const [inventoryListMode, setInventoryListMode] = useState<
     'storefront' | 'storeroom'
   >('storefront');
-  const [warehouseSyncing, setWarehouseSyncing] = useState(false);
-  const [storefrontSyncing, setStorefrontSyncing] = useState(false);
-  const [showInventoryBulkImport, setShowInventoryBulkImport] = useState(false);
+  const [inventoryViewLayout, setInventoryViewLayout] = useState<
+    'list' | 'grid'
+  >('list');
   const [productCountView, setProductCountView] = useState<
     'wholesale' | 'storeroom'
   >('wholesale');
@@ -364,8 +369,7 @@ export default function AdminDashboard() {
     );
   }, [sortedInventoryProducts, inventoryLetterFilter]);
 
-  const allWarehouseRows = useMemo(() => getWarehouseRows(), []);
-  const allStorefrontStockRows = useMemo(() => getStorefrontStockRows(), []);
+  const allStoreroomRows = useMemo(() => getStoreroomRows(), []);
   const productsByWarehouseCode = useMemo(
     () => indexInventoryByProductCode(products),
     [products]
@@ -377,11 +381,11 @@ export default function AdminDashboard() {
   const warehouseRowsFiltered = useMemo(
     () =>
       filterSortWarehouseRows(
-        allWarehouseRows,
+        allStoreroomRows,
         inventoryLetterFilter,
         inventorySortMode
       ),
-    [allWarehouseRows, inventoryLetterFilter, inventorySortMode]
+    [allStoreroomRows, inventoryLetterFilter, inventorySortMode]
   );
 
   const wholesaleProductCount = useMemo(
@@ -1396,56 +1400,6 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error('Failed to delete product');
-    }
-  };
-
-  const handleSyncWarehouseToInventory = async () => {
-    if (!db) {
-      toast.error('Database not available');
-      return;
-    }
-    setWarehouseSyncing(true);
-    try {
-      const rows = getWarehouseRows();
-      const res = await syncWarehouseToInventory(db, products, rows);
-      const parts = [
-        `${res.updated} updated` +
-          (res.updated > 0
-            ? ` (${res.updatedByCode} by code, ${res.updatedByName} by name)`
-            : ''),
-        `${res.created} added`,
-      ];
-      if (res.skipped > 0) parts.push(`${res.skipped} skipped`);
-      toast.success(`Warehouse file applied to inventory: ${parts.join(', ')}.`);
-    } catch (error) {
-      console.error('Warehouse sync:', error);
-      toast.error('Failed to apply warehouse file to inventory');
-    } finally {
-      setWarehouseSyncing(false);
-    }
-  };
-
-  const handleSyncStorefrontStockToInventory = async () => {
-    if (!db) {
-      toast.error('Database not available');
-      return;
-    }
-    setStorefrontSyncing(true);
-    try {
-      const rows = getStorefrontStockRows();
-      const res = await syncStorefrontStockToInventory(db, products, rows);
-      const parts = [
-        `${res.updated} storefront rows updated`,
-        `${res.created} new products added`,
-        `${res.hidden} hidden (not on list, wholesale qty 0)`,
-      ];
-      if (res.skipped > 0) parts.push(`${res.skipped} skipped`);
-      toast.success(`updatedStock.json applied: ${parts.join(', ')}.`);
-    } catch (error) {
-      console.error('Storefront stock sync:', error);
-      toast.error('Failed to apply updatedStock.json to storefront inventory');
-    } finally {
-      setStorefrontSyncing(false);
     }
   };
 
@@ -4004,74 +3958,80 @@ export default function AdminDashboard() {
           <div className='flex flex-col lg:flex-row flex-wrap gap-3 lg:items-center lg:justify-between'>
             <div className='flex flex-wrap gap-2 items-center'>
               <span className='text-sm text-muted-foreground shrink-0'>View:</span>
-              <Button
-                type='button'
-                size='sm'
-                variant={
-                  inventoryListMode === 'storefront' ? 'default' : 'outline'
-                }
-                onClick={() => setInventoryListMode('storefront')}
-              >
-                Storefront (wholesale)
-              </Button>
-              <Button
-                type='button'
-                size='sm'
-                variant={
-                  inventoryListMode === 'storeroom' ? 'default' : 'outline'
-                }
-                onClick={() => setInventoryListMode('storeroom')}
-              >
-                Storeroom / warehouse
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type='button'
+                    size='sm'
+                    variant={
+                      inventoryListMode === 'storefront' ? 'default' : 'outline'
+                    }
+                    onClick={() => setInventoryListMode('storefront')}
+                  >
+                    Wholesale
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side='bottom'>
+                  Wholesale inventory — what clients see and order on the
+                  storefront (price, sellable stock, hide/show)
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type='button'
+                    size='sm'
+                    variant={
+                      inventoryListMode === 'storeroom' ? 'default' : 'outline'
+                    }
+                    onClick={() => setInventoryListMode('storeroom')}
+                  >
+                    Warehouse
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side='bottom'>
+                  Warehouse / storeroom stock — backroom quantities and prices
+                  from storeroom.json (not the client storefront list)
+                </TooltipContent>
+              </Tooltip>
             </div>
-            <Button
-              type='button'
-              variant='ghost'
-              size='sm'
-              className='shrink-0 text-muted-foreground'
-              onClick={() => setShowInventoryBulkImport((v) => !v)}
-            >
-              {showInventoryBulkImport ? 'Hide bulk import' : 'Bulk import from JSON…'}
-            </Button>
-            {showInventoryBulkImport && inventoryListMode === 'storefront' && (
-              <Button
-                type='button'
-                variant='secondary'
-                size='sm'
-                className='shrink-0'
-                disabled={storefrontSyncing || !db}
-                onClick={handleSyncStorefrontStockToInventory}
-              >
-                {storefrontSyncing ? (
-                  <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Applying…
-                  </>
-                ) : (
-                  'Apply updatedStock.json to storefront'
-                )}
-              </Button>
-            )}
-            {showInventoryBulkImport && inventoryListMode === 'storeroom' && (
-              <Button
-                type='button'
-                variant='secondary'
-                size='sm'
-                className='shrink-0'
-                disabled={warehouseSyncing || !db}
-                onClick={handleSyncWarehouseToInventory}
-              >
-                {warehouseSyncing ? (
-                  <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Applying…
-                  </>
-                ) : (
-                  'Apply warehouse file to inventory'
-                )}
-              </Button>
-            )}
+            <div className='flex flex-wrap gap-1 items-center border rounded-md p-0.5 bg-muted/30'>
+              <span className='sr-only'>Layout</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type='button'
+                    size='sm'
+                    variant={inventoryViewLayout === 'list' ? 'default' : 'ghost'}
+                    className='h-8 px-2.5'
+                    onClick={() => setInventoryViewLayout('list')}
+                    aria-label='List view'
+                    aria-pressed={inventoryViewLayout === 'list'}
+                  >
+                    <LayoutList className='h-4 w-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side='bottom'>View inventory as a list</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type='button'
+                    size='sm'
+                    variant={inventoryViewLayout === 'grid' ? 'default' : 'ghost'}
+                    className='h-8 px-2.5'
+                    onClick={() => setInventoryViewLayout('grid')}
+                    aria-label='Grid view'
+                    aria-pressed={inventoryViewLayout === 'grid'}
+                  >
+                    <LayoutGrid className='h-4 w-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side='bottom'>
+                  View inventory as a grid of cards
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <Select
               value={inventorySortMode}
               onValueChange={(v) =>
@@ -4090,12 +4050,8 @@ export default function AdminDashboard() {
           </div>
           <p className='text-xs text-muted-foreground max-w-3xl'>
             {inventoryListMode === 'storefront'
-              ? showInventoryBulkImport
-                ? `Bulk import: “Apply updatedStock.json” updates wholesale price, quantity, and visibility from data/updatedStock.json (${allStorefrontStockRows.length} drugs, matched by name). Storeroom counts are not changed.`
-                : 'Wholesale storefront — what clients see when ordering (not storeroom/warehouse). Stock and hide/show apply to sellable shelf only. Use “Bulk import from JSON…” to refresh from updatedStock.json.'
-              : showInventoryBulkImport
-                ? `Bulk import: warehouse file (${allWarehouseRows.length} lines) updates storeroom price and quantity by product name (not wholesale shelf stock).`
-                : `Storeroom list is driven by data/warehouse.json (${allWarehouseRows.length} lines). Use “Bulk import from JSON…” to apply the warehouse file.`}
+              ? 'Wholesale — what clients see when ordering (not warehouse stock). Hide/show and sellable shelf stock apply here only.'
+              : `Warehouse list from data/storeroom.json (${allStoreroomRows.length} lines). Prices and quantities reflect the file; live counts come from inventory after sync (pnpm reset-storeroom --apply). Rows with zero warehouse quantity are faded.`}
           </p>
 
           <div className='flex flex-wrap items-center gap-2'>
@@ -4135,84 +4091,34 @@ export default function AdminDashboard() {
             )}
             {inventoryListMode === 'storefront' ? (
               <>
-                <div className='hidden md:flex flex-row items-center gap-4 p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
-                  <div className='flex-1 min-w-0'>Product</div>
-                  <div className='w-28 text-right shrink-0'>Price</div>
-                  <div className='w-44 text-center shrink-0'>Stock</div>
-                  <div className='w-20 text-center shrink-0'>Storeroom</div>
-                  <div className='w-[120px] shrink-0 text-right'>Actions</div>
-                </div>
-                {inventoryProductsFiltered.map((product) => {
-                  const wholesaleStock = wholesaleOnHand(product);
-                  const inProcess = reservedForOrders(product);
-                  const avail = availableToSell(product);
-                  const storeroomStock = product.storeroomStock ?? 0;
-                  const isLow = avail > 0 && avail < 10;
-                  return (
-                    <div
+                {inventoryViewLayout === 'list' && (
+                  <div className='hidden md:flex flex-row items-center gap-4 p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
+                    <div className='w-12 shrink-0' aria-hidden />
+                    <div className='flex-1 min-w-0'>Product</div>
+                    <div className='w-28 text-right shrink-0'>Price</div>
+                    <div className='w-44 text-center shrink-0'>Stock</div>
+                    <div className='w-20 text-center shrink-0'>Storeroom</div>
+                    <div className='w-[120px] shrink-0 text-right'>Actions</div>
+                  </div>
+                )}
+                <div
+                  className={
+                    inventoryViewLayout === 'grid'
+                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4'
+                      : undefined
+                  }
+                >
+                  {inventoryProductsFiltered.map((product) => (
+                    <AdminStorefrontInventoryItem
                       key={product.id}
-                      className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 border-b last:border-0 hover:bg-muted/5 transition-colors ${
-                        product.isHidden ? 'opacity-60 bg-muted/20' : ''
-                      }`}
-                    >
-                      <div className='flex-1 min-w-0 space-y-1'>
-                        <div className='flex items-center gap-2 flex-wrap'>
-                          {product.isHidden && (
-                            <Badge variant='secondary' className='text-xs'>
-                              Hidden
-                            </Badge>
-                          )}
-                          <span
-                            className='font-medium truncate'
-                            title={product.name}
-                          >
-                            {product.name}
-                          </span>
-                        </div>
-                        <p className='text-xs text-muted-foreground truncate'>
-                          {product.category}
-                          {product.code ? ` · ${product.code}` : ''}
-                        </p>
-                      </div>
-                      <div className='flex flex-row flex-wrap sm:flex-nowrap items-center gap-4 w-full sm:w-auto justify-between sm:justify-end sm:ml-auto'>
-                        <div className='w-28 text-right text-sm tabular-nums'>
-                          ₵{product.price.toFixed(2)}
-                        </div>
-                        <div className='w-48 sm:w-44 text-center space-y-0.5'>
-                          <Badge
-                            variant={
-                              avail === 0
-                                ? 'destructive'
-                                : isLow
-                                  ? 'secondary'
-                                  : 'outline'
-                            }
-                            className={
-                              isLow
-                                ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-                                : ''
-                            }
-                          >
-                            {avail} sellable
-                          </Badge>
-                          <p className='text-[11px] text-amber-800 leading-tight'>
-                            {inProcess} in process · {wholesaleStock} on shelf
-                          </p>
-                        </div>
-                        <div className='w-16 flex justify-center'>
-                          <Badge variant='outline'>{storeroomStock}</Badge>
-                        </div>
-                        <AdminInventoryRowActions
-                          product={product}
-                          onEdit={openProductDialog}
-                          onToggleVisibility={handleToggleProductVisibility}
-                          onDelete={handleDeleteProduct}
-                          showVisibilityToggle
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                      product={product}
+                      layout={inventoryViewLayout}
+                      onEdit={openProductDialog}
+                      onToggleVisibility={handleToggleProductVisibility}
+                      onDelete={handleDeleteProduct}
+                    />
+                  ))}
+                </div>
                 {!inventoryLoading &&
                   inventoryProductsFiltered.length === 0 && (
                     <div className='p-8 text-center text-sm text-muted-foreground'>
@@ -4222,169 +4128,52 @@ export default function AdminDashboard() {
               </>
             ) : (
               <>
-                <div className='hidden xl:grid xl:grid-cols-[5.5rem_1fr_5rem_5rem_6.5rem_7rem_7rem_6.5rem] xl:gap-3 xl:items-center p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
-                  <div>Code</div>
-                  <div className='min-w-0'>Description (file)</div>
-                  <div className='text-right'>Price</div>
-                  <div className='text-right'>Qty</div>
-                  <div className='text-right'>Line</div>
-                  <div className='text-center'>Storeroom</div>
-                  <div className='text-center'>Wholesale</div>
-                  <div className='text-right'>Actions</div>
-                </div>
+                {inventoryViewLayout === 'list' && (
+                  <div className='hidden xl:grid xl:grid-cols-[3rem_5.5rem_1fr_5rem_5rem_6.5rem_7rem_7rem_6.5rem] xl:gap-3 xl:items-center p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
+                    <div className='text-center'>Image</div>
+                    <div>Code</div>
+                    <div className='min-w-0'>Description</div>
+                    <div className='text-right'>Price</div>
+                    <div className='text-right'>Qty</div>
+                    <div className='text-right'>Line</div>
+                    <div className='text-center'>Storeroom</div>
+                    <div className='text-center'>Wholesale</div>
+                    <div className='text-right'>Actions</div>
+                  </div>
+                )}
                 {warehouseRowsFiltered.length === 0 ? (
                   <div className='p-8 text-center text-sm text-muted-foreground'>
                     No warehouse rows match this letter filter.
                   </div>
                 ) : (
-                  warehouseRowsFiltered.map((row) => {
-                    const codeKey = normalizeWarehouseCode(row.code);
-                    const resolved = resolveWarehouseRowToProduct(
-                      row,
-                      productsByWarehouseCode,
-                      productsByNormalizedLabel
-                    );
-                    const match = resolved?.product ?? null;
-                    const matchKind = resolved?.match;
-                    const fileQty = Math.max(
-                      0,
-                      Math.floor(Number(row.quantity) || 0)
-                    );
-                    const filePrice = Number(row.price) || 0;
-                    const lineFromFile =
-                      Number.isFinite(row.total) && row.total > 0
-                        ? row.total
-                        : filePrice * fileQty;
-                    const wholesaleStock = match
-                      ? wholesaleOnHand(match)
-                      : 0;
-                    const inProcess = match ? reservedForOrders(match) : 0;
-                    const avail = match ? availableToSell(match) : 0;
-                    const storeroomLive = match
-                      ? match.storeroomStock ?? 0
-                      : null;
-                    const isLowStoreroom =
-                      storeroomLive != null &&
-                      storeroomLive > 0 &&
-                      storeroomLive < 10;
-                    return (
-                      <div
-                        key={codeKey}
-                        className='flex flex-col gap-3 p-4 border-b last:border-0 hover:bg-muted/5 transition-colors xl:grid xl:grid-cols-[5.5rem_1fr_5rem_5rem_6.5rem_7rem_7rem_6.5rem] xl:gap-3 xl:items-center'
-                      >
-                        <div className='font-mono text-sm font-medium tabular-nums'>
-                          {codeKey}
-                        </div>
-                        <div className='min-w-0 space-y-1'>
-                          <div className='flex flex-wrap items-center gap-2'>
-                            <span
-                              className='font-medium text-sm leading-snug'
-                              title={row.description}
-                            >
-                              {row.description}
-                            </span>
-                            {match ? (
-                              <Badge variant='outline' className='text-xs'>
-                                {matchKind === 'name'
-                                  ? 'Matched by name / description'
-                                  : 'Matched by code'}
-                              </Badge>
-                            ) : (
-                              <Badge variant='secondary' className='text-xs'>
-                                Not in inventory
-                              </Badge>
-                            )}
-                          </div>
-                          {match && (
-                            <p className='text-xs text-muted-foreground truncate'>
-                              {match.name !== row.description.trim()
-                                ? `Listed as: ${match.name}`
-                                : match.category}
-                            </p>
-                          )}
-                        </div>
-                        <div className='flex justify-between xl:block xl:text-right text-sm tabular-nums'>
-                          <span className='text-muted-foreground xl:hidden'>
-                            Price
-                          </span>
-                          <span>₵{filePrice.toFixed(2)}</span>
-                        </div>
-                        <div className='flex justify-between xl:block xl:text-right text-sm tabular-nums'>
-                          <span className='text-muted-foreground xl:hidden'>
-                            Qty
-                          </span>
-                          <span>{fileQty}</span>
-                        </div>
-                        <div className='flex justify-between xl:block xl:text-right text-sm tabular-nums'>
-                          <span className='text-muted-foreground xl:hidden'>
-                            Line
-                          </span>
-                          <span>₵{lineFromFile.toFixed(2)}</span>
-                        </div>
-                        <div className='text-center space-y-0.5'>
-                          {storeroomLive == null ? (
-                            <span className='text-xs text-muted-foreground'>
-                              —
-                            </span>
-                          ) : (
-                            <>
-                              <Badge
-                                variant={
-                                  storeroomLive === 0
-                                    ? 'destructive'
-                                    : isLowStoreroom
-                                      ? 'secondary'
-                                      : 'outline'
-                                }
-                                className={
-                                  isLowStoreroom
-                                    ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-                                    : ''
-                                }
-                              >
-                                {storeroomLive}
-                              </Badge>
-                              {fileQty !== storeroomLive && (
-                                <p className='text-[10px] text-amber-800'>
-                                  File has {fileQty}; apply sync to align
-                                </p>
-                              )}
-                            </>
-                          )}
-                        </div>
-                        <div className='text-center space-y-0.5'>
-                          {match ? (
-                            <>
-                              <Badge variant='outline'>{avail} sellable</Badge>
-                              <p className='text-[11px] text-amber-800 leading-tight'>
-                                {inProcess} in process · {wholesaleStock}{' '}
-                                shelf
-                              </p>
-                            </>
-                          ) : (
-                            <span className='text-xs text-muted-foreground'>
-                              —
-                            </span>
-                          )}
-                        </div>
-                        <div className='flex justify-end gap-1 shrink-0'>
-                          {match ? (
-                            <AdminInventoryRowActions
-                              product={match}
-                              onEdit={openProductDialog}
-                              onToggleVisibility={handleToggleProductVisibility}
-                              onDelete={handleDeleteProduct}
-                              showVisibilityToggle={false}
-                            />
-                          ) : (
-                            <span className='text-xs text-muted-foreground px-2'>
-                              Sync to add
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })
+                  <div
+                    className={
+                      inventoryViewLayout === 'grid'
+                        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4'
+                        : undefined
+                    }
+                  >
+                    {warehouseRowsFiltered.map((row) => {
+                      const codeKey = normalizeWarehouseCode(row.code);
+                      const resolved = resolveWarehouseRowToProduct(
+                        row,
+                        productsByWarehouseCode,
+                        productsByNormalizedLabel
+                      );
+                      return (
+                        <AdminStoreroomInventoryItem
+                          key={codeKey}
+                          row={row}
+                          match={resolved?.product ?? null}
+                          matchKind={resolved?.match}
+                          layout={inventoryViewLayout}
+                          onEdit={openProductDialog}
+                          onToggleVisibility={handleToggleProductVisibility}
+                          onDelete={handleDeleteProduct}
+                        />
+                      );
+                    })}
+                  </div>
                 )}
               </>
             )}

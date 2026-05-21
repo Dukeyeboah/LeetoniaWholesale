@@ -1,4 +1,4 @@
-import warehouseJson from '@/data/warehouse.json';
+import storeroomJson from '@/data/storeroom.json';
 import type { Product } from '@/types';
 import {
   getFirstCharacterGroup,
@@ -13,8 +13,14 @@ export type WarehouseRow = {
   total: number;
 };
 
+/** Storeroom / warehouse stock list (`data/storeroom.json`). */
+export function getStoreroomRows(): WarehouseRow[] {
+  return storeroomJson as WarehouseRow[];
+}
+
+/** @deprecated Use getStoreroomRows — same data source. */
 export function getWarehouseRows(): WarehouseRow[] {
-  return warehouseJson as WarehouseRow[];
+  return getStoreroomRows();
 }
 
 export function normalizeWarehouseCode(raw: unknown): string {

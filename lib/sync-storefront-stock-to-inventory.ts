@@ -26,7 +26,8 @@ function chunk<T>(arr: T[], size: number): T[][] {
 export type StorefrontSyncResult = {
   updated: number;
   created: number;
-  hidden: number;
+  /** Legacy products removed from Firestore (not in updatedStock.json). */
+  removed: number;
   skipped: number;
 };
 
@@ -34,7 +35,7 @@ export type StorefrontSyncResult = {
  * Apply `data/updatedStock.json` to **wholesale / storefront** fields only:
  * `price`, `wholesaleStock`, `stock`, `isHidden`. Does **not** change `storeroomStock`.
  *
- * Products not matched to any row are set to wholesale qty 0 and hidden.
+ * Products not matched to any row are deleted (wholesale list = JSON only).
  */
 export async function syncStorefrontStockToInventory(
   db: Firestore,
@@ -45,7 +46,7 @@ export async function syncStorefrontStockToInventory(
   const matchedIds = new Set<string>();
   let updated = 0;
   let created = 0;
-  let hidden = 0;
+  let removed = 0;
   let skipped = 0;
 
   for (const part of chunk([...rows], BATCH_SIZE)) {
@@ -128,20 +129,15 @@ export async function syncStorefrontStockToInventory(
     await batch.commit();
   }
 
-  const toHide = products.filter((p) => !matchedIds.has(p.id));
-  for (const part of chunk(toHide, BATCH_SIZE)) {
+  const toRemove = products.filter((p) => !matchedIds.has(p.id));
+  for (const part of chunk(toRemove, BATCH_SIZE)) {
     const batch = writeBatch(db);
     for (const p of part) {
-      batch.update(doc(db, 'inventory', p.id), {
-        wholesaleStock: 0,
-        stock: 0,
-        isHidden: true,
-        updatedAt: Date.now(),
-      });
-      hidden += 1;
+      batch.delete(doc(db, 'inventory', p.id));
+      removed += 1;
     }
     await batch.commit();
   }
 
-  return { updated, created, hidden, skipped };
+  return { updated, created, removed, skipped };
 }

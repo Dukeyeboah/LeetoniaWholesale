@@ -144,6 +144,8 @@ export interface Product {
   wholesaleStock?: number;
   /** Backroom/warehouse stock (not directly sold). */
   storeroomStock?: number;
+  /** Storeroom unit price (GHS); separate from wholesale storefront `price`. */
+  storeroomPrice?: number;
   /** Quantity held for open orders (checkout); released on cancel or fulfilled on complete. */
   reservedQty?: number;
   unit: string;
