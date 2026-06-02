@@ -1,5 +1,5 @@
 import type { Product } from '@/types';
-import { categorizeDrug } from '@/lib/drug-categorizer';
+import { classifyProduct } from '@/lib/drug-categorizer';
 import { nextIsHiddenAfterWholesaleChange } from '@/lib/inventory-availability';
 import {
   assignBestImageMatches,
@@ -18,6 +18,7 @@ export type StorefrontResetProduct = {
   id: string;
   name: string;
   category: string;
+  subCategory?: string;
   price: number;
   wholesaleStock: number;
   stock: number;
@@ -138,10 +139,12 @@ export function buildStorefrontResetPlan(
     const isHidden = nextIsHiddenAfterWholesaleChange(0, wholesaleStock, true);
     const img = imageByProductId.get(docId);
 
+    const { category, subCategory } = classifyProduct(drug);
     products.push({
       id: docId,
       name: drug,
-      category: categorizeDrug(drug),
+      category,
+      ...(subCategory ? { subCategory } : {}),
       price,
       wholesaleStock,
       stock: wholesaleStock,

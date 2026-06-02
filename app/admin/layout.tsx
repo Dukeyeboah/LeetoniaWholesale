@@ -16,13 +16,13 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     <div className='flex min-h-screen bg-background'>
       <AppSidebar />
       <main
-        className={`flex-1 transition-all duration-300 ease-in-out ${
+        className={`flex-1 min-w-0 w-full max-w-[100vw] overflow-x-hidden transition-all duration-300 ease-in-out ${
           isCollapsed ? 'md:ml-20' : 'md:ml-64 lg:ml-72'
         }`}
       >
         <div
-          className={`w-full py-8 md:py-10 px-4 md:px-8 mt-12 md:mt-0 ${
-            isCollapsed ? 'max-w-full' : 'container max-w-6xl'
+          className={`w-full min-w-0 max-w-full overflow-x-hidden py-6 sm:py-8 md:py-10 px-3 sm:px-4 md:px-8 mt-12 md:mt-0 ${
+            isCollapsed ? '' : 'lg:container lg:max-w-6xl'
           }`}
         >
           {children}

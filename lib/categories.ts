@@ -1,45 +1,54 @@
 /**
- * Product Categories for Leetonia Wholesale
- * These categories are used for organizing and filtering products
+ * Product categories and subcategories for Leetonia Wholesale
  */
 
 export const PRODUCT_CATEGORIES = [
-  'ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)',
-  'ANTIPYRETICS (FEVER REDUCERS)',
-  'ANTIBIOTICS',
-  'ANTIMICROBIALS (NON-ANTIBIOTIC)',
-  'ANTI-MALARIALS',
-  'ANTIPARASITICS (ANTI-WORM MEDICINES)',
-  'ANTIVIRALS',
-  'ANTIFUNGALS',
-  'GASTROINTESTINAL MEDICINES',
-  'CARDIOVASCULAR MEDICINES',
-  'DIABETES MEDICINES',
-  'RESPIRATORY MEDICINES',
-  'VITAMINS & MINERALS',
-  'DIETARY OR NUTRITIONAL SUPPLEMENTS',
-  'HORMONAL MEDICATIONS',
-  'NEUROLOGICAL & PSYCHIATRIC MEDICINES',
-  'DERMATOLOGICAL (SKIN) MEDICINES',
-  'EYE & EAR PREPARATIONS',
-  'SPECIALTY INJECTIONS',
-  'IV FLUIDS (INFUSIONS)',
-  'ANTIHELMINTICS (Worm medicines)',
-  'OTC (OVER-THE-COUNTER) PRODUCTS',
-  'HERBAL PRODUCTS',
-  'MEDICAL CONSUMABLES',
-  'MEDICAL DEVICES',
-  'BABY & MATERNAL CARE ITEMS',
-  'HYGIENE & PERSONAL CARE',
+  'Analgesics',
+  'Anthelmintics',
+  'Anti-Asthmatic and Nasal Decongestants',
+  'Antacids',
+  'Anti diabetics',
+  'Anti-inflammatories',
+  'Anti hypertensives',
+  'Antibiotics',
+  'Antihistamines',
+  'Anti-Fungals',
+  'Anti-Malarials',
+  'Antiseptics',
+  'Cosmetics',
+  'Cough & Cold products',
+  'Creams/Ointments',
+  'Diuretics',
+  'Gastrointestinal',
+  'Herbals',
+  'Oral Rehydration Salts',
+  'Skin products',
+  'Toiletories',
+  'Tonics',
+  'Uncategorized',
+  'Vitamins',
 ] as const;
 
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
 
-/**
- * Category subcategories mapping
- * This will be populated later when subcategories are defined
- */
-export const CATEGORY_SUBCATEGORIES: Record<string, string[]> = {
-  // Example structure (to be populated later):
-  // 'ANTIBIOTICS': ['Penicillins', 'Cephalosporins', 'Macrolides'],
-};
+export const PRODUCT_SUBCATEGORIES = [
+  'Tablets',
+  'Capsules',
+  'Drops',
+  'Device',
+  'Syrups/Suspension',
+  'Injections',
+  'Creams/Ointments',
+  'Powdered',
+  'Toiletries & Cosmetics',
+] as const;
+
+export type ProductSubCategory = (typeof PRODUCT_SUBCATEGORIES)[number];
+
+export const UNCATEGORIZED_CATEGORY: ProductCategory = 'Uncategorized';
+
+/** Same subcategory options for every main category (form / filter). */
+export const CATEGORY_SUBCATEGORIES: Record<ProductCategory, ProductSubCategory[]> =
+  Object.fromEntries(
+    PRODUCT_CATEGORIES.map((cat) => [cat, [...PRODUCT_SUBCATEGORIES]])
+  ) as Record<ProductCategory, ProductSubCategory[]>;

@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select';
 import type { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
-import { PRODUCT_CATEGORIES } from '@/lib/categories';
+import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from '@/lib/categories';
 import { useAuth } from '@/lib/auth-context';
 
 const INITIAL_PAGE_SIZE = 50;
@@ -44,6 +44,7 @@ export default function InventoryPage() {
   const { addToCart } = useCart(); // Use hook
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [subCategoryFilter, setSubCategoryFilter] = useState('all');
   const [letterFilter, setLetterFilter] = useState<LetterFilter>('all');
   const [isMounted, setIsMounted] = useState(false);
   const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
@@ -57,7 +58,7 @@ export default function InventoryPage() {
   // Reset to first page when search, category, or letter changes
   useEffect(() => {
     setVisibleCount(INITIAL_PAGE_SIZE);
-  }, [searchQuery, categoryFilter, letterFilter]);
+  }, [searchQuery, categoryFilter, subCategoryFilter, letterFilter]);
 
   // Always use products from Firebase/IndexedDB - don't fall back to mock data
   // Mock data is only for development/testing when no data is seeded
@@ -78,10 +79,12 @@ export default function InventoryPage() {
       product.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
       categoryFilter === 'all' || product.category === categoryFilter;
+    const matchesSubCategory =
+      subCategoryFilter === 'all' || product.subCategory === subCategoryFilter;
     const matchesLetter =
       letterFilter === 'all' ||
       getFirstCharacterGroup(product.name || '') === letterFilter;
-    return matchesSearch && matchesCategory && matchesLetter;
+    return matchesSearch && matchesCategory && matchesSubCategory && matchesLetter;
   });
 
   const productsToShow = filteredProducts.slice(0, visibleCount);
@@ -154,6 +157,21 @@ export default function InventoryPage() {
             <Filter className='h-4 w-4' />
             <span>Category</span>
           </div>
+        ) : null}
+        {isSuperAdmin && isMounted ? (
+          <Select value={subCategoryFilter} onValueChange={setSubCategoryFilter}>
+            <SelectTrigger className='w-full md:w-[200px] bg-background border-border/60'>
+              <SelectValue placeholder='Type' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='all'>All types</SelectItem>
+              {PRODUCT_SUBCATEGORIES.map((sub) => (
+                <SelectItem key={sub} value={sub}>
+                  {sub}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         ) : null}
       </div>
 

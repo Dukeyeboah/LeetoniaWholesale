@@ -94,7 +94,7 @@ export function AdminStoreroomInventoryItem({
   if (layout === 'grid') {
     return (
       <Card
-        className={`overflow-hidden flex flex-col h-full ${
+        className={`min-w-0 w-full max-w-full overflow-hidden flex flex-col h-full ${
           d.isZeroStoreroom ? 'opacity-45' : ''
         }`}
       >
@@ -186,30 +186,27 @@ export function AdminStoreroomInventoryItem({
 
   return (
     <div
-      className={`flex flex-row flex-wrap items-start gap-3 p-4 border-b last:border-0 hover:bg-muted/5 transition-colors xl:grid xl:grid-cols-[3rem_5.5rem_1fr_5rem_5rem_6.5rem_7rem_7rem_6.5rem] xl:gap-3 xl:items-center ${
+      className={`w-full min-w-0 max-w-full p-4 border-b last:border-0 hover:bg-muted/5 transition-colors ${
         d.isZeroStoreroom ? 'opacity-45' : ''
       }`}
     >
-      <AdminInventoryThumb
-        imageUrl={match?.imageUrl}
-        name={row.description || match?.name || ''}
-        className='xl:justify-center'
-      />
-      <div className='font-mono text-sm font-medium tabular-nums'>
-        {d.codeKey}
-      </div>
-      <div className='min-w-0 space-y-1'>
-        <div className='flex flex-wrap items-center gap-2'>
-          <span
-            className='font-medium text-sm leading-snug'
+      <div className='flex gap-3 min-w-0'>
+        <AdminInventoryThumb
+          imageUrl={match?.imageUrl}
+          name={row.description || match?.name || ''}
+        />
+        <div className='flex-1 min-w-0 space-y-1'>
+          <p className='font-mono text-xs text-muted-foreground'>{d.codeKey}</p>
+          <p
+            className='font-medium text-sm leading-snug line-clamp-2 break-words'
             title={row.description}
           >
             {row.description}
-          </span>
+          </p>
           {match ? (
             <Badge variant='outline' className='text-xs'>
               {matchKind === 'name'
-                ? 'Matched by name / description'
+                ? 'Matched by name'
                 : 'Matched by code'}
             </Badge>
           ) : (
@@ -218,60 +215,50 @@ export function AdminStoreroomInventoryItem({
             </Badge>
           )}
         </div>
-        {match && (
-          <p className='text-xs text-muted-foreground truncate'>
-            {match.name !== row.description.trim()
-              ? `Listed as: ${match.name}`
-              : match.category}
-          </p>
-        )}
       </div>
-      <div className='flex justify-between xl:block xl:text-right text-sm tabular-nums'>
-        <span className='text-muted-foreground xl:hidden'>Price</span>
-        <span>₵{d.displayPrice.toFixed(2)}</span>
-        {d.priceOutOfSync && (
-          <p className='text-[10px] text-amber-800 xl:block'>
-            File ₵{d.filePrice.toFixed(2)}
-          </p>
-        )}
-      </div>
-      <div className='flex justify-between xl:block xl:text-right text-sm tabular-nums'>
-        <span className='text-muted-foreground xl:hidden'>Qty</span>
-        <span>{d.displayQty}</span>
-        {d.qtyOutOfSync && (
-          <p className='text-[10px] text-amber-800 xl:block'>File {d.fileQty}</p>
-        )}
-      </div>
-      <div className='flex justify-between xl:block xl:text-right text-sm tabular-nums'>
-        <span className='text-muted-foreground xl:hidden'>Line</span>
-        <span>₵{d.lineValue.toFixed(2)}</span>
-      </div>
-      <div className='text-center space-y-0.5'>
-        {match == null ? (
-          <span className='text-xs text-muted-foreground'>Not linked</span>
-        ) : d.qtyOutOfSync || d.priceOutOfSync ? (
-          <Badge variant='secondary' className='text-xs'>
-            Needs sync
-          </Badge>
-        ) : (
-          <Badge variant='outline' className='text-xs'>
-            Synced
-          </Badge>
-        )}
-      </div>
-      <div className='text-center space-y-0.5'>
-        {match ? (
-          <>
-            <Badge variant='outline'>{d.avail} sellable</Badge>
-            <p className='text-[11px] text-amber-800 leading-tight'>
-              {d.inProcess} in process · {d.wholesaleStock} shelf
-            </p>
-          </>
-        ) : (
-          <span className='text-xs text-muted-foreground'>—</span>
-        )}
-      </div>
-      <div className='flex justify-end gap-1 shrink-0'>
+      <dl className='mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm tabular-nums'>
+        <dt className='text-muted-foreground'>Price</dt>
+        <dd className='text-right font-medium'>
+          ₵{d.displayPrice.toFixed(2)}
+          {d.priceOutOfSync && (
+            <span className='block text-[10px] text-amber-800 font-normal'>
+              File ₵{d.filePrice.toFixed(2)}
+            </span>
+          )}
+        </dd>
+        <dt className='text-muted-foreground'>Qty</dt>
+        <dd className='text-right font-medium'>
+          {d.displayQty}
+          {d.qtyOutOfSync && (
+            <span className='block text-[10px] text-amber-800 font-normal'>
+              File {d.fileQty}
+            </span>
+          )}
+        </dd>
+        <dt className='text-muted-foreground'>Line</dt>
+        <dd className='text-right font-medium'>₵{d.lineValue.toFixed(2)}</dd>
+        <dt className='text-muted-foreground'>Sync</dt>
+        <dd className='text-right'>
+          {match == null ? (
+            <span className='text-xs text-muted-foreground'>Not linked</span>
+          ) : d.qtyOutOfSync || d.priceOutOfSync ? (
+            <Badge variant='secondary' className='text-xs'>
+              Needs sync
+            </Badge>
+          ) : (
+            <Badge variant='outline' className='text-xs'>
+              Synced
+            </Badge>
+          )}
+        </dd>
+      </dl>
+      {match && (
+        <p className='text-[11px] text-amber-800 mt-2'>
+          Wholesale: {d.avail} sellable · {d.inProcess} in process ·{' '}
+          {d.wholesaleStock} shelf
+        </p>
+      )}
+      <div className='mt-3 flex justify-center border-t pt-2'>
         {match ? (
           <AdminInventoryRowActions
             product={match}
@@ -279,11 +266,10 @@ export function AdminStoreroomInventoryItem({
             onToggleVisibility={onToggleVisibility}
             onDelete={onDelete}
             showVisibilityToggle={false}
+            className='justify-center w-full'
           />
         ) : (
-          <span className='text-xs text-muted-foreground px-2'>
-            Sync to add
-          </span>
+          <span className='text-xs text-muted-foreground'>Sync to add</span>
         )}
       </div>
     </div>

@@ -57,7 +57,7 @@ export function AdminStorefrontInventoryItem({
   if (layout === 'grid') {
     return (
       <Card
-        className={`overflow-hidden flex flex-col h-full ${
+        className={`min-w-0 w-full max-w-full overflow-hidden flex flex-col h-full ${
           hidden ? 'opacity-60' : ''
         }`}
       >
@@ -79,6 +79,7 @@ export function AdminStorefrontInventoryItem({
             </div>
             <p className='text-xs text-muted-foreground line-clamp-1'>
               {product.category}
+              {product.subCategory ? ` · ${product.subCategory}` : ''}
               {product.code ? ` · ${product.code}` : ''}
             </p>
           </div>
@@ -118,32 +119,40 @@ export function AdminStorefrontInventoryItem({
 
   return (
     <div
-      className={`flex flex-row items-start sm:items-center gap-3 p-4 border-b last:border-0 hover:bg-muted/5 transition-colors ${
+      className={`w-full min-w-0 max-w-full p-4 border-b last:border-0 hover:bg-muted/5 transition-colors ${
         hidden ? 'opacity-60 bg-muted/20' : ''
       }`}
     >
-      <AdminInventoryThumb imageUrl={product.imageUrl} name={product.name} />
-      <div className='flex-1 min-w-0 space-y-1'>
-        <div className='flex items-center gap-2 flex-wrap'>
-          {hidden && (
-            <Badge variant='secondary' className='text-xs'>
-              Hidden
-            </Badge>
-          )}
-          <span className='font-medium truncate' title={product.name}>
-            {product.name}
-          </span>
+      <div className='flex gap-3 min-w-0'>
+        <AdminInventoryThumb imageUrl={product.imageUrl} name={product.name} />
+        <div className='flex-1 min-w-0 space-y-1'>
+          <div className='flex items-center gap-2 flex-wrap'>
+            {hidden && (
+              <Badge variant='secondary' className='text-xs'>
+                Hidden
+              </Badge>
+            )}
+            <span
+              className='font-medium text-sm leading-snug line-clamp-2'
+              title={product.name}
+            >
+              {product.name}
+            </span>
+          </div>
+          <p className='text-xs text-muted-foreground line-clamp-2 break-words'>
+            {product.category}
+            {product.subCategory ? ` · ${product.subCategory}` : ''}
+            {product.code ? ` · ${product.code}` : ''}
+          </p>
         </div>
-        <p className='text-xs text-muted-foreground truncate'>
-          {product.category}
-          {product.code ? ` · ${product.code}` : ''}
-        </p>
       </div>
-      <div className='flex flex-row flex-wrap sm:flex-nowrap items-center gap-4 w-full sm:w-auto justify-between sm:justify-end sm:ml-auto'>
-        <div className='w-28 text-right text-sm tabular-nums'>
-          ₵{product.price.toFixed(2)}
+      <div className='mt-3 grid grid-cols-2 gap-2 text-sm tabular-nums md:grid-cols-4 md:items-center md:gap-4'>
+        <div>
+          <p className='text-xs text-muted-foreground md:hidden'>Price</p>
+          <p className='font-medium'>₵{product.price.toFixed(2)}</p>
         </div>
-        <div className='w-48 sm:w-44 text-center space-y-0.5'>
+        <div>
+          <p className='text-xs text-muted-foreground md:hidden'>Stock</p>
           <Badge
             variant={
               avail === 0 ? 'destructive' : isLow ? 'secondary' : 'outline'
@@ -154,20 +163,24 @@ export function AdminStorefrontInventoryItem({
           >
             {avail} sellable
           </Badge>
-          <p className='text-[11px] text-amber-800 leading-tight'>
-            {inProcess} in process · {wholesaleStock} on shelf
+          <p className='text-[11px] text-amber-800 leading-tight mt-0.5'>
+            {inProcess} in process · {wholesaleStock} shelf
           </p>
         </div>
-        <div className='w-16 flex justify-center'>
+        <div>
+          <p className='text-xs text-muted-foreground md:hidden'>Storeroom</p>
           <Badge variant='outline'>{storeroomStock}</Badge>
         </div>
-        <AdminInventoryRowActions
-          product={product}
-          onEdit={onEdit}
-          onToggleVisibility={onToggleVisibility}
-          onDelete={onDelete}
-          showVisibilityToggle
-        />
+        <div className='col-span-2 md:col-span-1 flex justify-start md:justify-end'>
+          <AdminInventoryRowActions
+            product={product}
+            onEdit={onEdit}
+            onToggleVisibility={onToggleVisibility}
+            onDelete={onDelete}
+            showVisibilityToggle
+            className='md:justify-end'
+          />
+        </div>
       </div>
     </div>
   );

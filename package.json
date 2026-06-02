@@ -16,6 +16,7 @@
     "crosscheck-images": "tsx scripts/crosscheck-product-images.ts",
     "reset-storefront": "tsx scripts/reset-storefront-inventory.ts",
     "reset-storeroom": "tsx scripts/reset-storeroom-inventory.ts",
+    "recategorize-inventory": "tsx scripts/recategorize-inventory.ts",
     "verify-storage": "tsx scripts/verify-storage-files.ts",
     "replace-inventory": "tsx scripts/replace-inventory.ts",
     "add-inventory": "tsx scripts/add-inventory.ts",

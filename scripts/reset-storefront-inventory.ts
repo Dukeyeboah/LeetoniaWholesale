@@ -248,6 +248,7 @@ async function main() {
       const payload: Record<string, unknown> = {
         name: p.name,
         category: p.category,
+        ...(p.subCategory ? { subCategory: p.subCategory } : {}),
         price: p.price,
         stock: p.stock,
         wholesaleStock: p.wholesaleStock,

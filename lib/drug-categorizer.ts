@@ -1,681 +1,610 @@
 /**
- * Intelligent drug categorization based on product names and descriptions
- * Maps drugs to appropriate categories from PRODUCT_CATEGORIES
+ * Classify drugs by therapeutic category and dosage form (subcategory)
+ * from product name / description.
  */
 
-import { PRODUCT_CATEGORIES } from './categories';
+import {
+  PRODUCT_CATEGORIES,
+  PRODUCT_SUBCATEGORIES,
+  UNCATEGORIZED_CATEGORY,
+  type ProductCategory,
+  type ProductSubCategory,
+} from './categories';
 
-// Category keywords mapping
-const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  'ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)': [
-    'paracetamol',
-    'acetaminophen',
-    'ibuprofen',
-    'aspirin',
-    'diclofenac',
-    'naproxen',
-    'ketorolac',
-    'tramadol',
-    'morphine',
-    'codeine',
-    'advil',
-    'panadol',
-    'brufen',
-    'voltaren',
-    'anacin',
-    'tylenol',
-    'pain',
-    'analgesic',
-    'anti-inflammatory',
-    'antiinflammatory',
-    'dolor',
-    'algia',
-  ],
-  'ANTIPYRETICS (FEVER REDUCERS)': [
-    'fever',
-    'antipyretic',
-    'pyrexia',
-    'temperature',
-    'hyperthermia',
-  ],
-  ANTIBIOTICS: [
-    'amoxicillin',
-    'ampicillin',
-    'penicillin',
-    'cephalexin',
-    'cefuroxime',
-    'azithromycin',
-    'erythromycin',
-    'clindamycin',
-    'doxycycline',
-    'tetracycline',
-    'ciprofloxacin',
-    'levofloxacin',
-    'metronidazole',
-    'trimethoprim',
-    'sulfamethoxazole',
-    'amikacin',
-    'gentamicin',
-    'vancomycin',
-    'amoksi',
-    'amoxi',
-    'clav',
-    'augmentin',
-    'zithromax',
-    'bactrim',
-    'septra',
-  ],
-  'ANTIMICROBIALS (NON-ANTIBIOTIC)': [
-    'antiseptic',
-    'disinfectant',
-    'chlorhexidine',
-    'povidone',
-    'iodine',
-    'hydrogen peroxide',
-    'alcohol',
-    'sanitizer',
-  ],
-  'ANTI-MALARIALS': [
-    'malaria',
-    'artemisinin',
-    'artemether',
-    'lumefantrine',
-    'quinine',
-    'chloroquine',
-    'mefloquine',
-    'primaquine',
-    'doxycycline',
-    'atovaquone',
-    'proguanil',
-    'coartem',
-    'malarone',
-    'fansidar',
-  ],
-  'ANTIPARASITICS (ANTI-WORM MEDICINES)': [
-    'albendazole',
-    'mebendazole',
-    'praziquantel',
-    'ivermectin',
-    'piperazine',
-    'worm',
-    'helminth',
-    'parasite',
-    'deworm',
-    'anthelmintic',
-  ],
-  ANTIVIRALS: [
-    'acyclovir',
-    'aciclovir',
-    'valacyclovir',
-    'ganciclovir',
-    'oseltamivir',
-    'zanamivir',
-    'ribavirin',
-    'lamivudine',
-    'tenofovir',
-    'efavirenz',
-    'antiviral',
-    'herpes',
-    'hiv',
-    'aids',
-    'flu',
-    'influenza',
-    'tamiflu',
-  ],
-  ANTIFUNGALS: [
-    'fluconazole',
-    'ketoconazole',
-    'clotrimazole',
-    'miconazole',
-    'nystatin',
-    'amphotericin',
-    'griseofulvin',
-    'terbinafine',
-    'antifungal',
-    'fungal',
-    'candidiasis',
-    'ringworm',
-    'tinea',
-    'yeast',
-  ],
-  'GASTROINTESTINAL MEDICINES': [
-    'omeprazole',
-    'pantoprazole',
-    'lansoprazole',
-    'ranitidine',
-    'cimetidine',
-    'famotidine',
-    'antacid',
-    'gaviscon',
-    'maalox',
-    'pepcid',
-    'prilosec',
-    'loperamide',
-    'diphenoxylate',
-    'metoclopramide',
-    'domperidone',
-    'ondansetron',
-    'granisetron',
-    'stomach',
-    'gastric',
-    'ulcer',
-    'reflux',
-    'gerd',
-    'diarrhea',
-    'diarrhoea',
-    'nausea',
-    'vomit',
-    'constipation',
-    'laxative',
-    'stool',
-    'bowel',
-  ],
-  'CARDIOVASCULAR MEDICINES': [
-    'amlodipine',
-    'atenolol',
-    'metoprolol',
-    'propranolol',
-    'lisinopril',
-    'enalapril',
-    'captopril',
-    'losartan',
-    'valsartan',
-    'irbesartan',
-    'furosemide',
-    'hydrochlorothiazide',
-    'spironolactone',
-    'digoxin',
-    'warfarin',
-    'aspirin',
-    'clopidogrel',
-    'atorvastatin',
-    'simvastatin',
-    'pravastatin',
-    'rosuvastatin',
-    'blood pressure',
-    'hypertension',
-    'heart',
-    'cardiac',
-    'cholesterol',
-    'lipid',
-    'anticoagulant',
-    'antiplatelet',
-    'beta blocker',
-    'ace inhibitor',
-    'calcium channel',
-    'diuretic',
-  ],
-  'DIABETES MEDICINES': [
-    'metformin',
-    'glibenclamide',
-    'gliclazide',
-    'glipizide',
-    'insulin',
-    'glimepiride',
-    'pioglitazone',
-    'rosiglitazone',
-    'sitagliptin',
-    'vildagliptin',
-    'diabetes',
-    'diabetic',
-    'glucose',
-    'sugar',
-    'glycemic',
-    'hypoglycemic',
-    'hyperglycemic',
-    'insulin',
-    'glucagon',
-    'amaryl',
-    'glucophage',
-    'januvia',
-  ],
-  'RESPIRATORY MEDICINES': [
-    'salbutamol',
-    'albuterol',
-    'ventolin',
-    'ipratropium',
-    'tiotropium',
-    'budesonide',
-    'fluticasone',
-    'beclomethasone',
-    'prednisolone',
-    'montelukast',
-    'theophylline',
-    'aminophylline',
-    'asthma',
-    'copd',
-    'bronchitis',
-    'cough',
-    'expectorant',
-    'mucolytic',
-    'decongestant',
-    'inhaler',
-    'nebulizer',
-    'respiratory',
-    'breathing',
-    'wheeze',
-  ],
-  'VITAMINS & MINERALS': [
-    'vitamin',
-    'multivitamin',
-    'calcium',
-    'iron',
-    'zinc',
-    'magnesium',
-    'folic acid',
-    'folate',
-    'b12',
-    'b complex',
-    'vitamin c',
-    'vitamin d',
-    'vitamin e',
-    'vitamin a',
-    'mineral',
-    'nutrient',
-  ],
-  'DIETARY OR NUTRITIONAL SUPPLEMENTS': [
-    'supplement',
-    'dietary',
-    'nutritional',
-    'omega',
-    'fish oil',
-    'protein',
-    'probiotic',
-    'prebiotic',
-    'collagen',
-    'glucosamine',
-    'chondroitin',
-    'coenzyme',
-    'coq10',
-    'q10',
-    'antioxidant',
-    'resveratrol',
-    'turmeric',
-    'curcumin',
-    'spirulina',
-    'chlorella',
-    'wheatgrass',
-    'barley grass',
-    'green tea extract',
-    'ginkgo',
-    'biloba',
-    'ginseng',
-    'ashwagandha',
-    'rhodiola',
-    'maca',
-    'moringa',
-    'aloe vera',
-    'echinacea',
-    'elderberry',
-    'saw palmetto',
-    'milk thistle',
-    'dandelion',
-    'nettle',
-    'valerian',
-    'melatonin',
-    '5-htp',
-    'st john',
-    'wort',
-    'evening primrose',
-    'flaxseed',
-    'hemp',
-    'cbd',
-    'wellness',
-    'vital',
-    'care',
-    'flora',
-    'radiance',
-    'pregna',
-    'procare',
-    'ipace',
-    'vital seas',
-    'vital woman',
-    'vital man',
-    'vital b',
-    'aj wellness',
-  ],
-  'HORMONAL MEDICATIONS': [
-    'estrogen',
-    'progesterone',
-    'testosterone',
-    'thyroid',
-    'levothyroxine',
-    'contraceptive',
-    'birth control',
-    'pill',
-    'hormone',
-    'steroid',
-    'prednisone',
-    'prednisolone',
-    'dexamethasone',
-    'hydrocortisone',
-    'cortisol',
-    'insulin',
-    'glucagon',
-  ],
-  'NEUROLOGICAL & PSYCHIATRIC MEDICINES': [
-    'amitriptyline',
-    'fluoxetine',
-    'sertraline',
-    'paroxetine',
-    'citalopram',
-    'escitalopram',
-    'duloxetine',
-    'venlafaxine',
-    'carbamazepine',
-    'phenytoin',
-    'valproate',
-    'gabapentin',
-    'pregabalin',
-    'diazepam',
-    'lorazepam',
-    'alprazolam',
-    'clonazepam',
-    'haloperidol',
-    'risperidone',
-    'olanzapine',
-    'quetiapine',
-    'antidepressant',
-    'antipsychotic',
-    'anticonvulsant',
-    'antiepileptic',
-    'anxiolytic',
-    'sedative',
-    'tranquilizer',
-    'mood',
-    'depression',
-    'anxiety',
-    'epilepsy',
-    'seizure',
-    'bipolar',
-    'schizophrenia',
-    'adhd',
-    'attention',
-  ],
-  'DERMATOLOGICAL (SKIN) MEDICINES': [
-    'hydrocortisone',
-    'betamethasone',
-    'clobetasol',
-    'mometasone',
-    'tretinoin',
-    'isotretinoin',
-    'benzoyl peroxide',
-    'salicylic acid',
-    'acne',
-    'eczema',
-    'psoriasis',
-    'dermatitis',
-    'rash',
-    'itch',
-    'pruritus',
-    'fungal',
-    'ringworm',
-    'tinea',
-    'cream',
-    'ointment',
-    'topical',
-    'skin',
-    'dermal',
-    'cutaneous',
-  ],
-  'EYE & EAR PREPARATIONS': [
-    'eye',
-    'ophthalmic',
-    'ocular',
-    'ear',
-    'otic',
-    'aural',
-    'drops',
-    'solution',
-    'ointment',
-    'conjunctivitis',
-    'glaucoma',
-    'cataract',
-    'retina',
-    'cornea',
-    'vision',
-    'sight',
-    'hearing',
-    'auditory',
-  ],
-  'SPECIALTY INJECTIONS': [
-    'injection',
-    'injectable',
-    'inject',
-    'injectable',
-    'vial',
-    'ampoule',
-    'syringe',
-    'iv',
-    'intravenous',
-    'im',
-    'intramuscular',
-    'subcutaneous',
-    'sc',
-    'infusion',
-    'drip',
-  ],
-  'IV FLUIDS (INFUSIONS)': [
-    'saline',
-    'dextrose',
-    'glucose',
-    'ringer',
-    'lactate',
-    'infusion',
-    'iv fluid',
-    'drip',
-    'solution',
-    'normal saline',
-    'ns',
-    'ds',
-    'd5w',
-    'd10w',
-    'ringer',
-    'hartmann',
-  ],
-  'ANTIHELMINTICS (Worm medicines)': [
-    'albendazole',
-    'mebendazole',
-    'praziquantel',
-    'ivermectin',
-    'piperazine',
-    'worm',
-    'helminth',
-    'parasite',
-    'deworm',
-    'anthelmintic',
-  ],
-  'OTC (OVER-THE-COUNTER) PRODUCTS': [
-    'cough syrup',
-    'cold',
-    'flu',
-    'allergy',
-    'antihistamine',
-    'nasal',
-    'spray',
-    'lozenge',
-    'throat',
-    'sore throat',
-    'cough',
-    'decongestant',
-  ],
-  'HERBAL PRODUCTS': [
-    'herbal',
-    'herb',
-    'natural',
-    'traditional',
-    'ginseng',
-    'ginger',
-    'turmeric',
-    'garlic',
-    'aloe',
-    'echinacea',
-    'echinacea',
-    'ginseng',
-    'ashwagandha',
-    'bitter',
-    'tonic',
-    'mixture',
-  ],
-  'MEDICAL CONSUMABLES': [
-    'syringe',
-    'needle',
-    'glove',
-    'mask',
-    'gauze',
-    'bandage',
-    'plaster',
-    'cotton',
-    'swab',
-    'alcohol',
-    'antiseptic',
-    'disinfectant',
-    'strip',
-    'test',
-    'kit',
-    'consumable',
-    'disposable',
-  ],
-  'MEDICAL DEVICES': [
-    'device',
-    'monitor',
-    'meter',
-    'glucometer',
-    'thermometer',
-    'bp',
-    'blood pressure',
-    'stethoscope',
-    'brace',
-    'support',
-    'splint',
-    'crutch',
-    'wheelchair',
-    'walker',
-    'cane',
-  ],
-  'BABY & MATERNAL CARE ITEMS': [
-    'baby',
-    'infant',
-    'pediatric',
-    'paediatric',
-    'maternal',
-    'pregnancy',
-    'prenatal',
-    'postnatal',
-    'lactation',
-    'breastfeeding',
-    'formula',
-    'diaper',
-    'nappy',
-    'pacifier',
-    'soother',
-    'bottle',
-    'feeding',
-  ],
-  'HYGIENE & PERSONAL CARE': [
-    'soap',
-    'shampoo',
-    'conditioner',
-    'toothpaste',
-    'toothbrush',
-    'deodorant',
-    'antiperspirant',
-    'sanitary',
-    'pad',
-    'tampon',
-    'liner',
-    'shower',
-    'gel',
-    'lotion',
-    'cream',
-    'moisturizer',
-    'sunscreen',
-    'hygiene',
-    'personal care',
-    'cosmetic',
-    'beauty',
-    'skincare',
-    'haircare',
-  ],
-};
+type CategoryRule = { category: ProductCategory; keywords: string[] };
+
+/** More specific categories first. */
+const CATEGORY_RULES: CategoryRule[] = [
+  {
+    category: 'Oral Rehydration Salts',
+    keywords: [
+      'ors',
+      'oral rehydration',
+      'rehydration salt',
+      'dioralyte',
+      'pedialyte',
+      'electral',
+    ],
+  },
+  {
+    category: 'Anti-Malarials',
+    keywords: [
+      'malaria',
+      'artemether',
+      'lumefantrine',
+      'artesunate',
+      'quinine',
+      'chloroquine',
+      'coartem',
+      'lonart',
+      'fansidar',
+      'mefloquine',
+      'primaquine',
+      'atovaquone',
+      'proguanil',
+    ],
+  },
+  {
+    category: 'Antibiotics',
+    keywords: [
+      'amoxicillin',
+      'amoxi',
+      'ampicillin',
+      'penicillin',
+      'cephalexin',
+      'cefuroxime',
+      'ceftriaxone',
+      'cefotaxime',
+      'azithromycin',
+      'erythromycin',
+      'clindamycin',
+      'doxycycline',
+      'tetracycline',
+      'ciprofloxacin',
+      'levofloxacin',
+      'metronidazole',
+      'flagyl',
+      'clav',
+      'augmentin',
+      'zithromax',
+      'bactrim',
+      'septra',
+      'gentamicin',
+      'vancomycin',
+      'antibiotic',
+    ],
+  },
+  {
+    category: 'Anthelmintics',
+    keywords: [
+      'albendazole',
+      'mebendazole',
+      'praziquantel',
+      'ivermectin',
+      'piperazine',
+      'anthelmintic',
+      'deworm',
+      'worm',
+      'vermox',
+      'zentel',
+    ],
+  },
+  {
+    category: 'Anti-Fungals',
+    keywords: [
+      'fluconazole',
+      'ketoconazole',
+      'clotrimazole',
+      'miconazole',
+      'nystatin',
+      'terbinafine',
+      'griseofulvin',
+      'antifungal',
+      'fungal',
+      'candida',
+      'canesten',
+    ],
+  },
+  {
+    category: 'Antihistamines',
+    keywords: [
+      'cetirizine',
+      'loratadine',
+      'chlorpheniramine',
+      'promethazine',
+      'diphenhydramine',
+      'antihistamine',
+      'histamine',
+      'zyrtec',
+      'clarityne',
+      'piriton',
+    ],
+  },
+  {
+    category: 'Anti-Asthmatic and Nasal Decongestants',
+    keywords: [
+      'salbutamol',
+      'albuterol',
+      'ventolin',
+      'budesonide',
+      'fluticasone',
+      'montelukast',
+      'theophylline',
+      'asthma',
+      'inhaler',
+      'nebul',
+      'decongestant',
+      'nasal spray',
+      'xylometazoline',
+      'oxymetazoline',
+      'beclomethasone',
+    ],
+  },
+  {
+    category: 'Anti diabetics',
+    keywords: [
+      'metformin',
+      'glibenclamide',
+      'gliclazide',
+      'glipizide',
+      'glimepiride',
+      'insulin',
+      'sitagliptin',
+      'diabetes',
+      'diabetic',
+      'glucophage',
+      'amaryl',
+      'januvia',
+      'glucometer',
+      'glucose strip',
+    ],
+  },
+  {
+    category: 'Anti hypertensives',
+    keywords: [
+      'amlodipine',
+      'atenolol',
+      'metoprolol',
+      'propranolol',
+      'lisinopril',
+      'enalapril',
+      'losartan',
+      'valsartan',
+      'nifedipine',
+      'hydralazine',
+      'hypertension',
+      'antihypertensive',
+      'blood pressure',
+      'ace inhibitor',
+      'calcium channel',
+    ],
+  },
+  {
+    category: 'Diuretics',
+    keywords: [
+      'furosemide',
+      'hydrochlorothiazide',
+      'spironolactone',
+      'amiloride',
+      'bendroflumethiazide',
+      'diuretic',
+      'lasix',
+    ],
+  },
+  {
+    category: 'Antacids',
+    keywords: [
+      'antacid',
+      'gaviscon',
+      'maalox',
+      'magnesium trisilicate',
+      'aluminium hydroxide',
+      'calcium carbonate chew',
+    ],
+  },
+  {
+    category: 'Antiseptics',
+    keywords: [
+      'antiseptic',
+      'chlorhexidine',
+      'povidone iodine',
+      'betadine',
+      'hydrogen peroxide',
+      'savlon',
+      'detol',
+      'dettol',
+      'disinfectant',
+      'hand sanitizer',
+      'sanitiser',
+    ],
+  },
+  {
+    category: 'Cough & Cold products',
+    keywords: [
+      'cough',
+      'cold',
+      'flu syrup',
+      'expectorant',
+      'mucolytic',
+      'ambroxol',
+      'bromhexine',
+      'guaifenesin',
+      'dextromethorphan',
+      'codral',
+      'benylin',
+      'robitussin',
+    ],
+  },
+  {
+    category: 'Vitamins',
+    keywords: [
+      'probiotic',
+      'cranberry',
+      'vitamin',
+      'multivitamin',
+      'b complex',
+      'b-complex',
+      'vit c',
+      'vit d',
+      'folic acid',
+      'folate',
+      'ascorbic',
+      'thiamine',
+      'riboflavin',
+      'niacin',
+      'pyridoxine',
+      'cyanocobalamin',
+      'zinc tablet',
+      'calcium tablet',
+      'iron tablet',
+      'ferrous',
+    ],
+  },
+  {
+    category: 'Tonics',
+    keywords: [
+      'tonic',
+      'appetizer',
+      'appetiser',
+      'blood tonic',
+      'hematinic',
+      '3fer',
+      'ferrous',
+      'folic',
+      'b12',
+      'multivite',
+    ],
+  },
+  {
+    category: 'Herbals',
+    keywords: [
+      'herbal',
+      'herb',
+      'moringa',
+      'neem',
+      'bitter leaf',
+      'ginger mixture',
+      'garlic',
+      'mixture',
+      'ginseng',
+      'echinacea',
+      'traditional',
+      'green tea',
+      'slimming tea',
+    ],
+  },
+  {
+    category: 'Gastrointestinal',
+    keywords: [
+      'omeprazole',
+      'pantoprazole',
+      'lansoprazole',
+      'ranitidine',
+      'loperamide',
+      'metoclopramide',
+      'domperidone',
+      'ondansetron',
+      'hyoscine',
+      'buscopan',
+      'lactulose',
+      'bisacodyl',
+      'senna',
+      'ulcer',
+      'reflux',
+      'gerd',
+      'ppi',
+      'gastro',
+      'intestinal',
+      'stomach',
+      'nausea',
+      'vomit',
+      'diarr',
+      'constipation',
+      'laxative',
+    ],
+  },
+  {
+    category: 'Cosmetics',
+    keywords: [
+      'cosmetic',
+      'lipstick',
+      'foundation',
+      'mascara',
+      'perfume',
+      'fragrance',
+      'makeup',
+      'beauty cream',
+      'face cream',
+      'body cream cosmetic',
+    ],
+  },
+  {
+    category: 'Toiletories',
+    keywords: [
+      'toilet',
+      'toothpaste',
+      'toothbrush',
+      'mouthwash',
+      'dental',
+      'floss',
+      'deodorant',
+      'sanitary pad',
+      'tampon',
+      'panty liner',
+      'tissue',
+      'wipe',
+    ],
+  },
+  {
+    category: 'Skin products',
+    keywords: [
+      'skin',
+      'derma',
+      'eczema',
+      'psoriasis',
+      'acne',
+      'sunscreen',
+      'sun block',
+      'moistur',
+      'lotion',
+      'emollient',
+      'benzyl benzoate',
+      'calamine',
+      'hydrocortisone cream',
+      'candid',
+    ],
+  },
+  {
+    category: 'Creams/Ointments',
+    keywords: [
+      'cream',
+      'ointment',
+      'unguent',
+      'topical',
+      'gel ',
+      'balm',
+      'pomade',
+      'aboniki',
+      'rub ',
+    ],
+  },
+  {
+    category: 'Anti-inflammatories',
+    keywords: [
+      'ibuprofen',
+      'diclofenac',
+      'naproxen',
+      'indomethacin',
+      'piroxicam',
+      'meloxicam',
+      'celecoxib',
+      'brufen',
+      'voltaren',
+      'anti-inflammatory',
+      'antiinflammatory',
+      'nsaid',
+    ],
+  },
+  {
+    category: 'Analgesics',
+    keywords: [
+      'paracetamol',
+      'acetaminophen',
+      'aspirin',
+      'tramadol',
+      'morphine',
+      'codeine phosphate',
+      'panadol',
+      'tylenol',
+      'analgesic',
+      'pain',
+      'dolor',
+    ],
+  },
+];
+
+function scoreKeywords(searchText: string, keywords: string[]): number {
+  let score = 0;
+  for (const keyword of keywords) {
+    if (searchText.includes(keyword)) {
+      score += keyword.length;
+    }
+  }
+  return score;
+}
+
+function matchByFormPatterns(nameUpper: string): ProductCategory | null {
+  if (
+    /\b(INF|INFUSION|DEXTROSE|GLUCOSE INF|NS |NORMAL SALINE|RINGER)\b/.test(
+      nameUpper
+    )
+  ) {
+    return 'Gastrointestinal';
+  }
+  if (/\b(INJ|INJECTION|IV |IM |AMP)\b/.test(nameUpper)) {
+    return null;
+  }
+  if (/\b(EYE|EAR|OPHTHAL|OTIC)\b/.test(nameUpper)) {
+    return 'Skin products';
+  }
+  return null;
+}
 
 /**
- * Categorizes a drug based on its name and description
+ * Therapeutic / product category from name and optional description.
  */
-export function categorizeDrug(name: string, description?: string): string {
+export function categorizeDrug(name: string, description?: string): ProductCategory {
   const searchText = `${name} ${description || ''}`.toLowerCase();
+  const nameUpper = (name || '').toUpperCase();
 
-  // Score each category based on keyword matches
-  const categoryScores: Record<string, number> = {};
-
-  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-    let score = 0;
-    for (const keyword of keywords) {
-      if (searchText.includes(keyword)) {
-        score += keyword.length; // Longer keywords get more weight
-      }
+  let best: { category: ProductCategory; score: number } | null = null;
+  for (const rule of CATEGORY_RULES) {
+    const score = scoreKeywords(searchText, rule.keywords);
+    if (score > 0 && (!best || score > best.score)) {
+      best = { category: rule.category, score };
     }
-    if (score > 0) {
-      categoryScores[category] = score;
+  }
+  if (best) return best.category;
+
+  const formCategory = matchByFormPatterns(nameUpper);
+  if (formCategory) return formCategory;
+
+  const legacy = normalizeLegacyCategory(name);
+  if (legacy) return legacy;
+
+  return UNCATEGORIZED_CATEGORY;
+}
+
+type SubRule = { sub: ProductSubCategory; patterns: RegExp[] };
+
+const SUBCATEGORY_RULES: SubRule[] = [
+  {
+    sub: 'Toiletries & Cosmetics',
+    patterns: [
+      /\b(SOAP|SHAMPOO|CONDITIONER|TOOTHPASTE|TOOTHBRUSH|DEODORANT|COSMETIC|LOTION|PERFUME|SANITARY|TISSUE|WIPE|BEAUTY)\b/i,
+    ],
+  },
+  {
+    sub: 'Device',
+    patterns: [
+      /\b(DEVICE|METER|GLUCOMETER|THERMOMETER|NEBULIZER|NEBULISER|INHALER|STRIP|TEST KIT|SYRINGE|NEEDLE|BP APPARATUS|STETHOSCOPE|MASK|GLOVE)\b/i,
+    ],
+  },
+  {
+    sub: 'Injections',
+    patterns: [
+      /\b(INJ|INJECTION|INJECTABLE|INFUSION|INF |IV |IM |AMP(OULE)?|VIAL)\b/i,
+    ],
+  },
+  {
+    sub: 'Syrups/Suspension',
+    patterns: [
+      /\b(SYR|SYRUP|SUSP|SUSPENSION|MIXTURE|ELIXIR|LINCTUS)\b/i,
+    ],
+  },
+  {
+    sub: 'Drops',
+    patterns: [/\b(DROP|DROPS|EYE DROP|EAR DROP|OPHTHAL|OTIC)\b/i],
+  },
+  {
+    sub: 'Creams/Ointments',
+    patterns: [/\b(CREAM|OINT|OINTMENT|GEL|TOPICAL|BALM|PASTE)\b/i],
+  },
+  {
+    sub: 'Capsules',
+    patterns: [/\b(CAP|CAPS|CAPSULE|CAPSULES)\b/i],
+  },
+  {
+    sub: 'Powdered',
+    patterns: [
+      /\b(POWDER|POWD|SACHET|GRANULE|EFFERVESCENT|ORS PACK)\b/i,
+    ],
+  },
+  {
+    sub: 'Tablets',
+    patterns: [/\b(TAB|TABLET|TABLETS|FILM COATED TAB)\b/i],
+  },
+];
+
+/**
+ * Dosage form / type subcategory from product name.
+ */
+export function inferProductSubCategory(
+  name: string,
+  description?: string
+): ProductSubCategory | undefined {
+  const text = `${name} ${description || ''}`;
+
+  for (const rule of SUBCATEGORY_RULES) {
+    if (rule.patterns.some((p) => p.test(text))) {
+      return rule.sub;
     }
   }
 
-  // Return the category with the highest score
-  if (Object.keys(categoryScores).length > 0) {
-    const bestCategory = Object.entries(categoryScores).sort(
-      (a, b) => b[1] - a[1]
-    )[0][0];
-    return bestCategory;
-  }
+  return undefined;
+}
 
-  // Default fallback categories based on common patterns
+/** Classify both category and subcategory. */
+export function classifyProduct(
+  name: string,
+  description?: string,
+  options?: { previousCategory?: string }
+): { category: ProductCategory; subCategory?: ProductSubCategory } {
+  let category = categorizeDrug(name, description);
   if (
-    name.includes('INF') ||
-    name.includes('INFUSION') ||
-    name.includes('DEXTROSE') ||
-    name.includes('GLUCOSE INF')
+    category === UNCATEGORIZED_CATEGORY &&
+    options?.previousCategory
   ) {
-    return 'IV FLUIDS (INFUSIONS)';
-  }
-
-  if (name.includes('INJ') || name.includes('INJECTION')) {
-    return 'SPECIALTY INJECTIONS';
-  }
-
-  if (name.includes('EYE') || name.includes('OPHTHALMIC')) {
-    return 'EYE & EAR PREPARATIONS';
-  }
-
-  if (
-    name.includes('CREAM') ||
-    name.includes('OINTMENT') ||
-    name.includes('TOPICAL')
-  ) {
-    return 'DERMATOLOGICAL (SKIN) MEDICINES';
-  }
-
-  if (
-    name.includes('SYR') ||
-    name.includes('SUSP') ||
-    name.includes('MIXTURE')
-  ) {
-    // Could be various categories, but common ones:
-    if (
-      name.includes('COUGH') ||
-      name.includes('COLD') ||
-      name.includes('FLU')
-    ) {
-      return 'RESPIRATORY MEDICINES';
-    }
-    if (
-      name.includes('BITTER') ||
-      name.includes('TONIC') ||
-      name.includes('HERBAL')
-    ) {
-      return 'HERBAL PRODUCTS';
+    const fromLegacy = normalizeLegacyCategory(options.previousCategory);
+    if (fromLegacy && fromLegacy !== UNCATEGORIZED_CATEGORY) {
+      category = fromLegacy;
     }
   }
+  const sub = inferProductSubCategory(name, description);
+  if (sub && PRODUCT_SUBCATEGORIES.includes(sub)) {
+    return { category, subCategory: sub };
+  }
+  return { category };
+}
 
-  // Default to OTC if no match found
-  return 'OTC (OVER-THE-COUNTER) PRODUCTS';
+/** Map legacy Firestore category strings to the new list (fallback). */
+const LEGACY_CATEGORY_MAP: Record<string, ProductCategory> = {
+  'ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)': 'Analgesics',
+  'ANTIPYRETICS (FEVER REDUCERS)': 'Analgesics',
+  ANTIBIOTICS: 'Antibiotics',
+  'ANTIMICROBIALS (NON-ANTIBIOTIC)': 'Antiseptics',
+  'ANTI-MALARIALS': 'Anti-Malarials',
+  'ANTIPARASITICS (ANTI-WORM MEDICINES)': 'Anthelmintics',
+  ANTIVIRALS: 'Uncategorized',
+  ANTIFUNGALS: 'Anti-Fungals',
+  'GASTROINTESTINAL MEDICINES': 'Gastrointestinal',
+  'CARDIOVASCULAR MEDICINES': 'Anti hypertensives',
+  'DIABETES MEDICINES': 'Anti diabetics',
+  'RESPIRATORY MEDICINES': 'Anti-Asthmatic and Nasal Decongestants',
+  'VITAMINS & MINERALS': 'Vitamins',
+  'DIETARY OR NUTRITIONAL SUPPLEMENTS': 'Tonics',
+  'HORMONAL MEDICATIONS': 'Uncategorized',
+  'NEUROLOGICAL & PSYCHIATRIC MEDICINES': 'Uncategorized',
+  'DERMATOLOGICAL (SKIN) MEDICINES': 'Skin products',
+  'EYE & EAR PREPARATIONS': 'Skin products',
+  'SPECIALTY INJECTIONS': 'Uncategorized',
+  'IV FLUIDS (INFUSIONS)': 'Gastrointestinal',
+  'ANTIHELMINTICS (Worm medicines)': 'Anthelmintics',
+  'OTC (OVER-THE-COUNTER) PRODUCTS': 'Uncategorized',
+  'HERBAL PRODUCTS': 'Herbals',
+  'MEDICAL CONSUMABLES': 'Antiseptics',
+  'MEDICAL DEVICES': 'Uncategorized',
+  'BABY & MATERNAL CARE ITEMS': 'Toiletories',
+  'HYGIENE & PERSONAL CARE': 'Toiletories',
+  Uncategorized: 'Uncategorized',
+};
+
+export function normalizeLegacyCategory(
+  legacy: string | undefined
+): ProductCategory | undefined {
+  if (!legacy) return undefined;
+  if (PRODUCT_CATEGORIES.includes(legacy as ProductCategory)) {
+    return legacy as ProductCategory;
+  }
+  return LEGACY_CATEGORY_MAP[legacy];
 }

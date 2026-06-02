@@ -1,0 +1,689 @@
+{
+  "generatedAt": "2026-06-02T21:36:17.676Z",
+  "total": 1924,
+  "toUpdate": 1881,
+  "categoryCounts": {
+    "Gastrointestinal": 67,
+    "Herbals": 45,
+    "Vitamins": 65,
+    "Skin products": 93,
+    "Tonics": 75,
+    "Antiseptics": 49,
+    "Creams/Ointments": 91,
+    "Uncategorized": 989,
+    "Cough & Cold products": 75,
+    "Analgesics": 47,
+    "Anthelmintics": 13,
+    "Antibiotics": 87,
+    "Toiletories": 75,
+    "Anti-Asthmatic and Nasal Decongestants": 23,
+    "Anti hypertensives": 37,
+    "Antacids": 10,
+    "Anti-inflammatories": 15,
+    "Anti-Malarials": 14,
+    "Diuretics": 7,
+    "Anti-Fungals": 14,
+    "Anti diabetics": 25,
+    "Antihistamines": 5,
+    "Cosmetics": 1,
+    "Oral Rehydration Salts": 2
+  },
+  "subCounts": {
+    "Injections": 65,
+    "Toiletries & Cosmetics": 60,
+    "Syrups/Suspension": 347,
+    "Creams/Ointments": 96,
+    "Capsules": 164,
+    "Drops": 61,
+    "Tablets": 78,
+    "Device": 25,
+    "Powdered": 8
+  },
+  "sample": [
+    {
+      "id": "sf_10d_glucose_inf_500ml",
+      "name": "10D GLUCOSE INF 500ML",
+      "oldCategory": "DIABETES MEDICINES",
+      "newCategory": "Gastrointestinal",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_21_century_herbal_slimming_green_tea_24_s",
+      "name": "21 CENTURY HERBAL SLIMMING GREEN TEA 24'S",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Herbals"
+    },
+    {
+      "id": "sf_21st_century_cranberry_probiotics_60_s",
+      "name": "21ST CENTURY CRANBERRY+ PROBIOTICS 60'S",
+      "oldCategory": "DIETARY OR NUTRITIONAL SUPPLEMENTS",
+      "newCategory": "Vitamins"
+    },
+    {
+      "id": "sf_2b_benzyl_benzoate_2_lotion_100ml",
+      "name": "2B(BENZYL BENZOATE) 2% LOTION 100ML",
+      "oldCategory": "HYGIENE & PERSONAL CARE",
+      "newCategory": "Skin products",
+      "subCategory": "Toiletries & Cosmetics"
+    },
+    {
+      "id": "sf_3fer_syr",
+      "name": "3FER SYR",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Tonics",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_3p_garlic_mixture",
+      "name": "3P GARLIC MIXTURE",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Herbals",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_5d_dextrose_5_infusion_500ml",
+      "name": "5D (DEXTROSE 5%) INFUSION 500ML",
+      "oldCategory": "IV FLUIDS (INFUSIONS)",
+      "newCategory": "Gastrointestinal",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_a_e_plaster_water_proof_20_s",
+      "name": "A&E PLASTER WATER PROOF 20'S",
+      "oldCategory": "MEDICAL CONSUMABLES",
+      "newCategory": "Antiseptics"
+    },
+    {
+      "id": "sf_aboniki",
+      "name": "ABONIKI",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Creams/Ointments"
+    },
+    {
+      "id": "sf_accu_check_active_strips",
+      "name": "ACCU-CHECK ACTIVE STRIPS",
+      "oldCategory": "MEDICAL CONSUMABLES",
+      "newCategory": "Antiseptics"
+    },
+    {
+      "id": "sf_accu_check_instant_kit",
+      "name": "ACCU-CHECK INSTANT KIT",
+      "oldCategory": "MEDICAL CONSUMABLES",
+      "newCategory": "Antiseptics"
+    },
+    {
+      "id": "sf_accu_check_instant_strips",
+      "name": "ACCU-CHECK INSTANT STRIPS",
+      "oldCategory": "MEDICAL CONSUMABLES",
+      "newCategory": "Antiseptics"
+    },
+    {
+      "id": "sf_acetylcysteine_400mg_2ml_mucomix_inj_20_s",
+      "name": "ACETYLCYSTEINE 400MG/2ML (MUCOMIX) INJ  20'S",
+      "oldCategory": "SPECIALTY INJECTIONS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_aciclovir_200mg_28_s_exeter",
+      "name": "ACICLOVIR 200MG 28'S EXETER",
+      "oldCategory": "ANTIVIRALS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_aciclovir_200mg_tabs_25_s_uk",
+      "name": "ACICLOVIR 200MG TABS 25'S UK",
+      "oldCategory": "ANTIVIRALS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_aciclovir_400mg_tabs_56_s_uk",
+      "name": "ACICLOVIR 400MG TABS 56'S UK",
+      "oldCategory": "ANTIVIRALS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_aciclovir_cream_2gm_5_uk_virasorb",
+      "name": "ACICLOVIR CREAM 2GM 5% UK (VIRASORB)",
+      "oldCategory": "ANTIVIRALS",
+      "newCategory": "Creams/Ointments",
+      "subCategory": "Creams/Ointments"
+    },
+    {
+      "id": "sf_aciclovir_cream_pharmanova",
+      "name": "ACICLOVIR CREAM-PHARMANOVA",
+      "oldCategory": "ANTIVIRALS",
+      "newCategory": "Creams/Ointments",
+      "subCategory": "Creams/Ointments"
+    },
+    {
+      "id": "sf_aciclovir_tabs_200mg_28_s_vega",
+      "name": "ACICLOVIR TABS 200MG 28'S VEGA",
+      "oldCategory": "ANTIVIRALS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_acidom_40mg_omeprazole_inj",
+      "name": "ACIDOM 40MG(OMEPRAZOLE) INJ",
+      "oldCategory": "GASTROINTESTINAL MEDICINES",
+      "newCategory": "Gastrointestinal",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_acidom_caps_2_x_10_s",
+      "name": "ACIDOM CAPS 2 X 10'S",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_aciguard_o_susp",
+      "name": "ACIGUARD-O SUSP",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_aciguard_susp_200ml",
+      "name": "ACIGUARD SUSP 200ML",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_acne_oval_facial_bar_clear_soap",
+      "name": "ACNE OVAL FACIAL BAR(CLEAR SOAP)",
+      "oldCategory": "DERMATOLOGICAL (SKIN) MEDICINES",
+      "newCategory": "Skin products",
+      "subCategory": "Toiletries & Cosmetics"
+    },
+    {
+      "id": "sf_acne_transparent_bar_treatment_soap",
+      "name": "ACNE TRANSPARENT BAR( TREATMENT SOAP)",
+      "oldCategory": "DERMATOLOGICAL (SKIN) MEDICINES",
+      "newCategory": "Skin products",
+      "subCategory": "Toiletries & Cosmetics"
+    },
+    {
+      "id": "sf_actifed_dry_cough_syr",
+      "name": "ACTIFED DRY COUGH SYR",
+      "oldCategory": "RESPIRATORY MEDICINES",
+      "newCategory": "Cough & Cold products",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_actifed_multiaction_tabs_12_s",
+      "name": "ACTIFED MULTIACTION TABS 12'S",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_actilife",
+      "name": "ACTILIFE",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_actilife_womens_flora_tabs",
+      "name": "ACTILIFE WOMENS FLORA TABS",
+      "oldCategory": "DIETARY OR NUTRITIONAL SUPPLEMENTS",
+      "newCategory": "Tonics"
+    },
+    {
+      "id": "sf_actrapid_flexpen_3ml_5_s",
+      "name": "ACTRAPID FLEXPEN 3ML 5'S",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_actrapid_hm_100iu",
+      "name": "ACTRAPID HM 100IU",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_acyvlovir_denk_200mg",
+      "name": "ACYVLOVIR DENK 200MG",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_adalat_la_30mg_tabs",
+      "name": "ADALAT LA 30MG TABS",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_adams_secret_1_s",
+      "name": "ADAMS SECRET 1'S",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_addyzoa_capsules",
+      "name": "ADDYZOA CAPSULES",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_adidas_spray_150ml",
+      "name": "ADIDAS SPRAY 150ML",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_adidas_spray_200ml",
+      "name": "ADIDAS SPRAY 200ML",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_adom_koo_mixture",
+      "name": "ADOM KOO MIXTURE",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Herbals",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_adom_koo_oint",
+      "name": "ADOM KOO OINT",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Creams/Ointments"
+    },
+    {
+      "id": "sf_adom_natural_man_caps",
+      "name": "ADOM NATURAL MAN CAPS",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Herbals",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_adom_natural_man_tonic",
+      "name": "ADOM NATURAL MAN TONIC",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Tonics"
+    },
+    {
+      "id": "sf_adom_p_away_mixture",
+      "name": "ADOM P.AWAY MIXTURE",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Herbals",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_adrenaline_inj_1ml_1ml_10_s",
+      "name": "ADRENALINE INJ 1ML/1ML 10'S",
+      "oldCategory": "SPECIALTY INJECTIONS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_adrenaline_injection_1ml_1_s",
+      "name": "ADRENALINE INJECTION 1ML 1'S",
+      "oldCategory": "SPECIALTY INJECTIONS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_adutwumwaa_tonic",
+      "name": "ADUTWUMWAA TONIC",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Tonics"
+    },
+    {
+      "id": "sf_advantan_0_1_krem",
+      "name": "ADVANTAN 0.1% KREM",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_advil_200mg_24_s",
+      "name": "ADVIL 200MG 24'S",
+      "oldCategory": "ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)",
+      "newCategory": "Analgesics"
+    },
+    {
+      "id": "sf_advil_liqui_gels_minis_20_s",
+      "name": "ADVIL LIQUI-GELS MINIS 20'S",
+      "oldCategory": "ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)",
+      "newCategory": "Analgesics"
+    },
+    {
+      "id": "sf_advil_liquigel_120_s_x2",
+      "name": "ADVIL LIQUIGEL 120'S X2",
+      "oldCategory": "ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)",
+      "newCategory": "Creams/Ointments"
+    },
+    {
+      "id": "sf_agbeve_tonic",
+      "name": "AGBEVE TONIC",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Tonics"
+    },
+    {
+      "id": "sf_agbeveh_phevah_330ml",
+      "name": "AGBEVEH PHEVAH 330ML",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_airwick_automatic_refil_250ml",
+      "name": "AIRWICK AUTOMATIC REFIL 250ML",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_aj_wellness_vital_b_plus_caps_30_s",
+      "name": "AJ WELLNESS VITAL B PLUS CAPS 30'S",
+      "oldCategory": "DIETARY OR NUTRITIONAL SUPPLEMENTS",
+      "newCategory": "Tonics",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_aj_wellness_vital_man_tabs_30_s",
+      "name": "AJ WELLNESS VITAL MAN TABS 30'S",
+      "oldCategory": "DIETARY OR NUTRITIONAL SUPPLEMENTS",
+      "newCategory": "Tonics"
+    },
+    {
+      "id": "sf_aj_wellness_vital_seas_silver_caps_30_s",
+      "name": "AJ WELLNESS VITAL SEAS SILVER CAPS 30'S",
+      "oldCategory": "DIETARY OR NUTRITIONAL SUPPLEMENTS",
+      "newCategory": "Tonics",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_aj_wellness_vital_woman_caps_30_s",
+      "name": "AJ WELLNESS VITAL WOMAN CAPS 30'S",
+      "oldCategory": "DIETARY OR NUTRITIONAL SUPPLEMENTS",
+      "newCategory": "Tonics",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_akanayoo_bitters_plain",
+      "name": "AKANAYOO BITTERS PLAIN",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Herbals"
+    },
+    {
+      "id": "sf_albendazole_400mg_obend",
+      "name": "ALBENDAZOLE 400MG(OBEND)",
+      "oldCategory": "ANTIPARASITICS (ANTI-WORM MEDICINES)",
+      "newCategory": "Anthelmintics"
+    },
+    {
+      "id": "sf_aldactone_25mg_tabs_100_s",
+      "name": "ALDACTONE 25MG TABS 100'S",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_aldomet_250mg_tabs_60_s",
+      "name": "ALDOMET 250MG TABS 60'S",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_alendronic_acid_70mg_tabs_4_s",
+      "name": "ALENDRONIC ACID 70MG TABS 4'S",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_alka_5_syr_100ml",
+      "name": "ALKA-5 SYR 100ML",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_alka_seltzer_x_10",
+      "name": "ALKA SELTZER X 10",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_allerex_eye_drop",
+      "name": "ALLEREX EYE DROP",
+      "oldCategory": "EYE & EAR PREPARATIONS",
+      "newCategory": "Skin products",
+      "subCategory": "Drops"
+    },
+    {
+      "id": "sf_allupirinol_300mg_tabs_28_s_uk",
+      "name": "ALLUPIRINOL 300MG TABS 28'S UK",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_almetro_metronidazole_injection",
+      "name": "ALMETRO (METRONIDAZOLE) INJECTION",
+      "oldCategory": "SPECIALTY INJECTIONS",
+      "newCategory": "Antibiotics",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_almol_paracetamol_infusion_100ml",
+      "name": "ALMOL PARACETAMOL INFUSION 100ML",
+      "oldCategory": "ANALGESICS & ANTI-INFLAMMATORIES (PAINKILLERS)",
+      "newCategory": "Analgesics",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_alpha_garlic_caps_30_s",
+      "name": "ALPHA GARLIC CAPS 30'S",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Herbals",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_alpha_garlic_caps_60_s",
+      "name": "ALPHA GARLIC CAPS 60'S",
+      "oldCategory": "HERBAL PRODUCTS",
+      "newCategory": "Herbals",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_alpha_vitamin_c_eff_1000mg_tabs_20_s_plain",
+      "name": "ALPHA VITAMIN C EFF 1000MG TABS 20'S PLAIN",
+      "oldCategory": "VITAMINS & MINERALS",
+      "newCategory": "Vitamins"
+    },
+    {
+      "id": "sf_alvit_c_zinc_d3_tube",
+      "name": "ALVIT-C ZINC & D3 TUBE",
+      "oldCategory": "VITAMINS & MINERALS",
+      "newCategory": "Vitamins"
+    },
+    {
+      "id": "sf_always_pantyliner_normal_20_s",
+      "name": "ALWAYS PANTYLINER NORMAL 20'S",
+      "oldCategory": "HYGIENE & PERSONAL CARE",
+      "newCategory": "Toiletories"
+    },
+    {
+      "id": "sf_amantadine_tabs_100mg_56_s",
+      "name": "AMANTADINE TABS 100MG 56'S",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amciclox_susp_100ml",
+      "name": "AMCICLOX SUSP 100ML",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_amcof_adult",
+      "name": "AMCOF ADULT",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amcof_baby",
+      "name": "AMCOF BABY",
+      "oldCategory": "BABY & MATERNAL CARE ITEMS",
+      "newCategory": "Toiletories"
+    },
+    {
+      "id": "sf_amcof_chesty_syr_200ml",
+      "name": "AMCOF CHESTY SYR 200ML",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_amcof_junior",
+      "name": "AMCOF JUNIOR",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amikacin_injection",
+      "name": "AMIKACIN INJECTION",
+      "oldCategory": "SPECIALTY INJECTIONS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_aminophylline_250mg_inj_1ml_50_s_per_amp",
+      "name": "AMINOPHYLLINE 250MG INJ 1ML 50'S PER AMP",
+      "oldCategory": "RESPIRATORY MEDICINES",
+      "newCategory": "Anti-Asthmatic and Nasal Decongestants",
+      "subCategory": "Injections"
+    },
+    {
+      "id": "sf_amitriptyline_10mg_tabs_28_s_uk",
+      "name": "AMITRIPTYLINE 10MG TABS 28'S UK",
+      "oldCategory": "NEUROLOGICAL & PSYCHIATRIC MEDICINES",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amitriptyline_25mg_teva",
+      "name": "AMITRIPTYLINE 25MG TEVA",
+      "oldCategory": "NEUROLOGICAL & PSYCHIATRIC MEDICINES",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amlo_denk_10mg_tabs_10x5",
+      "name": "AMLO-DENK 10MG TABS 10X5",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amlo_denk_5mg_10x5",
+      "name": "AMLO DENK 5MG 10X5",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amlodipine_bes_tab_10mg_tev_28",
+      "name": "AMLODIPINE BES TAB 10MG TEV 28",
+      "oldCategory": "CARDIOVASCULAR MEDICINES",
+      "newCategory": "Anti hypertensives",
+      "subCategory": "Tablets"
+    },
+    {
+      "id": "sf_amlodipine_bes_tab_5mg_tev_28",
+      "name": "AMLODIPINE BES TAB 5MG TEV 28",
+      "oldCategory": "CARDIOVASCULAR MEDICINES",
+      "newCategory": "Anti hypertensives",
+      "subCategory": "Tablets"
+    },
+    {
+      "id": "sf_amokxinate_1g_tabs_14_s",
+      "name": "AMOKXINATE 1G TABS 14'S",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amokxinate_457mg_susp",
+      "name": "AMOKXINATE 457MG SUSP",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_amokxinate_625mg_tabs",
+      "name": "AMOKXINATE 625MG TABS",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amovulin_228_susp",
+      "name": "AMOVULIN 228 SUSP",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_amovulin_457",
+      "name": "AMOVULIN 457",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amovulin_625",
+      "name": "AMOVULIN 625",
+      "oldCategory": "OTC (OVER-THE-COUNTER) PRODUCTS",
+      "newCategory": "Uncategorized"
+    },
+    {
+      "id": "sf_amoxi_clav_1gm_14_s_luex",
+      "name": "AMOXI + CLAV 1GM  14'S LUEX",
+      "oldCategory": "ANTIBIOTICS",
+      "newCategory": "Antibiotics"
+    },
+    {
+      "id": "sf_amoxi_clav_228mg_susp_70ml_luex",
+      "name": "AMOXI & CLAV 228MG SUSP 70ML LUEX",
+      "oldCategory": "ANTIBIOTICS",
+      "newCategory": "Antibiotics",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_amoxi_clav_475mg_susp_70ml_luex",
+      "name": "AMOXI & CLAV 475MG SUSP 70ML LUEX",
+      "oldCategory": "ANTIBIOTICS",
+      "newCategory": "Antibiotics",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_amoxi_clav_625_tabs_14_s_luex",
+      "name": "AMOXI CLAV. 625 TABS 14'S LUEX",
+      "oldCategory": "ANTIBIOTICS",
+      "newCategory": "Antibiotics"
+    },
+    {
+      "id": "sf_amoxicillin_250mg_caps_50x10_letap",
+      "name": "AMOXICILLIN 250MG CAPS 50X10-LETAP",
+      "oldCategory": "ANTIBIOTICS",
+      "newCategory": "Antibiotics",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_amoxicillin_500mg_caps_10x10_letap",
+      "name": "AMOXICILLIN 500MG CAPS 10X10 LETAP",
+      "oldCategory": "ANTIBIOTICS",
+      "newCategory": "Antibiotics",
+      "subCategory": "Capsules"
+    },
+    {
+      "id": "sf_amoxicillin_susp_100ml_letap",
+      "name": "AMOXICILLIN SUSP 100ML LETAP",
+      "oldCategory": "ANTIBIOTICS",
+      "newCategory": "Antibiotics",
+      "subCategory": "Syrups/Suspension"
+    },
+    {
+      "id": "sf_amoxicillin_susp_100ml_m_g",
+      "name": "AMOXICILLIN SUSP 100ML M&G",
+      "oldCategory": "ANTIBIOTICS",
+      "newCategory": "Antibiotics",
+      "subCategory": "Syrups/Suspension"
+    }
+  ]
+}

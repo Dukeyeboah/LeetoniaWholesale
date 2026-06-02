@@ -82,6 +82,7 @@ import { useAuth } from '@/lib/auth-context';
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
 import { AdminStorefrontInventoryItem } from '@/components/admin-storefront-inventory-item';
 import { AdminStoreroomInventoryItem } from '@/components/admin-storeroom-inventory-item';
+import { AdminPharmacyMobileCard } from '@/components/admin-pharmacy-mobile-card';
 import type { Pharmacy } from '@/types';
 import {
   applyCreditBalanceOnOrderCompleted,
@@ -103,7 +104,7 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import type { User } from '@/types';
-import { PRODUCT_CATEGORIES } from '@/lib/categories';
+import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from '@/lib/categories';
 import { createOrderStatusNotification } from '@/lib/notifications';
 import { printOrderInvoice } from '@/lib/print-invoice';
 import { paymentMethodLabel } from '@/lib/payment-method-label';
@@ -337,7 +338,11 @@ export default function AdminDashboard() {
   >('storefront');
   const [inventoryViewLayout, setInventoryViewLayout] = useState<
     'list' | 'grid'
-  >('list');
+  >('grid');
+  const [inventoryCategoryFilter, setInventoryCategoryFilter] =
+    useState<string>('all');
+  const [inventorySubCategoryFilter, setInventorySubCategoryFilter] =
+    useState<string>('all');
   const [productCountView, setProductCountView] = useState<
     'wholesale' | 'storeroom'
   >('wholesale');
@@ -363,11 +368,25 @@ export default function AdminDashboard() {
   }, [products, inventorySortMode]);
 
   const inventoryProductsFiltered = useMemo(() => {
-    if (inventoryLetterFilter === 'all') return sortedInventoryProducts;
-    return sortedInventoryProducts.filter(
-      (p) => getFirstCharacterGroup(p.name || '') === inventoryLetterFilter
-    );
-  }, [sortedInventoryProducts, inventoryLetterFilter]);
+    let list = sortedInventoryProducts;
+    if (inventoryLetterFilter !== 'all') {
+      list = list.filter(
+        (p) => getFirstCharacterGroup(p.name || '') === inventoryLetterFilter
+      );
+    }
+    if (inventoryCategoryFilter !== 'all') {
+      list = list.filter((p) => p.category === inventoryCategoryFilter);
+    }
+    if (inventorySubCategoryFilter !== 'all') {
+      list = list.filter((p) => p.subCategory === inventorySubCategoryFilter);
+    }
+    return list;
+  }, [
+    sortedInventoryProducts,
+    inventoryLetterFilter,
+    inventoryCategoryFilter,
+    inventorySubCategoryFilter,
+  ]);
 
   const allStoreroomRows = useMemo(() => getStoreroomRows(), []);
   const productsByWarehouseCode = useMemo(
@@ -1824,19 +1843,23 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className='space-y-8'>
-      <div className='flex flex-col md:flex-row justify-between md:items-center gap-4'>
-        <h1 className='text-3xl font-serif font-bold text-primary'>
+    <div className='space-y-6 sm:space-y-8 w-full min-w-0 max-w-full overflow-x-hidden'>
+      <div className='flex flex-col sm:flex-row justify-between sm:items-center gap-3'>
+        <h1 className='text-2xl sm:text-3xl font-serif font-bold text-primary'>
           Admin Dashboard
         </h1>
-        <div className='flex gap-2'>
-          <Button onClick={() => openProductDialog()}>
-            <Plus className='mr-2 h-4 w-4' /> Add Product
+        <div className='flex gap-2 shrink-0'>
+          <Button
+            onClick={() => openProductDialog()}
+            className='w-full sm:w-auto'
+            size='sm'
+          >
+            <Plus className='mr-2 h-4 w-4 shrink-0' /> Add Product
           </Button>
         </div>
       </div>
 
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+      <div className='grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4'>
         <Card
           className='cursor-pointer hover:shadow-md transition-shadow'
           onClick={() => {
@@ -1911,7 +1934,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <div className='grid gap-4 md:grid-cols-3'>
+      <div className='grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
         <Card>
           <CardHeader className='pb-2'>
             <CardTitle className='text-sm font-medium text-muted-foreground'>
@@ -1988,37 +2011,59 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
-        <TabsList className='w-full justify-start h-12 bg-muted/50 p-1'>
-          <TabsTrigger value='inventory' className='h-full px-6'>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full min-w-0 max-w-full overflow-x-hidden'>
+        <TabsList className='w-full justify-start h-auto min-h-11 bg-muted/50 p-1 flex flex-wrap gap-1'>
+          <TabsTrigger
+            value='inventory'
+            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
+          >
             Manage Inventory
           </TabsTrigger>
-          <TabsTrigger value='orders' className='h-full px-6'>
+          <TabsTrigger
+            value='orders'
+            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
+          >
             Manage Orders
           </TabsTrigger>
-          <TabsTrigger value='history' className='h-full px-6'>
+          <TabsTrigger
+            value='history'
+            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
+          >
             Order History
           </TabsTrigger>
-          <TabsTrigger value='analytics' className='h-full px-6'>
+          <TabsTrigger
+            value='analytics'
+            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
+          >
             Analytics
           </TabsTrigger>
           {isSuperAdmin && (
-            <TabsTrigger value='staff' className='h-full px-6'>
-              Staff Management
+            <TabsTrigger
+              value='staff'
+              className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
+            >
+              Staff
             </TabsTrigger>
           )}
-          <TabsTrigger value='pharmacies' className='h-full px-6'>
-            <Building2 className='inline h-4 w-4 mr-1.5 align-text-bottom' />
+          <TabsTrigger
+            value='pharmacies'
+            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
+          >
+            <Building2 className='inline h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 align-text-bottom' />
             Pharmacies
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value='orders' className='mt-6 space-y-6'>
+        <TabsContent
+          value='orders'
+          className='mt-6 space-y-6 w-full min-w-0 max-w-full overflow-x-hidden'
+        >
           {/* Status Filter Tabs */}
           <div className='flex flex-wrap gap-2 border-b pb-4'>
             <Button
               variant={statusFilter === 'all' ? 'default' : 'outline'}
               size='sm'
+              className='text-xs sm:text-sm'
               onClick={() => setStatusFilter('all')}
             >
               All Orders ({orders.length})
@@ -2192,7 +2237,7 @@ export default function AdminDashboard() {
                       <CollapsibleTrigger asChild>
                         <button
                           type='button'
-                          className='flex w-full flex-row flex-wrap items-center justify-between gap-2 py-4 px-6 text-left hover:bg-secondary/50 transition-colors'
+                          className='flex w-full flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-between gap-2 py-4 px-4 sm:px-6 text-left hover:bg-secondary/50 transition-colors min-w-0'
                         >
                           <div className='flex min-w-0 items-start gap-2'>
                             <ChevronDown
@@ -2516,7 +2561,10 @@ export default function AdminDashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value='history' className='mt-6 space-y-6'>
+        <TabsContent
+          value='history'
+          className='mt-6 space-y-6 w-full min-w-0 max-w-full overflow-x-hidden'
+        >
           <div className='flex flex-col md:flex-row gap-4 items-center justify-between'>
             <h2 className='text-2xl font-serif font-bold'>Order History</h2>
             <div className='flex flex-wrap gap-2'>
@@ -2591,34 +2639,39 @@ export default function AdminDashboard() {
                       toggleHistoryOrderOpen(order.id, open)
                     }
                   >
-                    <div className='flex flex-col gap-2 bg-secondary/30 sm:flex-row sm:items-stretch'>
+                    <div className='flex flex-col bg-secondary/30 sm:flex-row sm:items-stretch min-w-0'>
                       <CollapsibleTrigger asChild>
                         <button
                           type='button'
-                          className='flex flex-1 items-center gap-3 px-4 py-4 text-left hover:bg-secondary/45 transition-colors min-w-0'
+                          className='flex flex-1 flex-col gap-3 px-4 py-4 text-left hover:bg-secondary/45 transition-colors min-w-0 sm:flex-row sm:items-center sm:gap-3'
                         >
-                          <ChevronDown
-                            className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform ${
-                              expandedHistoryOrderIds.has(order.id)
-                                ? 'rotate-180'
-                                : ''
-                            }`}
-                          />
-                          <div className='min-w-0 flex-1'>
-                            <CardTitle className='text-base font-mono'>
-                              Order {formatOrderLabel(order)}
-                            </CardTitle>
-                            <CardDescription>
-                              {getUserName(order.userId)} •{' '}
-                              {format(order.createdAt, 'MMM d, yyyy • h:mm a')}
-                            </CardDescription>
+                          <div className='flex items-start gap-3 min-w-0 w-full'>
+                            <ChevronDown
+                              className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform mt-0.5 ${
+                                expandedHistoryOrderIds.has(order.id)
+                                  ? 'rotate-180'
+                                  : ''
+                              }`}
+                            />
+                            <div className='min-w-0 flex-1'>
+                              <CardTitle className='text-base font-mono break-words'>
+                                Order {formatOrderLabel(order)}
+                              </CardTitle>
+                              <CardDescription className='break-words'>
+                                {getUserName(order.userId)} •{' '}
+                                {format(
+                                  order.createdAt,
+                                  'MMM d, yyyy • h:mm a'
+                                )}
+                              </CardDescription>
+                            </div>
                           </div>
-                          <div className='flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-4'>
+                          <div className='hidden sm:flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-4'>
                             <span className='font-bold tabular-nums'>
                               ₵
-                              {(order.total + (order.deliveryFee || 0)).toFixed(
-                                2
-                              )}
+                              {(
+                                order.total + (order.deliveryFee || 0)
+                              ).toFixed(2)}
                             </span>
                             <Badge
                               variant={
@@ -2637,11 +2690,34 @@ export default function AdminDashboard() {
                           </div>
                         </button>
                       </CollapsibleTrigger>
-                      <div className='flex items-center justify-end border-t border-border/50 px-4 py-2 sm:border-t-0 sm:border-l sm:py-4 sm:pr-4'>
+                      <div className='flex flex-wrap items-center justify-between gap-2 border-t border-border/50 px-4 py-3 sm:border-t-0 sm:border-l sm:flex-nowrap sm:justify-end sm:py-4 sm:pr-4 sm:pl-0'>
+                        <div className='flex flex-wrap items-center gap-2 min-w-0 sm:hidden'>
+                          <span className='font-bold tabular-nums text-base'>
+                            ₵
+                            {(order.total + (order.deliveryFee || 0)).toFixed(
+                              2
+                            )}
+                          </span>
+                          <Badge
+                            variant={
+                              order.status === 'completed' ||
+                              order.status === 'processing' ||
+                              order.status === 'client_finalized' ||
+                              order.status === 'invoice_sent' ||
+                              order.status === 'customer_confirmed' ||
+                              order.status === 'pharmacy_confirmed'
+                                ? 'default'
+                                : 'secondary'
+                            }
+                          >
+                            {order.status.replace('_', ' ')}
+                          </Badge>
+                        </div>
                         <Button
                           variant='outline'
                           size='sm'
                           type='button'
+                          className='shrink-0 ml-auto sm:ml-0'
                           onClick={() => generateInvoice(order)}
                         >
                           <Download className='mr-2 h-4 w-4' />
@@ -3612,7 +3688,7 @@ export default function AdminDashboard() {
                     setPharmacySortMode(v as 'default' | 'az')
                   }
                 >
-                  <SelectTrigger className='w-[200px]'>
+                  <SelectTrigger className='w-full sm:w-[200px]'>
                     <SelectValue placeholder='Sort' />
                   </SelectTrigger>
                   <SelectContent>
@@ -3621,7 +3697,7 @@ export default function AdminDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className='flex flex-wrap items-center gap-2'>
+              <div className='flex flex-wrap items-center gap-2 w-full min-w-0'>
                 <span className='text-sm text-muted-foreground shrink-0'>
                   Starts with:
                 </span>
@@ -3651,9 +3727,36 @@ export default function AdminDashboard() {
                   onChange={(e) => setPharmacySearchQuery(e.target.value)}
                 />
               </div>
-              <div className='rounded-md border overflow-x-auto'>
+              <div className='md:hidden rounded-md border divide-y min-w-0'>
+                {pharmaciesLoading ? (
+                  <AdminLoadingPanel
+                    title='Loading pharmacies…'
+                    subtitle='Please wait while pharmacy records are loaded.'
+                  />
+                ) : filteredPharmacies.length === 0 ? (
+                  <p className='p-8 text-center text-sm text-muted-foreground'>
+                    {pharmacies.length === 0
+                      ? 'No pharmacy records yet.'
+                      : 'No pharmacies match filters or search.'}
+                  </p>
+                ) : (
+                  filteredPharmacies.map((p) => (
+                    <AdminPharmacyMobileCard
+                      key={p.id}
+                      pharmacy={p}
+                      segment={pharmacyUsesCreditLine(p) ? 'credit' : 'cash'}
+                      isAdmin={isAdmin}
+                      isSuperAdmin={isSuperAdmin}
+                      onManage={openPharmacySuperEdit}
+                      onVerify={handleVerifyPharmacy}
+                      onDelete={handleDeletePharmacy}
+                    />
+                  ))
+                )}
+              </div>
+              <div className='hidden md:block rounded-md border overflow-x-auto'>
                 {pharmacySegmentFilter === 'cash' ? (
-                  <table className='w-full text-sm min-w-[640px]'>
+                  <table className='w-full text-sm'>
                     <thead>
                       <tr className='border-b bg-muted/40 text-left'>
                         <th className='p-3 font-medium'>Pharmacy</th>
@@ -3769,7 +3872,7 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 ) : (
-                  <table className='w-full text-sm min-w-[860px]'>
+                  <table className='w-full text-sm'>
                     <thead>
                       <tr className='border-b bg-muted/40 text-left'>
                         <th className='p-3 font-medium'>Pharmacy</th>
@@ -3954,10 +4057,14 @@ export default function AdminDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value='inventory' className='mt-6 space-y-4'>
-          <div className='flex flex-col lg:flex-row flex-wrap gap-3 lg:items-center lg:justify-between'>
-            <div className='flex flex-wrap gap-2 items-center'>
+        <TabsContent
+          value='inventory'
+          className='mt-6 space-y-4 w-full min-w-0 max-w-full overflow-x-hidden'
+        >
+          <div className='flex flex-col gap-3 w-full min-w-0'>
+            <div className='flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center'>
               <span className='text-sm text-muted-foreground shrink-0'>View:</span>
+              <div className='flex flex-wrap gap-2 items-center'>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -3994,8 +4101,7 @@ export default function AdminDashboard() {
                   from storeroom.json (not the client storefront list)
                 </TooltipContent>
               </Tooltip>
-            </div>
-            <div className='flex flex-wrap gap-1 items-center border rounded-md p-0.5 bg-muted/30'>
+              <div className='flex flex-wrap gap-1 items-center border rounded-md p-0.5 bg-muted/30'>
               <span className='sr-only'>Layout</span>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -4031,6 +4137,7 @@ export default function AdminDashboard() {
                   View inventory as a grid of cards
                 </TooltipContent>
               </Tooltip>
+              </div>
             </div>
             <Select
               value={inventorySortMode}
@@ -4038,7 +4145,7 @@ export default function AdminDashboard() {
                 setInventorySortMode(v as 'default' | 'az' | 'code')
               }
             >
-              <SelectTrigger className='w-[220px]'>
+              <SelectTrigger className='w-full sm:w-[220px]'>
                 <SelectValue placeholder='Sort' />
               </SelectTrigger>
               <SelectContent>
@@ -4054,11 +4161,48 @@ export default function AdminDashboard() {
               : `Warehouse list from data/storeroom.json (${allStoreroomRows.length} lines). Prices and quantities reflect the file; live counts come from inventory after sync (pnpm reset-storeroom --apply). Rows with zero warehouse quantity are faded.`}
           </p>
 
+          {inventoryListMode === 'storefront' && (
+            <div className='flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3'>
+              <Select
+                value={inventoryCategoryFilter}
+                onValueChange={setInventoryCategoryFilter}
+              >
+                <SelectTrigger className='w-full sm:w-[220px] h-9'>
+                  <SelectValue placeholder='Category' />
+                </SelectTrigger>
+                <SelectContent className='max-h-[min(20rem,70vh)]'>
+                  <SelectItem value='all'>All categories</SelectItem>
+                  {PRODUCT_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={inventorySubCategoryFilter}
+                onValueChange={setInventorySubCategoryFilter}
+              >
+                <SelectTrigger className='w-full sm:w-[200px] h-9'>
+                  <SelectValue placeholder='Type' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='all'>All types</SelectItem>
+                  {PRODUCT_SUBCATEGORIES.map((sub) => (
+                    <SelectItem key={sub} value={sub}>
+                      {sub}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className='flex flex-wrap items-center gap-2'>
             <span className='text-sm text-muted-foreground shrink-0'>
               Starts with:
             </span>
-            <div className='flex flex-wrap gap-1.5'>
+            <div className='flex flex-wrap gap-1.5 max-w-full'>
               {INVENTORY_LETTER_OPTIONS.map((letter) => (
                 <Button
                   key={letter}
@@ -4075,8 +4219,9 @@ export default function AdminDashboard() {
               ))}
             </div>
           </div>
+          </div>
 
-          <div className='rounded-md border bg-card relative min-h-[12rem]'>
+          <div className='rounded-md border bg-card relative min-h-[12rem] w-full min-w-0 max-w-full overflow-hidden'>
             {inventoryLoading && (
               <div
                 className='absolute inset-0 z-20 flex items-center justify-center bg-background/85 backdrop-blur-[2px] rounded-md'
@@ -4104,8 +4249,8 @@ export default function AdminDashboard() {
                 <div
                   className={
                     inventoryViewLayout === 'grid'
-                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4'
-                      : undefined
+                      ? 'grid grid-cols-1 gap-3 p-3 w-full min-w-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4 sm:p-4'
+                      : 'w-full min-w-0'
                   }
                 >
                   {inventoryProductsFiltered.map((product) => (
@@ -4128,19 +4273,6 @@ export default function AdminDashboard() {
               </>
             ) : (
               <>
-                {inventoryViewLayout === 'list' && (
-                  <div className='hidden xl:grid xl:grid-cols-[3rem_5.5rem_1fr_5rem_5rem_6.5rem_7rem_7rem_6.5rem] xl:gap-3 xl:items-center p-4 border-b font-medium text-sm text-muted-foreground bg-muted/20'>
-                    <div className='text-center'>Image</div>
-                    <div>Code</div>
-                    <div className='min-w-0'>Description</div>
-                    <div className='text-right'>Price</div>
-                    <div className='text-right'>Qty</div>
-                    <div className='text-right'>Line</div>
-                    <div className='text-center'>Storeroom</div>
-                    <div className='text-center'>Wholesale</div>
-                    <div className='text-right'>Actions</div>
-                  </div>
-                )}
                 {warehouseRowsFiltered.length === 0 ? (
                   <div className='p-8 text-center text-sm text-muted-foreground'>
                     No warehouse rows match this letter filter.
@@ -4149,8 +4281,8 @@ export default function AdminDashboard() {
                   <div
                     className={
                       inventoryViewLayout === 'grid'
-                        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4'
-                        : undefined
+                        ? 'grid grid-cols-1 gap-3 p-3 w-full min-w-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4 sm:p-4'
+                        : 'w-full min-w-0'
                     }
                   >
                     {warehouseRowsFiltered.map((row) => {
@@ -4182,7 +4314,7 @@ export default function AdminDashboard() {
       </Tabs>
 
       <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
-        <DialogContent className='max-h-[90vh] overflow-y-auto'>
+        <DialogContent className='max-h-[90vh] overflow-y-auto w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] sm:max-w-lg'>
           <DialogHeader>
             <DialogTitle>
               {editingProduct ? 'Edit Product' : 'Add New Product'}
@@ -4192,8 +4324,8 @@ export default function AdminDashboard() {
             </DialogDescription>
           </DialogHeader>
           <div className='grid gap-4 py-4'>
-            <div className='grid grid-cols-4 items-center gap-4'>
-              <Label htmlFor='name' className='text-right'>
+            <div className='grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4'>
+              <Label htmlFor='name' className='sm:text-right'>
                 Name
               </Label>
               <Input
@@ -4202,11 +4334,11 @@ export default function AdminDashboard() {
                 onChange={(e) =>
                   setProductForm({ ...productForm, name: e.target.value })
                 }
-                className='col-span-3'
+                className='sm:col-span-3'
               />
             </div>
-            <div className='grid grid-cols-4 items-center gap-4'>
-              <Label htmlFor='category' className='text-right'>
+            <div className='grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4'>
+              <Label htmlFor='category' className='sm:text-right'>
                 Category
               </Label>
               <Select
@@ -4215,7 +4347,7 @@ export default function AdminDashboard() {
                   setProductForm({ ...productForm, category: value })
                 }
               >
-                <SelectTrigger className='col-span-3'>
+                <SelectTrigger className='sm:col-span-3'>
                   <SelectValue placeholder='Select category' />
                 </SelectTrigger>
                 <SelectContent>
@@ -4227,22 +4359,32 @@ export default function AdminDashboard() {
                 </SelectContent>
               </Select>
             </div>
-            <div className='grid grid-cols-4 items-center gap-4'>
-              <Label htmlFor='subCategory' className='text-right'>
-                Sub Category
+            <div className='grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4'>
+              <Label htmlFor='subCategory' className='sm:text-right'>
+                Type
               </Label>
-              <Input
-                id='subCategory'
-                placeholder='Optional subcategory'
-                value={productForm.subCategory || ''}
-                onChange={(e) =>
+              <Select
+                value={productForm.subCategory || '__none__'}
+                onValueChange={(value) =>
                   setProductForm({
                     ...productForm,
-                    subCategory: e.target.value || undefined,
+                    subCategory:
+                      value === '__none__' ? undefined : value,
                   })
                 }
-                className='col-span-3'
-              />
+              >
+                <SelectTrigger className='col-span-1 sm:col-span-3'>
+                  <SelectValue placeholder='Select type (optional)' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='__none__'>None</SelectItem>
+                  {PRODUCT_SUBCATEGORIES.map((sub) => (
+                    <SelectItem key={sub} value={sub}>
+                      {sub}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
               <Label htmlFor='price' className='text-right'>
