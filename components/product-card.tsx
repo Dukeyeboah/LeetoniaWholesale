@@ -128,63 +128,61 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </span>
         </div>
       </CardContent>
-      <CardFooter className='p-3 pt-0 mt-auto'>
+      <CardFooter className='p-2 sm:p-3 pt-0 mt-auto min-w-0'>
         {!isOutOfStock ? (
-          <div className='flex items-center gap-2 w-full'>
-            {/* Quantity Selector on the left */}
-            <div className='flex items-center gap-3 flex-shrink-0'>
+          <div className='flex flex-col gap-2 w-full min-w-0 sm:flex-row sm:items-center sm:gap-2'>
+            <div className='flex items-center justify-center gap-1.5 min-w-0 w-full sm:w-auto sm:justify-start'>
               <Label
                 htmlFor={`qty-${product.id}`}
-                className='text-xs text-muted-foreground whitespace-nowrap'
+                className='text-[10px] sm:text-xs text-muted-foreground shrink-0'
               >
-                Qty:
+                Qty
               </Label>
-              <div className='flex items-center gap-1'>
-                <Button
-                  variant='outline'
-                  size='icon'
-                  className='h-8 w-8'
-                  onClick={handleDecrement}
-                  disabled={quantity <= 1}
-                >
-                  <Minus className='h-3 w-3' />
-                </Button>
-                <Input
-                  id={`qty-${product.id}`}
-                  type='number'
-                  min={1}
-                  max={maxQuantity}
-                  value={quantity}
-                  onChange={(e) =>
-                    handleQuantityChange(parseInt(e.target.value) || 1)
-                  }
-                  className='w-14 text-center h-8 text-sm'
-                />
-                <Button
-                  variant='outline'
-                  size='icon'
-                  className='h-8 w-8'
-                  onClick={handleIncrement}
-                  disabled={quantity >= maxQuantity}
-                >
-                  <Plus className='h-3 w-3' />
-                </Button>
-              </div>
+              <Button
+                variant='outline'
+                size='icon'
+                className='h-7 w-7 shrink-0 sm:h-8 sm:w-8'
+                onClick={handleDecrement}
+                disabled={quantity <= 1}
+                aria-label='Decrease quantity'
+              >
+                <Minus className='h-3 w-3' />
+              </Button>
+              <Input
+                id={`qty-${product.id}`}
+                type='number'
+                min={1}
+                max={maxQuantity}
+                value={quantity}
+                onChange={(e) =>
+                  handleQuantityChange(parseInt(e.target.value, 10) || 1)
+                }
+                className='w-10 min-w-0 text-center h-7 text-xs px-1 sm:w-12 sm:h-8 sm:text-sm'
+              />
+              <Button
+                variant='outline'
+                size='icon'
+                className='h-7 w-7 shrink-0 sm:h-8 sm:w-8'
+                onClick={handleIncrement}
+                disabled={quantity >= maxQuantity}
+                aria-label='Increase quantity'
+              >
+                <Plus className='h-3 w-3' />
+              </Button>
             </div>
-            {/* Add to Order button on the right */}
             <Button
-              className='ml-auto mr-1 w-36'
+              className='w-full min-w-0 h-8 text-xs px-2 sm:h-9 sm:text-sm sm:ml-auto sm:w-auto sm:max-w-[10.5rem] md:max-w-none shrink-0'
               variant='default'
               size='sm'
               onClick={handleAddToCart}
             >
-              <Plus className='mr-2 h-4 w-4' />
-              Add to Order
+              <Plus className='h-3 w-3 shrink-0 sm:mr-1.5' />
+              <span className='truncate'>Add to order</span>
             </Button>
           </div>
         ) : (
           <Button
-            className='w-full'
+            className='w-full h-8 text-xs sm:h-9 sm:text-sm'
             variant='outline'
             disabled={isOutOfStock && user !== null}
             onClick={() => {
@@ -192,11 +190,10 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 setShowLoginDialog(true);
                 return;
               }
-              // Handle notify me functionality for authenticated users
             }}
           >
-            <AlertCircle className='mr-2 h-4 w-4' />
-            Notify Me
+            <AlertCircle className='mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 shrink-0' />
+            Notify me
           </Button>
         )}
       </CardFooter>

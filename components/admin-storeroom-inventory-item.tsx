@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { AdminInventoryRowActions } from '@/components/admin-inventory-row-actions';
 import { AdminInventoryThumb } from '@/components/admin-inventory-thumb';
+import { AdminInventoryCategoryBadge } from '@/components/admin-inventory-category-badge';
 import {
   availableToSell,
   reservedForOrders,
@@ -65,10 +66,18 @@ function computeStoreroomRowDerived(row: WarehouseRow, match: Product | null) {
   };
 }
 
-function CardImage({ imageUrl, name }: { imageUrl?: string; name: string }) {
+function CardImage({
+  imageUrl,
+  name,
+  category,
+}: {
+  imageUrl?: string;
+  name: string;
+  category?: string;
+}) {
   const initial = (name || '?').trim().charAt(0).toUpperCase() || '?';
   return (
-    <div className='aspect-[4/3] w-full relative bg-muted/30 overflow-hidden border-b'>
+    <div className='aspect-[4/3] w-full relative bg-muted/30 overflow-hidden border-b shrink-0'>
       {imageUrl ? (
         <img src={imageUrl} alt='' className='w-full h-full object-cover' />
       ) : (
@@ -76,6 +85,7 @@ function CardImage({ imageUrl, name }: { imageUrl?: string; name: string }) {
           {initial}
         </span>
       )}
+      <AdminInventoryCategoryBadge category={category} variant='overlay' />
     </div>
   );
 }
@@ -94,13 +104,14 @@ export function AdminStoreroomInventoryItem({
   if (layout === 'grid') {
     return (
       <Card
-        className={`min-w-0 w-full max-w-full overflow-hidden flex flex-col h-full ${
+        className={`min-w-0 w-full max-w-full overflow-hidden flex flex-col h-full py-0 gap-0 ${
           d.isZeroStoreroom ? 'opacity-45' : ''
         }`}
       >
         <CardImage
           imageUrl={match?.imageUrl}
           name={row.description || match?.name || ''}
+          category={match?.category}
         />
         <CardContent className='p-3 flex flex-col flex-1 gap-2'>
           <div className='font-mono text-xs text-muted-foreground'>
@@ -172,7 +183,7 @@ export function AdminStoreroomInventoryItem({
               onToggleVisibility={onToggleVisibility}
               onDelete={onDelete}
               showVisibilityToggle={false}
-              className='justify-center pt-1 border-t w-full'
+              className='justify-center gap-3 pt-3 pb-1 border-t w-full'
             />
           ) : (
             <p className='text-xs text-muted-foreground text-center pt-1 border-t'>
@@ -191,10 +202,16 @@ export function AdminStoreroomInventoryItem({
       }`}
     >
       <div className='flex gap-3 min-w-0'>
-        <AdminInventoryThumb
-          imageUrl={match?.imageUrl}
-          name={row.description || match?.name || ''}
-        />
+        <div className='shrink-0 flex flex-col items-center gap-1 w-14'>
+          <AdminInventoryThumb
+            imageUrl={match?.imageUrl}
+            name={row.description || match?.name || ''}
+          />
+          <AdminInventoryCategoryBadge
+            category={match?.category}
+            variant='inline'
+          />
+        </div>
         <div className='flex-1 min-w-0 space-y-1'>
           <p className='font-mono text-xs text-muted-foreground'>{d.codeKey}</p>
           <p

@@ -491,9 +491,15 @@ const SUBCATEGORY_RULES: SubRule[] = [
     ],
   },
   {
+    sub: 'Infusion',
+    patterns: [
+      /\b(INFUSION|INF |DEXTROSE|GLUCOSE INF|NORMAL SALINE|RINGER|HARTMANN|D5W|D10W|NS )\b/i,
+    ],
+  },
+  {
     sub: 'Injections',
     patterns: [
-      /\b(INJ|INJECTION|INJECTABLE|INFUSION|INF |IV |IM |AMP(OULE)?|VIAL)\b/i,
+      /\b(INJ|INJECTION|INJECTABLE|IV |IM |AMP(OULE)?|VIAL)\b/i,
     ],
   },
   {

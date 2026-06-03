@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { AdminInventoryRowActions } from '@/components/admin-inventory-row-actions';
 import { AdminInventoryThumb } from '@/components/admin-inventory-thumb';
+import { AdminInventoryCategoryBadge } from '@/components/admin-inventory-category-badge';
 import {
   availableToSell,
   reservedForOrders,
@@ -21,10 +22,18 @@ type Props = {
   onDelete: (productId: string) => void;
 };
 
-function CardImage({ imageUrl, name }: { imageUrl?: string; name: string }) {
+function CardImage({
+  imageUrl,
+  name,
+  category,
+}: {
+  imageUrl?: string;
+  name: string;
+  category?: string;
+}) {
   const initial = (name || '?').trim().charAt(0).toUpperCase() || '?';
   return (
-    <div className='aspect-[4/3] w-full relative bg-muted/30 overflow-hidden border-b'>
+    <div className='aspect-[4/3] w-full relative bg-muted/30 overflow-hidden border-b shrink-0'>
       {imageUrl ? (
         <img
           src={imageUrl}
@@ -36,6 +45,7 @@ function CardImage({ imageUrl, name }: { imageUrl?: string; name: string }) {
           {initial}
         </span>
       )}
+      <AdminInventoryCategoryBadge category={category} variant='overlay' />
     </div>
   );
 }
@@ -57,11 +67,15 @@ export function AdminStorefrontInventoryItem({
   if (layout === 'grid') {
     return (
       <Card
-        className={`min-w-0 w-full max-w-full overflow-hidden flex flex-col h-full ${
+        className={`min-w-0 w-full max-w-full overflow-hidden flex flex-col h-full py-0 gap-0 ${
           hidden ? 'opacity-60' : ''
         }`}
       >
-        <CardImage imageUrl={product.imageUrl} name={product.name} />
+        <CardImage
+          imageUrl={product.imageUrl}
+          name={product.name}
+          category={product.category}
+        />
         <CardContent className='p-3 flex flex-col flex-1 gap-2'>
           <div className='space-y-1 min-w-0 flex-1'>
             <div className='flex flex-wrap items-center gap-1.5'>
@@ -77,11 +91,13 @@ export function AdminStorefrontInventoryItem({
                 {product.name}
               </h3>
             </div>
-            <p className='text-xs text-muted-foreground line-clamp-1'>
-              {product.category}
-              {product.subCategory ? ` · ${product.subCategory}` : ''}
-              {product.code ? ` · ${product.code}` : ''}
-            </p>
+            {(product.subCategory || product.code) && (
+              <p className='text-xs text-muted-foreground line-clamp-1'>
+                {product.subCategory}
+                {product.subCategory && product.code ? ' · ' : ''}
+                {product.code}
+              </p>
+            )}
           </div>
           <div className='text-lg font-semibold tabular-nums text-primary'>
             ₵{product.price.toFixed(2)}
@@ -110,7 +126,7 @@ export function AdminStorefrontInventoryItem({
             onToggleVisibility={onToggleVisibility}
             onDelete={onDelete}
             showVisibilityToggle
-            className='justify-center pt-1 border-t w-full'
+            className='justify-center gap-3 pt-3 pb-1 border-t w-full'
           />
         </CardContent>
       </Card>
@@ -124,7 +140,16 @@ export function AdminStorefrontInventoryItem({
       }`}
     >
       <div className='flex gap-3 min-w-0'>
-        <AdminInventoryThumb imageUrl={product.imageUrl} name={product.name} />
+        <div className='shrink-0 flex flex-col items-center gap-1 w-14'>
+          <AdminInventoryThumb
+            imageUrl={product.imageUrl}
+            name={product.name}
+          />
+          <AdminInventoryCategoryBadge
+            category={product.category}
+            variant='inline'
+          />
+        </div>
         <div className='flex-1 min-w-0 space-y-1'>
           <div className='flex items-center gap-2 flex-wrap'>
             {hidden && (
@@ -139,11 +164,13 @@ export function AdminStorefrontInventoryItem({
               {product.name}
             </span>
           </div>
-          <p className='text-xs text-muted-foreground line-clamp-2 break-words'>
-            {product.category}
-            {product.subCategory ? ` · ${product.subCategory}` : ''}
-            {product.code ? ` · ${product.code}` : ''}
-          </p>
+          {(product.subCategory || product.code) && (
+            <p className='text-xs text-muted-foreground line-clamp-2 break-words'>
+              {product.subCategory}
+              {product.subCategory && product.code ? ' · ' : ''}
+              {product.code}
+            </p>
+          )}
         </div>
       </div>
       <div className='mt-3 grid grid-cols-2 gap-2 text-sm tabular-nums md:grid-cols-4 md:items-center md:gap-4'>

@@ -31,17 +31,22 @@ export function AdminInventoryRowActions({
   const hidden = product.isHidden ?? false;
 
   return (
-    <div className={cn('flex justify-end gap-1 shrink-0', className)}>
+    <div
+      className={cn(
+        'flex justify-end items-center gap-2.5 sm:gap-2 shrink-0',
+        className
+      )}
+    >
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             variant='ghost'
             size='icon'
-            className='h-8 w-8'
+            className='h-11 w-11 sm:h-9 sm:w-9 touch-manipulation'
             onClick={() => onEdit(product)}
             aria-label='Edit product'
           >
-            <Edit className='h-4 w-4' />
+            <Edit className='h-5 w-5 sm:h-4 sm:w-4' />
           </Button>
         </TooltipTrigger>
         <TooltipContent side='top'>
@@ -55,14 +60,14 @@ export function AdminInventoryRowActions({
             <Button
               variant='ghost'
               size='icon'
-              className='h-8 w-8'
+              className='h-11 w-11 sm:h-9 sm:w-9 touch-manipulation'
               onClick={() => onToggleVisibility(product)}
               aria-label={hidden ? 'Show on storefront' : 'Hide from storefront'}
             >
               {hidden ? (
-                <EyeOff className='h-4 w-4' />
+                <EyeOff className='h-5 w-5 sm:h-4 sm:w-4' />
               ) : (
-                <Eye className='h-4 w-4' />
+                <Eye className='h-5 w-5 sm:h-4 sm:w-4' />
               )}
             </Button>
           </TooltipTrigger>
@@ -79,11 +84,11 @@ export function AdminInventoryRowActions({
           <Button
             variant='ghost'
             size='icon'
-            className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+            className='h-11 w-11 sm:h-9 sm:w-9 touch-manipulation text-destructive hover:text-destructive hover:bg-destructive/10'
             onClick={() => onDelete(product.id)}
             aria-label='Delete product'
           >
-            <Trash2 className='h-4 w-4' />
+            <Trash2 className='h-5 w-5 sm:h-4 sm:w-4' />
           </Button>
         </TooltipTrigger>
         <TooltipContent side='top'>

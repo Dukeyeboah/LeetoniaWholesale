@@ -38,6 +38,7 @@ export const PRODUCT_SUBCATEGORIES = [
   'Device',
   'Syrups/Suspension',
   'Injections',
+  'Infusion',
   'Creams/Ointments',
   'Powdered',
   'Toiletries & Cosmetics',

@@ -123,6 +123,13 @@ import {
 import { formatOrderLabel } from '@/lib/order-display';
 import { generateInventoryProductCode } from '@/lib/product-code';
 import {
+  INVENTORY_IMAGE_ACCEPT,
+  inventoryImageContentType,
+  inventoryImageExtension,
+  isAllowedInventoryImageFile,
+  prepareInventoryImageFile,
+} from '@/lib/prepare-inventory-image-file';
+import {
   DEFAULT_PROFORMA_NOTE,
   notifyClientProformaReady,
   notifyClientInvoiceSent,
@@ -227,6 +234,7 @@ export default function AdminDashboard() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [preparingImage, setPreparingImage] = useState(false);
   const inventoryImageGalleryRef = useRef<HTMLInputElement>(null);
   const inventoryImageCameraRef = useRef<HTMLInputElement>(null);
   const [transferQty, setTransferQty] = useState<number>(0);
@@ -1226,11 +1234,13 @@ export default function AdminDashboard() {
 
   const MAX_INVENTORY_IMAGE_BYTES = 5 * 1024 * 1024;
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please choose an image file (JPG, PNG, WebP, etc.).');
+    if (!isAllowedInventoryImageFile(file)) {
+      toast.error(
+        'Please choose an image file (JPG, PNG, WebP, GIF, or HEIC).'
+      );
       e.target.value = '';
       return;
     }
@@ -1239,12 +1249,25 @@ export default function AdminDashboard() {
       e.target.value = '';
       return;
     }
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    setPreparingImage(true);
+    try {
+      const prepared = await prepareInventoryImageFile(file);
+      setImageFile(prepared.file);
+      setImagePreview(prepared.previewDataUrl);
+      if (prepared.convertedFromHeic) {
+        toast.success('HEIC photo converted to JPEG for upload.');
+      }
+    } catch (error) {
+      console.error('Image prepare:', error);
+      toast.error(
+        'Could not use this image. Try JPG or PNG, or pick the photo again.'
+      );
+      setImageFile(null);
+      setImagePreview(productForm.imageUrl || null);
+    } finally {
+      setPreparingImage(false);
+      e.target.value = '';
+    }
   };
 
   const clearSelectedImage = () => {
@@ -1271,15 +1294,7 @@ export default function AdminDashboard() {
       if (imageFile && storage) {
         setUploadingImage(true);
         try {
-          const rawExt = (imageFile.name.split('.').pop() || 'jpg')
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '');
-          const fileExtension =
-            rawExt && ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(rawExt)
-              ? rawExt === 'jpeg'
-                ? 'jpg'
-                : rawExt
-              : 'jpg';
+          const fileExtension = inventoryImageExtension(imageFile);
           const slug = (productForm.name || 'product')
             .replace(/[^a-zA-Z0-9\s]/g, '')
             .replace(/\s+/g, '_')
@@ -1293,14 +1308,7 @@ export default function AdminDashboard() {
           );
 
           const contentType =
-            imageFile.type ||
-            (fileExtension === 'png'
-              ? 'image/png'
-              : fileExtension === 'gif'
-                ? 'image/gif'
-                : fileExtension === 'webp'
-                  ? 'image/webp'
-                  : 'image/jpeg');
+            imageFile.type || inventoryImageContentType(fileExtension);
           await uploadBytes(imageRef, imageFile, { contentType });
           imageUrl = await getDownloadURL(imageRef);
           toast.success('Image uploaded successfully');
@@ -4538,7 +4546,7 @@ export default function AdminDashboard() {
                 <input
                   ref={inventoryImageGalleryRef}
                   type='file'
-                  accept='image/jpeg,image/png,image/webp,image/gif'
+                  accept={INVENTORY_IMAGE_ACCEPT}
                   className='hidden'
                   onChange={handleImageChange}
                   aria-hidden
@@ -4557,9 +4565,10 @@ export default function AdminDashboard() {
                     type='button'
                     variant='outline'
                     size='sm'
+                    disabled={preparingImage}
                     onClick={() => inventoryImageGalleryRef.current?.click()}
                   >
-                    Choose file
+                    {preparingImage ? 'Preparing…' : 'Choose file'}
                   </Button>
                   <Button
                     type='button'
@@ -4573,8 +4582,8 @@ export default function AdminDashboard() {
                   </Button>
                 </div>
                 <p className='text-xs text-muted-foreground'>
-                  Upload or capture a photo (max 5 MB). Stored in Firebase
-                  Storage; the download link is saved on the product.
+                  Upload or capture a photo (max 5 MB). JPG, PNG, WebP, GIF, and
+                  iPhone HEIC are supported — HEIC is converted to JPEG automatically.
                 </p>
                 {(imagePreview || productForm.imageUrl) && (
                   <div className='relative w-36 h-36 border rounded-md overflow-hidden bg-muted/30'>
@@ -4626,8 +4635,15 @@ export default function AdminDashboard() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleSaveProduct} disabled={uploadingImage}>
-              {uploadingImage ? 'Uploading...' : 'Save Product'}
+            <Button
+              onClick={handleSaveProduct}
+              disabled={uploadingImage || preparingImage}
+            >
+              {uploadingImage
+                ? 'Uploading...'
+                : preparingImage
+                  ? 'Preparing image...'
+                  : 'Save Product'}
             </Button>
           </DialogFooter>
         </DialogContent>
