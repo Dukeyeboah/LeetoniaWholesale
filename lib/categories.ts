@@ -13,6 +13,7 @@ export const PRODUCT_CATEGORIES = [
   'Antibiotics',
   'Antihistamines',
   'Anti-Fungals',
+  'Anti-viral',
   'Anti-Malarials',
   'Antiseptics',
   'Cosmetics',
