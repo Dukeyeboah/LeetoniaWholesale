@@ -27,6 +27,24 @@ const CATEGORY_RULES: CategoryRule[] = [
     ],
   },
   {
+    category: 'Infusion',
+    keywords: [
+      'infusion',
+      'dextrose',
+      'glucose inf',
+      'normal saline',
+      'ringer',
+      'hartmann',
+      'hartmanns',
+      'd5w',
+      'd10w',
+      ' iv fluid',
+      'saline 500',
+      'ns 500',
+      'lactated',
+    ],
+  },
+  {
     category: 'Anti-Malarials',
     keywords: [
       'malaria',
@@ -439,7 +457,7 @@ function matchByFormPatterns(nameUpper: string): ProductCategory | null {
       nameUpper
     )
   ) {
-    return 'Gastrointestinal';
+    return 'Infusion';
   }
   if (/\b(INJ|INJECTION|IV |IM |AMP)\b/.test(nameUpper)) {
     return null;
@@ -594,7 +612,7 @@ const LEGACY_CATEGORY_MAP: Record<string, ProductCategory> = {
   'DERMATOLOGICAL (SKIN) MEDICINES': 'Skin products',
   'EYE & EAR PREPARATIONS': 'Skin products',
   'SPECIALTY INJECTIONS': 'Uncategorized',
-  'IV FLUIDS (INFUSIONS)': 'Gastrointestinal',
+  'IV FLUIDS (INFUSIONS)': 'Infusion',
   'ANTIHELMINTICS (Worm medicines)': 'Anthelmintics',
   'OTC (OVER-THE-COUNTER) PRODUCTS': 'Uncategorized',
   'HERBAL PRODUCTS': 'Herbals',

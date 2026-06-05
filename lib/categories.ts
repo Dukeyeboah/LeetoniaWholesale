@@ -20,6 +20,7 @@ export const PRODUCT_CATEGORIES = [
   'Creams/Ointments',
   'Diuretics',
   'Gastrointestinal',
+  'Infusion',
   'Herbals',
   'Oral Rehydration Salts',
   'Skin products',
