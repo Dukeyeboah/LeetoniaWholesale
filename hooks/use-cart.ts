@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { CartItem, Product } from '@/types';
 import { toast } from 'sonner';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -9,11 +9,46 @@ import { useAuth } from '@/lib/auth-context';
 import { availableToSell } from '@/lib/inventory-availability';
 
 const CART_STORAGE_KEY = 'leetonia_cart';
+const CART_SYNC_EVENT = 'leetonia:cart-sync';
+
+function cartSignature(items: CartItem[]) {
+  return items.map((item) => `${item.id}:${item.quantity}`).join('|');
+}
+
+function broadcastCart(items: CartItem[]) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(CART_SYNC_EVENT, { detail: items }));
+}
+
+/** Clears cart from this browser only. Does not empty the user's Firestore cart. */
+export function clearBrowserCartOnLogout() {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(CART_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+  broadcastCart([]);
+}
 
 export function useCart() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const { user } = useAuth();
+  const skipNextBroadcast = useRef(true);
+  const persistEmptyToCloud = useRef(false);
+
+  useEffect(() => {
+    const onSync = (event: Event) => {
+      const next = (event as CustomEvent<CartItem[]>).detail;
+      if (!Array.isArray(next)) return;
+      setCart((prev) =>
+        cartSignature(prev) === cartSignature(next) ? prev : next
+      );
+    };
+    window.addEventListener(CART_SYNC_EVENT, onSync);
+    return () => window.removeEventListener(CART_SYNC_EVENT, onSync);
+  }, []);
 
   // Load cart from localStorage and Firebase (if authenticated) on mount
   useEffect(() => {
@@ -74,7 +109,8 @@ export function useCart() {
 
         if (mergedCart.length > 0) {
           setCart(mergedCart);
-          console.log('Loaded cart:', mergedCart.length, 'items');
+        } else {
+          setCart([]);
         }
       } catch (e) {
         console.error('Failed to load cart:', e);
@@ -99,7 +135,6 @@ export function useCart() {
           localStorage.removeItem(CART_STORAGE_KEY);
         }
 
-        // Also save to Firebase if user is authenticated
         if (user && db && cart.length > 0) {
           try {
             const cartDocRef = doc(db, 'carts', user.id);
@@ -113,10 +148,9 @@ export function useCart() {
             );
           } catch (error) {
             console.error('Failed to save cart to Firebase:', error);
-            // Don't block the UI if Firebase save fails
           }
-        } else if (user && db && cart.length === 0) {
-          // Clear Firebase cart if empty
+        } else if (user && db && cart.length === 0 && persistEmptyToCloud.current) {
+          persistEmptyToCloud.current = false;
           try {
             const cartDocRef = doc(db, 'carts', user.id);
             await setDoc(cartDocRef, { items: [], updatedAt: Date.now() });
@@ -130,6 +164,11 @@ export function useCart() {
     };
 
     saveCart();
+    if (skipNextBroadcast.current) {
+      skipNextBroadcast.current = false;
+      return;
+    }
+    broadcastCart(cart);
   }, [cart, isInitialized, user]);
 
   const addToCart = useCallback((product: Product, quantity: number = 1) => {
@@ -216,6 +255,7 @@ export function useCart() {
   }, []);
 
   const clearCart = useCallback(() => {
+    persistEmptyToCloud.current = true;
     setCart([]);
     if (typeof window !== 'undefined') {
       localStorage.removeItem(CART_STORAGE_KEY);

@@ -5,7 +5,7 @@ import { useInventory } from '@/hooks/use-inventory';
 import { useCart } from '@/hooks/use-cart'; // Import useCart
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, WifiOff, ChevronDown, Loader2 } from 'lucide-react';
+import { Search, WifiOff, ChevronDown, Loader2 } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -18,7 +18,6 @@ import {
 import type { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from '@/lib/categories';
-import { useAuth } from '@/lib/auth-context';
 
 const INITIAL_PAGE_SIZE = 50;
 const LOAD_MORE_SIZE = 50;
@@ -39,15 +38,15 @@ function getFirstCharacterGroup(name: string): string {
 }
 
 export default function InventoryPage() {
-  const { isSuperAdmin } = useAuth();
   const { products, loading, offline } = useInventory();
-  const { addToCart } = useCart(); // Use hook
+  const { addToCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [subCategoryFilter, setSubCategoryFilter] = useState('all');
   const [letterFilter, setLetterFilter] = useState<LetterFilter>('all');
   const [isMounted, setIsMounted] = useState(false);
   const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
+  const [showLetterFilter, setShowLetterFilter] = useState(false);
 
 
   // Fix hydration errors by only rendering Select after mount
@@ -94,103 +93,120 @@ export default function InventoryPage() {
     addToCart(product, quantity);
   };
 
+  const idleFill =
+    'border-border/70 bg-white text-foreground shadow-sm';
+  const activeFill = '!bg-control border-primary/20 text-foreground';
+  const searchClass = `h-9 rounded-full cursor-text ${idleFill}`;
+  const filterControlClass = `inline-flex h-8 min-w-0 flex-1 cursor-pointer items-center overflow-hidden rounded-full border px-2.5 text-xs font-medium sm:flex-none ${idleFill}`;
+  const selectControlClass = `${filterControlClass} w-full justify-between gap-1 pr-1.5 pl-2.5 data-[state=open]:!bg-control [&>span]:min-w-0 [&>span]:flex-1 [&>span]:truncate [&>span]:text-left [&_svg]:ml-auto [&_svg]:shrink-0`;
+
   return (
-    <div className='space-y-8'>
-      <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
-        <div>
-          <h1 className='text-3xl font-serif font-bold text-primary'>
-            Inventory
-          </h1>
-          <p className='text-muted-foreground mt-1'>
-            Wholesale storefront — prices and stock for ordering (not
-            storeroom/warehouse).
-          </p>
-        </div>
-        {offline && products.length === 0 && (
-          <Badge
-            variant='outline'
-            className='bg-yellow-50/50 text-yellow-700 border-yellow-200 w-fit flex gap-1.5 items-center px-3 py-1'
-          >
-            <WifiOff className='h-3 w-3' />
-            Offline Mode
-          </Badge>
-        )}
-      </div>
+    <div className='space-y-2'>
+      {offline && products.length === 0 && (
+        <Badge
+          variant='outline'
+          className='bg-yellow-50/50 text-yellow-700 border-yellow-200 w-fit flex gap-1.5 items-center px-3 py-1'
+        >
+          <WifiOff className='h-3 w-3' />
+          Offline Mode
+        </Badge>
+      )}
 
-      <div className='flex flex-col md:flex-row gap-4 bg-card p-4 rounded-lg shadow-sm border'>
-        {/* <div className='relative md:max-w- flex-1'> */}
-        <div className='relative flex-1'>
-          <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-          <Input
-            placeholder='Search medicines...'
-            className='pl-9 bg-background border-border/60'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        {isSuperAdmin && isMounted ? (
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className='w-full md:w-[280px] bg-background border-border/60 overflow-hidden'>
-              <div className='flex items-center gap-2 text-muted-foreground min-w-0 flex-1 overflow-hidden'>
-                <Filter className='h-4 w-4 flex-shrink-0' />
-                <SelectValue
-                  placeholder='Category'
-                  className='truncate min-w-0 flex-1'
-                />
-              </div>
-            </SelectTrigger>
-            <SelectContent className='max-w-[280px]'>
-              {categories.map((cat) => (
-                <SelectItem
-                  key={cat}
-                  value={cat}
-                  className='truncate pr-8'
-                  title={cat}
-                >
-                  {cat === 'all' ? 'All Categories' : cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : isSuperAdmin ? (
-          <div className='w-full md:w-[280px] h-10 bg-background border border-border/60 rounded-md flex items-center gap-2 px-3 text-muted-foreground'>
-            <Filter className='h-4 w-4' />
-            <span>Category</span>
+      <div className='sticky top-[var(--storefront-nav-h,3rem)] z-30 -mx-4 space-y-2 bg-background px-4 py-1.5 transition-[top] duration-200 ease-out md:-mx-8 md:px-8'>
+        <div className='flex justify-center'>
+          <div className='relative w-full sm:w-80 sm:shrink-0'>
+            <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+            <Input
+              placeholder='Search…'
+              className={`pl-9 ${searchClass}`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-        ) : null}
-        {isSuperAdmin && isMounted ? (
-          <Select value={subCategoryFilter} onValueChange={setSubCategoryFilter}>
-            <SelectTrigger className='w-full md:w-[200px] bg-background border-border/60'>
-              <SelectValue placeholder='Type' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All types</SelectItem>
-              {PRODUCT_SUBCATEGORIES.map((sub) => (
-                <SelectItem key={sub} value={sub}>
-                  {sub}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : null}
-      </div>
-
-      {/* Alphabetical filter */}
-      <div className='flex flex-wrap items-center gap-2'>
-        <span className='text-sm text-muted-foreground shrink-0'>Starts with:</span>
-        <div className='flex flex-wrap gap-1.5'>
-          {LETTER_OPTIONS.map((letter) => (
-            <Button
-              key={letter}
-              variant={letterFilter === letter ? 'default' : 'outline'}
-              size='sm'
-              className='min-w-[2rem] h-8 px-2 font-medium'
-              onClick={() => setLetterFilter(letter)}
-            >
-              {letter === 'all' ? 'All' : letter}
-            </Button>
-          ))}
         </div>
+
+        <div className='flex items-center justify-center gap-1.5'>
+          <button
+            type='button'
+            aria-pressed={showLetterFilter}
+            className={`${filterControlClass} justify-center sm:w-28 ${
+              showLetterFilter ? activeFill : ''
+            }`}
+            onClick={() => setShowLetterFilter((open) => !open)}
+          >
+            Name
+          </button>
+          {isMounted ? (
+            <>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger
+                  className={`${selectControlClass} sm:w-40 ${
+                    categoryFilter !== 'all' ? activeFill : ''
+                  }`}
+                >
+                  <SelectValue placeholder='Categories' />
+                </SelectTrigger>
+                <SelectContent className='max-w-[min(100vw-2rem,280px)]'>
+                  {categories.map((cat) => (
+                    <SelectItem
+                      key={cat}
+                      value={cat}
+                      className='truncate pr-8'
+                      title={cat}
+                    >
+                      {cat === 'all' ? 'Categories' : cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={subCategoryFilter}
+                onValueChange={setSubCategoryFilter}
+              >
+                <SelectTrigger
+                  className={`${selectControlClass} sm:w-32 ${
+                    subCategoryFilter !== 'all' ? activeFill : ''
+                  }`}
+                >
+                  <SelectValue placeholder='Types' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='all'>Types</SelectItem>
+                  {PRODUCT_SUBCATEGORIES.map((sub) => (
+                    <SelectItem key={sub} value={sub}>
+                      {sub}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          ) : (
+            <>
+              <div className={`${filterControlClass} sm:w-40`} />
+              <div className={`${filterControlClass} sm:w-32`} />
+            </>
+          )}
+        </div>
+
+        {showLetterFilter && (
+          <div className='grid grid-cols-[repeat(14,minmax(0,1fr))] gap-px sm:flex sm:flex-wrap sm:justify-center sm:gap-1.5'>
+            {LETTER_OPTIONS.map((letter) => (
+              <Button
+                key={letter}
+                variant='secondary'
+                size='sm'
+                className={`h-6 w-full rounded-full border-0 p-0 text-[10px] font-medium shadow-none sm:h-8 sm:w-auto sm:min-w-[2rem] sm:px-2 sm:text-sm ${
+                  letterFilter === letter
+                    ? '!bg-control text-foreground'
+                    : 'bg-secondary/70 text-foreground'
+                }`}
+                onClick={() => setLetterFilter(letter)}
+              >
+                {letter === 'all' ? 'All' : letter}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
 
       {loading ? (
@@ -209,8 +225,8 @@ export default function InventoryPage() {
               items this may take a moment.
             </p>
           </div>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7 w-full mt-4 opacity-40 pointer-events-none'>
-            {[1, 2, 3].map((i) => (
+          <div className='grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 w-full mt-4 opacity-40 pointer-events-none'>
+            {Array.from({ length: 10 }, (_, i) => (
               <Skeleton key={i} className='h-[280px] w-full rounded-lg' />
             ))}
           </div>
@@ -230,6 +246,7 @@ export default function InventoryPage() {
             onClick={() => {
               setSearchQuery('');
               setCategoryFilter('all');
+              setSubCategoryFilter('all');
               setLetterFilter('all');
             }}
           >
@@ -238,7 +255,7 @@ export default function InventoryPage() {
         </div>
       ) : (
         <div className='space-y-6'>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7'>
+          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3'>
             {productsToShow.map((product) => (
               <ProductCard
                 key={product.id}

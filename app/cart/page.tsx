@@ -15,10 +15,35 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowRight, Trash2, ShoppingBag } from 'lucide-react';
+import { Minus, Pencil, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import type { Order } from '@/types';
+import { LoginDialog } from '@/components/login-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { availableToSell } from '@/lib/inventory-availability';
+import {
+  buildWhatsAppOrderMessage,
+  whatsappOrderLaunchUrl,
+} from '@/lib/whatsapp-order';
 import {
   buildDisplayOrderId,
   buildFirestoreOrderId,
@@ -40,6 +65,7 @@ export default function CartPage() {
     cart,
     removeFromCart,
     updateQuantity,
+    setQuantity,
     clearCart,
     total,
     isInitialized,
@@ -49,6 +75,30 @@ export default function CartPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactPhone, setContactPhone] = useState('');
+  const [showSignupDialog, setShowSignupDialog] = useState(false);
+  const [showOrderConfirm, setShowOrderConfirm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const sendWhatsAppOrder = () => {
+    if (!user) {
+      setShowSignupDialog(true);
+      return;
+    }
+    if (needsClientPharmacyProfile) {
+      toast.error(
+        'Complete your pharmacy profile before making an order.'
+      );
+      return;
+    }
+    const message = buildWhatsAppOrderMessage({
+      items: cart,
+      total,
+      user,
+      contactPhone,
+    });
+    window.open(whatsappOrderLaunchUrl(message), '_blank', 'noopener,noreferrer');
+    setShowOrderConfirm(true);
+  };
 
   const handleCheckout = async () => {
     if (!user) {
@@ -197,8 +247,50 @@ export default function CartPage() {
   }
 
   return (
-    <div className='space-y-8'>
-      <h1 className='text-3xl font-serif font-bold text-primary'>Your Cart</h1>
+    <div className='space-y-6'>
+      <div className='flex flex-wrap items-center justify-between gap-3'>
+        <h1 className='text-3xl font-serif font-bold text-primary'>Your Cart</h1>
+        <div className='flex flex-wrap items-center gap-2'>
+          <Button
+            type='button'
+            variant={isEditing ? 'default' : 'outline'}
+            size='sm'
+            onClick={() => setIsEditing((open) => !open)}
+          >
+            <Pencil className='mr-1.5 h-3.5 w-3.5' />
+            {isEditing ? 'Done' : 'Edit cart'}
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button type='button' variant='outline' size='sm'>
+                <Trash2 className='mr-1.5 h-3.5 w-3.5' />
+                Clear cart
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className='bg-white'>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear your cart?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This removes every product from your cart. You can add them
+                  again from inventory.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    clearCart();
+                    setIsEditing(false);
+                    toast.success('Cart cleared');
+                  }}
+                >
+                  Clear cart
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
 
       <div className='grid gap-8 md:grid-cols-3'>
         <div className='md:col-span-2'>
@@ -234,25 +326,70 @@ export default function CartPage() {
                         <p className='text-xs text-muted-foreground'>
                           {item.unit}
                         </p>
-                        <span className='text-xs text-muted-foreground'>
-                          • Qty: {item.quantity}
-                        </span>
+                        {!isEditing && (
+                          <span className='text-xs text-muted-foreground'>
+                            • Qty: {item.quantity}
+                          </span>
+                        )}
                       </div>
+                      {isEditing && (
+                        <div className='mt-2 flex items-center gap-1.5'>
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='icon'
+                            className='h-7 w-7'
+                            disabled={item.quantity <= 1}
+                            onClick={() => updateQuantity(item.id, -1)}
+                            aria-label='Decrease quantity'
+                          >
+                            <Minus className='h-3 w-3' />
+                          </Button>
+                          <Input
+                            type='number'
+                            min={1}
+                            max={availableToSell(item) || 1}
+                            value={item.quantity}
+                            className='h-7 w-14 px-1 text-center text-sm'
+                            onChange={(e) => {
+                              const next = Number(e.target.value);
+                              if (Number.isFinite(next)) {
+                                setQuantity(item.id, next);
+                              }
+                            }}
+                          />
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='icon'
+                            className='h-7 w-7'
+                            disabled={
+                              item.quantity >= (availableToSell(item) || 1)
+                            }
+                            onClick={() => updateQuantity(item.id, 1)}
+                            aria-label='Increase quantity'
+                          >
+                            <Plus className='h-3 w-3' />
+                          </Button>
+                        </div>
+                      )}
                       {showPrice && (
                         <p className='font-bold text-sm text-primary mt-1'>
                           ₵{(item.price * item.quantity).toFixed(2)}
                         </p>
                       )}
                     </div>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='h-7 w-7 flex-shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10'
-                      onClick={() => removeFromCart(item.id)}
-                      title='Remove item'
-                    >
-                      <Trash2 className='h-3.5 w-3.5' />
-                    </Button>
+                    {isEditing && (
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        className='h-7 w-7 flex-shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10'
+                        onClick={() => removeFromCart(item.id)}
+                        title='Remove item'
+                      >
+                        <Trash2 className='h-3.5 w-3.5' />
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -332,7 +469,8 @@ export default function CartPage() {
                 />
               </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className='flex flex-col gap-3'>
+              {/* Place Order is paused — keep handler above to restore later.
               <Button
                 className='w-full'
                 size='lg'
@@ -342,10 +480,61 @@ export default function CartPage() {
                 {isSubmitting ? 'Processing...' : 'Place Order'}
                 {!isSubmitting && <ArrowRight className='ml-2 h-4 w-4' />}
               </Button>
+              */}
+
+              <Button
+                type='button'
+                className='w-full'
+                size='lg'
+                onClick={sendWhatsAppOrder}
+              >
+                Make order
+              </Button>
             </CardFooter>
           </Card>
         </div>
       </div>
+      <LoginDialog
+        open={showSignupDialog}
+        onOpenChange={setShowSignupDialog}
+        defaultIntent='signup'
+        description='Create an account or sign in so we know which pharmacy this order is for.'
+      />
+      <Dialog open={showOrderConfirm} onOpenChange={setShowOrderConfirm}>
+        <DialogContent className='border-border/40 bg-white sm:max-w-sm sm:rounded-2xl'>
+          <DialogHeader className='text-center sm:text-center'>
+            <DialogTitle className='font-serif text-xl'>
+              Confirm order sent
+            </DialogTitle>
+            <DialogDescription>
+              If you sent the order in WhatsApp, confirm below and we will
+              clear your cart. If it did not go through, keep the items.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className='flex flex-col gap-2 sm:flex-col'>
+            <Button
+              type='button'
+              className='w-full'
+              onClick={() => {
+                clearCart();
+                setIsEditing(false);
+                setShowOrderConfirm(false);
+                toast.success('Cart cleared');
+              }}
+            >
+              Confirm order sent
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              className='w-full'
+              onClick={() => setShowOrderConfirm(false)}
+            >
+              Order not done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -2,18 +2,15 @@
 
 import { useState } from 'react';
 import type { Product } from '@/types';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Plus, AlertCircle, Minus } from 'lucide-react';
+import {
+  AlertCircle,
+  ShoppingCart,
+  ChevronUp,
+  ChevronDown,
+} from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { LoginDialog } from '@/components/login-dialog';
 import { LazyImage } from '@/components/lazy-image';
@@ -28,43 +25,25 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [quantity, setQuantity] = useState(1);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const { user, isAdmin, viewMode } = useAuth();
-  const showPrice = true;
+  const { user } = useAuth();
   const sellableQty = availableToSell(product);
   const isOutOfStock = sellableQty <= 0;
   const isLowStock = sellableQty > 0 && sellableQty < 10;
   const maxQuantity = Math.min(sellableQty, 999);
 
   const handleQuantityChange = (value: number) => {
-    const newQuantity = Math.max(1, Math.min(value, maxQuantity));
-    setQuantity(newQuantity);
+    setQuantity(Math.max(1, Math.min(value, maxQuantity || 1)));
   };
 
-  const handleIncrement = () => {
-    if (quantity < maxQuantity) {
-      setQuantity(quantity + 1);
-    }
-  };
-  const handleDecrement = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
-  };
-  const handleAddToCart = () => {
-    if (!user) {
-      setShowLoginDialog(true);
-      return;
-    }
-    if (!isOutOfStock && quantity > 0 && quantity <= sellableQty) {
-      onAddToCart(product, quantity);
-      setQuantity(1); // Reset to 1 after adding
-    }
+  const handleWhatsAppAdd = () => {
+    if (isOutOfStock || quantity <= 0 || quantity > sellableQty) return;
+    onAddToCart(product, quantity);
+    setQuantity(1);
   };
 
   return (
-    <Card className='overflow-hidden transition-all hover:shadow-md border-border/60 bg-card flex flex-col h-full'>
-      <div className='aspect-[3/2] relative bg-secondary/20 flex items-center justify-center text-muted-foreground overflow-hidden'>
-        {/* Lazy loading image component */}
+    <Card className='overflow-hidden py-0 gap-0 border-border/50 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer'>
+      <div className='aspect-[4/3] relative bg-secondary/20 flex items-center justify-center text-muted-foreground overflow-hidden'>
         {product.imageUrl && !imageError ? (
           <LazyImage
             src={product.imageUrl}
@@ -73,131 +52,97 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             onError={() => setImageError(true)}
           />
         ) : (
-          <span className='text-2xl font-serif opacity-30'>
+          <span className='text-lg font-serif opacity-30'>
             {product.name.charAt(0)}
           </span>
         )}
-
         {isOutOfStock && (
-          <div className='absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center'>
-            <Badge variant='destructive' className='text-xs px-2 py-0.5'>
+          <div className='absolute inset-0 bg-background/60 flex items-center justify-center'>
+            <Badge variant='destructive' className='text-[10px] px-1.5 py-0'>
               Out of Stock
             </Badge>
           </div>
         )}
       </div>
-      <CardHeader className='p-3 pb-0 flex-shrink-0'>
-        <div className='flex justify-between items-start gap-2'>
-          <div className='flex-1 min-w-0'>
-            <div className='flex items-start justify-between gap-3'>
-              <CardTitle className='font-serif text-base leading-tight line-clamp-2'>
-                {product.name}
-              </CardTitle>
-              {showPrice && (
-                <span className='font-bold text-primary text-base flex-shrink-0'>
-                  ₵{product.price.toFixed(2)}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className='p-3 pt-0 flex-shrink-0'>
-        <div className='flex items-center gap-2 text-sm'>
-          <div
-            className={`h-2 w-2 rounded-full flex-shrink-0 ${
-              isOutOfStock
-                ? 'bg-destructive'
-                : isLowStock
-                  ? 'bg-yellow-500'
-                  : 'bg-green-500'
-            }`}
-          />
-          <span
-            className={
-              isOutOfStock
-                ? 'text-destructive font-medium'
-                : isLowStock
-                  ? 'text-yellow-600'
-                  : 'text-green-600'
-            }
+
+      <div className='p-2 flex flex-col gap-1 flex-1 min-w-0'>
+        <div className='flex items-start justify-between gap-1 min-w-0'>
+          <h3
+            className='font-medium text-xs leading-tight line-clamp-2 min-w-0'
+            title={product.name}
           >
-            {isOutOfStock
-              ? 'Unavailable'
-              : `${sellableQty} available to order`}
+            {product.name}
+          </h3>
+          <span className='font-semibold text-primary text-xs tabular-nums shrink-0'>
+            ₵{product.price.toFixed(2)}
           </span>
         </div>
-      </CardContent>
-      <CardFooter className='p-2 sm:p-3 pt-0 mt-auto min-w-0'>
+
         {!isOutOfStock ? (
-          <div className='flex flex-col gap-2 w-full min-w-0 sm:flex-row sm:items-center sm:gap-2'>
-            <div className='flex items-center justify-center gap-1.5 min-w-0 w-full sm:w-auto sm:justify-start'>
-              <Label
-                htmlFor={`qty-${product.id}`}
-                className='text-[10px] sm:text-xs text-muted-foreground shrink-0'
-              >
-                Qty
-              </Label>
-              <Button
-                variant='outline'
-                size='icon'
-                className='h-7 w-7 shrink-0 sm:h-8 sm:w-8'
-                onClick={handleDecrement}
-                disabled={quantity <= 1}
-                aria-label='Decrease quantity'
-              >
-                <Minus className='h-3 w-3' />
-              </Button>
-              <Input
-                id={`qty-${product.id}`}
-                type='number'
-                min={1}
-                max={maxQuantity}
-                value={quantity}
-                onChange={(e) =>
-                  handleQuantityChange(parseInt(e.target.value, 10) || 1)
-                }
-                className='w-10 min-w-0 text-center h-7 text-xs px-1 sm:w-12 sm:h-8 sm:text-sm'
-              />
-              <Button
-                variant='outline'
-                size='icon'
-                className='h-7 w-7 shrink-0 sm:h-8 sm:w-8'
-                onClick={handleIncrement}
-                disabled={quantity >= maxQuantity}
-                aria-label='Increase quantity'
-              >
-                <Plus className='h-3 w-3' />
-              </Button>
-            </div>
-            <Button
-              className='w-full min-w-0 h-8 text-xs px-2 sm:h-9 sm:text-sm sm:ml-auto sm:w-auto sm:max-w-[10.5rem] md:max-w-none shrink-0'
-              variant='default'
-              size='sm'
-              onClick={handleAddToCart}
+          <div className='mt-auto flex items-center gap-1 min-w-0'>
+            <span
+              className={`text-[10px] leading-none shrink-0 tabular-nums ${
+                isLowStock ? 'text-yellow-600' : 'text-green-700'
+              }`}
+              title={`${sellableQty} available`}
             >
-              <Plus className='h-3 w-3 shrink-0 sm:mr-1.5' />
-              <span className='truncate'>Add to order</span>
-            </Button>
+              {sellableQty} avail
+            </span>
+            <div className='flex items-center ml-auto shrink-0'>
+              <div className='flex flex-col -space-y-0.5'>
+                <button
+                  type='button'
+                  className='h-3.5 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30'
+                  onClick={() => handleQuantityChange(quantity + 1)}
+                  disabled={quantity >= maxQuantity}
+                  aria-label='Increase quantity'
+                >
+                  <ChevronUp className='h-3 w-3' />
+                </button>
+                <button
+                  type='button'
+                  className='h-3.5 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30'
+                  onClick={() => handleQuantityChange(quantity - 1)}
+                  disabled={quantity <= 1}
+                  aria-label='Decrease quantity'
+                >
+                  <ChevronDown className='h-3 w-3' />
+                </button>
+              </div>
+              <span className='w-5 text-center text-xs tabular-nums font-medium'>
+                {quantity}
+              </span>
+            </div>
+            <button
+              type='button'
+              onClick={handleWhatsAppAdd}
+              aria-label='Add to cart'
+              title='Add to cart'
+              className='ml-0.5 shrink-0 h-7 w-7 rounded-full bg-control text-primary shadow-sm hover:brightness-95 active:scale-95 transition-transform flex items-center justify-center cursor-pointer'
+            >
+              <ShoppingCart className='h-3.5 w-3.5' />
+            </button>
           </div>
         ) : (
           <Button
-            className='w-full h-8 text-xs sm:h-9 sm:text-sm'
+            className='mt-auto w-full h-7 text-[10px]'
             variant='outline'
-            disabled={isOutOfStock && user !== null}
+            size='sm'
+            disabled={!!user}
             onClick={() => {
-              if (!user) {
-                setShowLoginDialog(true);
-                return;
-              }
+              if (!user) setShowLoginDialog(true);
             }}
           >
-            <AlertCircle className='mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4 shrink-0' />
+            <AlertCircle className='mr-1 h-3 w-3' />
             Notify me
           </Button>
         )}
-      </CardFooter>
-      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
+      </div>
+      <LoginDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        defaultIntent='signup'
+      />
     </Card>
   );
 }

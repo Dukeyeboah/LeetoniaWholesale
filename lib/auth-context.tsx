@@ -9,6 +9,7 @@ import { auth, db } from '@/lib/firebase';
 import type { User } from '@/types';
 import { useRouter } from 'next/navigation';
 import { inferSignInProvider } from '@/lib/auth-providers';
+import { clearBrowserCartOnLogout } from '@/hooks/use-cart';
 
 interface AuthContextType {
   user: User | null;
@@ -143,12 +144,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setUser(null);
       setViewMode('client');
+      clearBrowserCartOnLogout();
       router.push('/');
     } catch (error) {
       console.error('Error during logout:', error);
       // Still clear local state even if Firebase signOut fails
       setUser(null);
       setViewMode('client');
+      clearBrowserCartOnLogout();
       router.push('/');
     }
   };
