@@ -4,17 +4,22 @@ import type { CartItem, User } from '@/types';
  * Order chat number stays in code only — never shown in the UI.
  * WhatsApp click-to-chat opens one conversation with the order pre-filled.
  */
-const WHATSAPP_ORDER_CHAT_DIGITS = '18457418759';
+const WHATSAPP_ORDER_CHAT_DIGITS = '233206351107';
 
 export function buildWhatsAppOrderMessage(opts: {
   items: CartItem[];
   total: number;
   user?: User | null;
   contactPhone?: string;
+  paymentMethod?: 'momo' | 'cash' | 'cheque';
+  deliveryOption?: 'pickup' | 'delivery';
 }): string {
-  const { items, total, user, contactPhone } = opts;
+  const { items, total, user, contactPhone, paymentMethod, deliveryOption } =
+    opts;
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const lines: string[] = [
+    '*Order from leetoniawholesale.com*',
+    '',
     'Hello Leetonia Wholesale,',
     '',
     'I would like to place the following order.',
@@ -32,6 +37,20 @@ export function buildWhatsAppOrderMessage(opts: {
   }
   if (contactPhone?.trim()) {
     lines.push(`*Contact phone:* ${contactPhone.trim()}`);
+  }
+  if (paymentMethod) {
+    const payLabel =
+      paymentMethod === 'momo'
+        ? 'MoMo'
+        : paymentMethod === 'cheque'
+          ? 'Cheque'
+          : 'Cash';
+    lines.push(`*Payment:* ${payLabel}`);
+  }
+  if (deliveryOption) {
+    lines.push(
+      `*Fulfillment:* ${deliveryOption === 'pickup' ? 'Pick up' : 'Delivery'}`
+    );
   }
 
   lines.push('', '————————————', '*ORDER LIST*', '————————————', '');
@@ -53,7 +72,9 @@ export function buildWhatsAppOrderMessage(opts: {
     `*${itemCount} item${itemCount === 1 ? '' : 's'} (${items.length} product${items.length === 1 ? '' : 's'})*`,
     '————————————',
     '',
-    'Please confirm availability and delivery. Thank you.'
+    deliveryOption === 'pickup'
+      ? 'Please confirm availability. I will pick up this order. Thank you.'
+      : 'Please confirm availability and delivery. Thank you.'
   );
 
   return lines.join('\n');

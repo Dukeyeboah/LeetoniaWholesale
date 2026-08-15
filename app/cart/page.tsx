@@ -77,9 +77,16 @@ export default function CartPage() {
   const [contactPhone, setContactPhone] = useState('');
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [showOrderConfirm, setShowOrderConfirm] = useState(false);
+  const [showFulfillment, setShowFulfillment] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<
+    'momo' | 'cash' | 'cheque' | ''
+  >('');
+  const [deliveryOption, setDeliveryOption] = useState<
+    'pickup' | 'delivery' | ''
+  >('');
 
-  const sendWhatsAppOrder = () => {
+  const openFulfillmentStep = () => {
     if (!user) {
       setShowSignupDialog(true);
       return;
@@ -90,12 +97,23 @@ export default function CartPage() {
       );
       return;
     }
+    setShowFulfillment(true);
+  };
+
+  const sendWhatsAppOrder = () => {
+    if (!paymentMethod || !deliveryOption) {
+      toast.error('Choose a payment method and pick up or delivery.');
+      return;
+    }
     const message = buildWhatsAppOrderMessage({
       items: cart,
       total,
       user,
       contactPhone,
+      paymentMethod,
+      deliveryOption,
     });
+    setShowFulfillment(false);
     window.open(whatsappOrderLaunchUrl(message), '_blank', 'noopener,noreferrer');
     setShowOrderConfirm(true);
   };
@@ -486,7 +504,7 @@ export default function CartPage() {
                 type='button'
                 className='w-full'
                 size='lg'
-                onClick={sendWhatsAppOrder}
+                onClick={openFulfillmentStep}
               >
                 Make order
               </Button>
@@ -500,6 +518,79 @@ export default function CartPage() {
         defaultIntent='signup'
         description='Create an account or sign in so we know which pharmacy this order is for.'
       />
+      <Dialog open={showFulfillment} onOpenChange={setShowFulfillment}>
+        <DialogContent className='border-border/40 bg-white sm:max-w-sm sm:rounded-2xl'>
+          <DialogHeader className='text-center sm:text-center'>
+            <DialogTitle className='font-serif text-xl'>
+              Finalize order
+            </DialogTitle>
+            <DialogDescription>
+              Choose how you will pay and whether this is pick up or delivery.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-4'>
+            <div className='space-y-2'>
+              <p className='text-sm font-medium'>Payment</p>
+              <div className='grid grid-cols-3 gap-2'>
+                {(
+                  [
+                    ['momo', 'MoMo'],
+                    ['cash', 'Cash'],
+                    ['cheque', 'Cheque'],
+                  ] as const
+                ).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type='button'
+                    onClick={() => setPaymentMethod(value)}
+                    className={`rounded-full border px-2 py-2 text-sm font-medium ${
+                      paymentMethod === value
+                        ? 'border-primary bg-control text-foreground'
+                        : 'border-border bg-white text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className='space-y-2'>
+              <p className='text-sm font-medium'>Fulfillment</p>
+              <div className='grid grid-cols-2 gap-2'>
+                {(
+                  [
+                    ['pickup', 'Pick up'],
+                    ['delivery', 'Delivery'],
+                  ] as const
+                ).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type='button'
+                    onClick={() => setDeliveryOption(value)}
+                    className={`rounded-full border px-2 py-2 text-sm font-medium ${
+                      deliveryOption === value
+                        ? 'border-primary bg-control text-foreground'
+                        : 'border-border bg-white text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter className='flex flex-col gap-2 sm:flex-col'>
+            <Button
+              type='button'
+              className='w-full'
+              disabled={!paymentMethod || !deliveryOption}
+              onClick={sendWhatsAppOrder}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={showOrderConfirm} onOpenChange={setShowOrderConfirm}>
         <DialogContent className='border-border/40 bg-white sm:max-w-sm sm:rounded-2xl'>
           <DialogHeader className='text-center sm:text-center'>
