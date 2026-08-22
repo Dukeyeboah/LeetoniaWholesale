@@ -42,6 +42,7 @@ import {
 import { availableToSell } from '@/lib/inventory-availability';
 import {
   buildWhatsAppOrderMessage,
+  openWhatsAppUrl,
   whatsappOrderLaunchUrl,
 } from '@/lib/whatsapp-order';
 import {
@@ -76,7 +77,6 @@ export default function CartPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactPhone, setContactPhone] = useState('');
   const [showSignupDialog, setShowSignupDialog] = useState(false);
-  const [showOrderConfirm, setShowOrderConfirm] = useState(false);
   const [showFulfillment, setShowFulfillment] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<
@@ -100,57 +100,34 @@ export default function CartPage() {
     setShowFulfillment(true);
   };
 
-  const sendWhatsAppOrder = () => {
+  const placeOrderAndNotify = async () => {
     if (!paymentMethod || !deliveryOption) {
       toast.error('Choose a payment method and pick up or delivery.');
       return;
     }
-    const message = buildWhatsAppOrderMessage({
-      items: cart,
-      total,
-      user,
-      contactPhone,
-      paymentMethod,
-      deliveryOption,
-    });
-    setShowFulfillment(false);
-    window.open(whatsappOrderLaunchUrl(message), '_blank', 'noopener,noreferrer');
-    setShowOrderConfirm(true);
-  };
-
-  const handleCheckout = async () => {
     if (!user) {
-      toast.error('You must be logged in to place an order');
-      router.push('/login');
+      setShowSignupDialog(true);
       return;
     }
-
     if (needsClientPharmacyProfile) {
-      toast.error('Complete your pharmacy profile before placing an order.');
+      toast.error('Complete your pharmacy profile before making an order.');
       return;
     }
-
     if (!db) {
-      toast.error('Database not available - Demo Mode');
-      // In a real offline app, we would save to IndexedDB 'pending_orders' here
-      // For this demo, just clear the cart to simulate success locally
-      clearCart();
-      router.push('/orders');
+      toast.error('Database not available');
       return;
     }
 
+    const waWin = window.open('about:blank', '_blank');
     setIsSubmitting(true);
-
     try {
-      // Recalculate total to ensure it's correct (price * quantity for each item)
       const calculatedTotal = cart.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
       );
-
       const lineItems = cart.map((item) => ({ ...item }));
-
-      const phone = contactPhone.trim();
+      const phone =
+        contactPhone.trim() || user.phone || user.pharmacyPhone || '';
       const newOrder: Omit<Order, 'id'> = {
         userId: user.id,
         userName: user.name || user.email,
@@ -163,53 +140,50 @@ export default function CartPage() {
         total: calculatedTotal,
         createdAt: Date.now(),
         updatedAt: Date.now(),
+        paymentMethod,
+        deliveryOption,
         ...(phone ? { contactPhone: phone } : {}),
       };
 
+      let displayOrderId = '';
+
       if (user.role === 'client') {
         if (!user.pharmacyId || !user.pharmacyName) {
-          toast.error('Your profile is missing pharmacy details. Please sign in again or contact support.');
+          waWin?.close();
+          toast.error(
+            'Your profile is missing pharmacy details. Please sign in again or contact support.'
+          );
           setIsSubmitting(false);
           return;
         }
-        try {
-          const placed = await placeOrderWithPharmacyLimit({
-            db,
-            pharmacyId: user.pharmacyId,
-            pharmacyDisplayName: user.pharmacyName,
-            orderPrefix: toOrderIdPrefix(user.pharmacyName),
-            orderPayload: newOrder,
-          });
-          await notifyAdminsNewOrderRequest(db, {
-            id: placed.orderId,
-            displayOrderId: placed.displayOrderId,
-            userName: user.name || user.email,
-            userEmail: user.email,
-          });
-        } catch (err) {
-          if (err instanceof PharmacyLimitError) {
-            toast.error(
-              'This order would exceed your pharmacy’s account credit limit. An admin has been notified — credit can be adjusted under Admin → Pharmacies.'
-            );
-            setIsSubmitting(false);
-            return;
-          }
-          if (err instanceof InsufficientStockError) {
-            toast.error(err.message);
-            setIsSubmitting(false);
-            return;
-          }
-          throw err;
-        }
+        const placed = await placeOrderWithPharmacyLimit({
+          db,
+          pharmacyId: user.pharmacyId,
+          pharmacyDisplayName: user.pharmacyName,
+          orderPrefix: toOrderIdPrefix(user.pharmacyName),
+          orderPayload: newOrder,
+        });
+        displayOrderId = placed.displayOrderId;
+        await notifyAdminsNewOrderRequest(db, {
+          id: placed.orderId,
+          displayOrderId: placed.displayOrderId,
+          userName: user.name || user.email,
+          userEmail: user.email,
+        });
       } else {
         const suffix = randomOrderSuffix(8);
         const orderPrefix = 'Leetonia';
-        const displayOrderId = buildDisplayOrderId(orderPrefix, suffix);
+        displayOrderId = buildDisplayOrderId(orderPrefix, suffix);
         const orderId = buildFirestoreOrderId(orderPrefix, suffix);
-        await placeAdminOrderWithReservation(db, orderId, {
-          ...newOrder,
-          displayOrderId,
-        }, lineItems);
+        await placeAdminOrderWithReservation(
+          db,
+          orderId,
+          {
+            ...newOrder,
+            displayOrderId,
+          },
+          lineItems
+        );
         await notifyAdminsNewOrderRequest(db, {
           id: orderId,
           displayOrderId,
@@ -218,15 +192,32 @@ export default function CartPage() {
         });
       }
 
-      toast.success(
-        'Order submitted! The pharmacy will send you a proforma to confirm.'
-      );
+      const message = buildWhatsAppOrderMessage({
+        items: cart,
+        total: calculatedTotal,
+        user,
+        contactPhone: phone,
+        paymentMethod,
+        deliveryOption,
+        displayOrderId,
+      });
+      openWhatsAppUrl(whatsappOrderLaunchUrl(message), waWin);
+      setShowFulfillment(false);
       clearCart();
-      router.push('/orders');
-    } catch (error) {
-      console.error('Checkout error:', error);
-      if (error instanceof InsufficientStockError) {
-        toast.error(error.message);
+      setIsEditing(false);
+      toast.success(
+        'Order placed. Send the WhatsApp copy if the chat opened. You will get a proforma in the app to confirm.'
+      );
+      router.push('/home');
+    } catch (err) {
+      waWin?.close();
+      console.error('Checkout error:', err);
+      if (err instanceof PharmacyLimitError) {
+        toast.error(
+          'This order would exceed your pharmacy’s account credit limit. An admin has been notified — credit can be adjusted under Admin → Pharmacies.'
+        );
+      } else if (err instanceof InsufficientStockError) {
+        toast.error(err.message);
       } else {
         toast.error('Failed to place order. Please try again.');
       }
@@ -488,25 +479,13 @@ export default function CartPage() {
               </div>
             </CardContent>
             <CardFooter className='flex flex-col gap-3'>
-              {/* Place Order is paused — keep handler above to restore later.
-              <Button
-                className='w-full'
-                size='lg'
-                onClick={handleCheckout}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Processing...' : 'Place Order'}
-                {!isSubmitting && <ArrowRight className='ml-2 h-4 w-4' />}
-              </Button>
-              */}
-
               <Button
                 type='button'
                 className='w-full'
                 size='lg'
                 onClick={openFulfillmentStep}
               >
-                Make order
+                Place order
               </Button>
             </CardFooter>
           </Card>
@@ -583,45 +562,10 @@ export default function CartPage() {
             <Button
               type='button'
               className='w-full'
-              disabled={!paymentMethod || !deliveryOption}
-              onClick={sendWhatsAppOrder}
+              disabled={isSubmitting || !paymentMethod || !deliveryOption}
+              onClick={placeOrderAndNotify}
             >
-              Continue
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      <Dialog open={showOrderConfirm} onOpenChange={setShowOrderConfirm}>
-        <DialogContent className='border-border/40 bg-white sm:max-w-sm sm:rounded-2xl'>
-          <DialogHeader className='text-center sm:text-center'>
-            <DialogTitle className='font-serif text-xl'>
-              Confirm order sent
-            </DialogTitle>
-            <DialogDescription>
-              If you sent the order in WhatsApp, confirm below and we will
-              clear your cart. If it did not go through, keep the items.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className='flex flex-col gap-2 sm:flex-col'>
-            <Button
-              type='button'
-              className='w-full'
-              onClick={() => {
-                clearCart();
-                setIsEditing(false);
-                setShowOrderConfirm(false);
-                toast.success('Cart cleared');
-              }}
-            >
-              Confirm order sent
-            </Button>
-            <Button
-              type='button'
-              variant='outline'
-              className='w-full'
-              onClick={() => setShowOrderConfirm(false)}
-            >
-              Order not done
+              {isSubmitting ? 'Placing order…' : 'Place order'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useInventory } from '@/hooks/use-inventory';
-import { useCart } from '@/hooks/use-cart'; // Import useCart
-import { Input } from '@/components/ui/input';
+import { useCart } from '@/hooks/use-cart';
 import { Button } from '@/components/ui/button';
-import { Search, WifiOff, ChevronDown, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Search, WifiOff, ChevronDown, Loader2, SlidersHorizontal } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -15,57 +16,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import type { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from '@/lib/categories';
+import {
+  INVENTORY_LETTER_OPTIONS,
+  getFirstCharacterGroup,
+  type InventoryLetterFilter,
+} from '@/lib/inventory-filters';
 
 const INITIAL_PAGE_SIZE = 50;
 const LOAD_MORE_SIZE = 50;
 
-const LETTER_OPTIONS = [
-  'all',
-  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
-  '0-9',
-] as const;
-type LetterFilter = (typeof LETTER_OPTIONS)[number];
+type DiscoveryMethod = 'name' | 'category' | 'type';
 
-function getFirstCharacterGroup(name: string): string {
-  const first = (name || '').trim()[0];
-  if (!first) return '';
-  if (/\d/.test(first)) return '0-9';
-  const upper = first.toUpperCase();
-  return /[A-Z]/.test(upper) ? upper : '';
-}
-
-export default function InventoryPage() {
+function InventoryCatalog() {
   const { products, loading, offline } = useInventory();
   const { addToCart } = useCart();
-  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '');
+
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [subCategoryFilter, setSubCategoryFilter] = useState('all');
-  const [letterFilter, setLetterFilter] = useState<LetterFilter>('all');
+  const [letterFilter, setLetterFilter] = useState<InventoryLetterFilter>('all');
+  const [searchBy, setSearchBy] = useState<DiscoveryMethod | ''>('');
   const [isMounted, setIsMounted] = useState(false);
   const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
-  const [showLetterFilter, setShowLetterFilter] = useState(false);
 
-
-  // Fix hydration errors by only rendering Select after mount
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Reset to first page when search, category, or letter changes
   useEffect(() => {
     setVisibleCount(INITIAL_PAGE_SIZE);
-  }, [searchQuery, categoryFilter, subCategoryFilter, letterFilter]);
+  }, [searchQuery, categoryFilter, subCategoryFilter, letterFilter, searchBy]);
 
-  // Always use products from Firebase/IndexedDB - don't fall back to mock data
-  // Mock data is only for development/testing when no data is seeded
-  // Filter out hidden products (only show to customers if not hidden)
-   const displayProducts = products.filter((p) => !p.isHidden);
-  //const displayProducts = products.filter((p) => p.isHidden !== true);
+  const displayProducts = products.filter((p) => !p.isHidden);
 
-  // Get unique categories from products, merge with predefined categories
   const productCategories = Array.from(
     new Set(displayProducts.map((p) => p.category).filter(Boolean))
   );
@@ -73,14 +68,21 @@ export default function InventoryPage() {
   const categories = ['all', ...Array.from(allCategories).sort()];
 
   const filteredProducts = displayProducts.filter((product) => {
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      !q ||
+      product.name.toLowerCase().includes(q) ||
+      product.description?.toLowerCase().includes(q);
     const matchesCategory =
-      categoryFilter === 'all' || product.category === categoryFilter;
+      searchBy !== 'category' ||
+      categoryFilter === 'all' ||
+      product.category === categoryFilter;
     const matchesSubCategory =
-      subCategoryFilter === 'all' || product.subCategory === subCategoryFilter;
+      searchBy !== 'type' ||
+      subCategoryFilter === 'all' ||
+      product.subCategory === subCategoryFilter;
     const matchesLetter =
+      searchBy !== 'name' ||
       letterFilter === 'all' ||
       getFirstCharacterGroup(product.name || '') === letterFilter;
     return matchesSearch && matchesCategory && matchesSubCategory && matchesLetter;
@@ -88,17 +90,84 @@ export default function InventoryPage() {
 
   const productsToShow = filteredProducts.slice(0, visibleCount);
   const hasMore = visibleCount < filteredProducts.length;
+  const filtersActive =
+    Boolean(searchBy) ||
+    Boolean(searchQuery.trim()) ||
+    letterFilter !== 'all' ||
+    categoryFilter !== 'all' ||
+    subCategoryFilter !== 'all';
 
   const handleAddToCart = (product: Product, quantity: number) => {
     addToCart(product, quantity);
   };
 
-  const idleFill =
-    'border-border/70 bg-white text-foreground shadow-sm';
+  const clearFilters = () => {
+    setSearchBy('');
+    setLetterFilter('all');
+    setCategoryFilter('all');
+    setSubCategoryFilter('all');
+    setSearchQuery('');
+    if (searchParams.get('q')) {
+      router.replace('/inventory', { scroll: false });
+    }
+  };
+
+  const onSearchByChange = (value: DiscoveryMethod) => {
+    setSearchBy(value);
+    if (value !== 'name') setLetterFilter('all');
+    if (value !== 'category') setCategoryFilter('all');
+    if (value !== 'type') setSubCategoryFilter('all');
+  };
+
+  const idleFill = 'border-border/70 bg-white text-foreground shadow-sm';
   const activeFill = '!bg-control border-primary/20 text-foreground';
-  const searchClass = `h-9 rounded-full cursor-text ${idleFill}`;
-  const filterControlClass = `inline-flex h-8 min-w-0 flex-1 cursor-pointer items-center overflow-hidden rounded-full border px-2.5 text-xs font-medium sm:flex-none ${idleFill}`;
+  const searchClass = `h-8 rounded-full cursor-text ${idleFill}`;
+  const filterControlClass = `inline-flex h-8 min-w-0 cursor-pointer items-center overflow-hidden rounded-full border px-2.5 text-xs font-medium ${idleFill}`;
   const selectControlClass = `${filterControlClass} w-full justify-between gap-1 pr-1.5 pl-2.5 data-[state=open]:!bg-control [&>span]:min-w-0 [&>span]:flex-1 [&>span]:truncate [&>span]:text-left [&_svg]:ml-auto [&_svg]:shrink-0`;
+
+  const renderCategorySelect = () => (
+    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+      <SelectTrigger
+        className={`${selectControlClass} ${
+          categoryFilter !== 'all' ? activeFill : ''
+        }`}
+      >
+        <SelectValue placeholder='All categories' />
+      </SelectTrigger>
+      <SelectContent className='max-w-[min(100vw-2rem,280px)]'>
+        {categories.map((cat) => (
+          <SelectItem
+            key={cat}
+            value={cat}
+            className='truncate pr-8'
+            title={cat}
+          >
+            {cat === 'all' ? 'All categories' : cat}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+
+  const renderTypeSelect = () => (
+    <Select value={subCategoryFilter} onValueChange={setSubCategoryFilter}>
+      <SelectTrigger
+        className={`${selectControlClass} ${
+          subCategoryFilter !== 'all' ? activeFill : ''
+        }`}
+      >
+        <SelectValue placeholder='All types' />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value='all'>All types</SelectItem>
+        {PRODUCT_SUBCATEGORIES.map((sub) => (
+          <SelectItem key={sub} value={sub}>
+            {sub}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 
   return (
     <div className='space-y-2'>
@@ -112,85 +181,118 @@ export default function InventoryPage() {
         </Badge>
       )}
 
-      <div className='sticky top-[var(--storefront-nav-h,3rem)] z-30 -mx-4 space-y-2 bg-background px-4 py-1.5 transition-[top] duration-200 ease-out md:-mx-8 md:px-8'>
-        <div className='flex justify-center'>
-          <div className='relative w-full sm:w-80 sm:shrink-0'>
+      <div className='sticky top-[var(--storefront-nav-h,3.5rem)] z-30 -mx-4 space-y-2 bg-background px-4 py-1.5 transition-[top] duration-200 ease-out md:-mx-8 md:px-8'>
+        <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
+          <div className='relative min-w-0 w-full sm:flex-1'>
             <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
             <Input
-              placeholder='Search…'
+              placeholder='Search products…'
               className={`pl-9 ${searchClass}`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label='Search products'
             />
+          </div>
+          <div className='flex min-w-0 items-center justify-between gap-2 sm:justify-end'>
+            {isMounted && searchBy === 'category' && (
+              <div className='min-w-0 max-w-[11rem] shrink'>
+                {renderCategorySelect()}
+              </div>
+            )}
+            {isMounted && searchBy === 'type' && (
+              <div className='min-w-0 max-w-[9rem] shrink'>
+                {renderTypeSelect()}
+              </div>
+            )}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='sm'
+                  className={`h-8 shrink-0 rounded-full px-3 text-xs font-medium ${
+                    searchBy ||
+                    categoryFilter !== 'all' ||
+                    subCategoryFilter !== 'all' ||
+                    letterFilter !== 'all'
+                      ? activeFill
+                      : idleFill
+                  }`}
+                >
+                  <SlidersHorizontal className='mr-1.5 h-3.5 w-3.5' />
+                  {searchBy === 'name'
+                    ? 'Name'
+                    : searchBy === 'category'
+                      ? 'Category'
+                      : searchBy === 'type'
+                        ? 'Type'
+                        : 'Filter'}
+                  <ChevronDown className='ml-1 h-3.5 w-3.5 opacity-70' />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align='end' className='w-72 space-y-4'>
+                <p className='text-xs font-semibold tracking-wide text-muted-foreground'>
+                  FILTER
+                </p>
+                <div className='space-y-2'>
+                  <p className='text-sm font-medium'>Search by</p>
+                  <RadioGroup
+                    value={searchBy || undefined}
+                    onValueChange={(value) =>
+                      onSearchByChange(value as DiscoveryMethod)
+                    }
+                    className='gap-2'
+                  >
+                    {(
+                      [
+                        ['name', 'Name'],
+                        ['category', 'Category'],
+                        ['type', 'Type'],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <div key={value} className='flex items-center gap-2'>
+                        <RadioGroupItem value={value} id={`filter-${value}`} />
+                        <Label htmlFor={`filter-${value}`} className='font-normal'>
+                          {label}
+                          {searchBy === value ? (
+                            <span className='ml-2 text-xs text-muted-foreground'>
+                              on
+                            </span>
+                          ) : null}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+                {searchBy === 'name' && (
+                  <p className='text-xs text-muted-foreground'>
+                    Name is on. Choose a letter below to browse the catalog.
+                  </p>
+                )}
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='sm'
+                  className='w-full'
+                  onClick={clearFilters}
+                >
+                  Clear filters
+                </Button>
+              </PopoverContent>
+            </Popover>
+            <p className='ml-auto shrink-0 text-xs tabular-nums text-muted-foreground sm:ml-0 sm:text-sm'>
+              {loading
+                ? '…'
+                : `${filteredProducts.length.toLocaleString()} product${
+                    filteredProducts.length === 1 ? '' : 's'
+                  }`}
+            </p>
           </div>
         </div>
 
-        <div className='flex items-center justify-center gap-1.5'>
-          <button
-            type='button'
-            aria-pressed={showLetterFilter}
-            className={`${filterControlClass} justify-center sm:w-28 ${
-              showLetterFilter ? activeFill : ''
-            }`}
-            onClick={() => setShowLetterFilter((open) => !open)}
-          >
-            Name
-          </button>
-          {isMounted ? (
-            <>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger
-                  className={`${selectControlClass} sm:w-40 ${
-                    categoryFilter !== 'all' ? activeFill : ''
-                  }`}
-                >
-                  <SelectValue placeholder='Categories' />
-                </SelectTrigger>
-                <SelectContent className='max-w-[min(100vw-2rem,280px)]'>
-                  {categories.map((cat) => (
-                    <SelectItem
-                      key={cat}
-                      value={cat}
-                      className='truncate pr-8'
-                      title={cat}
-                    >
-                      {cat === 'all' ? 'Categories' : cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={subCategoryFilter}
-                onValueChange={setSubCategoryFilter}
-              >
-                <SelectTrigger
-                  className={`${selectControlClass} sm:w-32 ${
-                    subCategoryFilter !== 'all' ? activeFill : ''
-                  }`}
-                >
-                  <SelectValue placeholder='Types' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='all'>Types</SelectItem>
-                  {PRODUCT_SUBCATEGORIES.map((sub) => (
-                    <SelectItem key={sub} value={sub}>
-                      {sub}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </>
-          ) : (
-            <>
-              <div className={`${filterControlClass} sm:w-40`} />
-              <div className={`${filterControlClass} sm:w-32`} />
-            </>
-          )}
-        </div>
-
-        {showLetterFilter && (
+        {searchBy === 'name' && (
           <div className='grid grid-cols-[repeat(14,minmax(0,1fr))] gap-px sm:flex sm:flex-wrap sm:justify-center sm:gap-1.5'>
-            {LETTER_OPTIONS.map((letter) => (
+            {INVENTORY_LETTER_OPTIONS.map((letter) => (
               <Button
                 key={letter}
                 variant='secondary'
@@ -217,9 +319,7 @@ export default function InventoryPage() {
         >
           <Loader2 className='h-10 w-10 animate-spin text-primary' />
           <div className='text-center space-y-2 max-w-md'>
-            <p className='font-medium text-foreground'>
-              Loading products…
-            </p>
+            <p className='font-medium text-foreground'>Loading products…</p>
             <p className='text-sm text-muted-foreground animate-pulse'>
               Please wait while we load the wholesale catalog. With thousands of
               items this may take a moment.
@@ -240,18 +340,11 @@ export default function InventoryPage() {
           <p className='text-muted-foreground'>
             Try adjusting your search or filters.
           </p>
-          <Button
-            variant='link'
-            className='mt-2'
-            onClick={() => {
-              setSearchQuery('');
-              setCategoryFilter('all');
-              setSubCategoryFilter('all');
-              setLetterFilter('all');
-            }}
-          >
-            Clear all filters
-          </Button>
+          {filtersActive && (
+            <Button variant='link' className='mt-2' onClick={clearFilters}>
+              Clear all filters
+            </Button>
+          )}
         </div>
       ) : (
         <div className='space-y-6'>
@@ -267,17 +360,25 @@ export default function InventoryPage() {
           {filteredProducts.length > INITIAL_PAGE_SIZE && (
             <div className='flex flex-col items-center gap-3 pt-4'>
               <p className='text-sm text-muted-foreground'>
-                Showing {productsToShow.length} of {filteredProducts.length} products
+                Showing {productsToShow.length} of {filteredProducts.length}{' '}
+                products
               </p>
               {hasMore && (
                 <Button
                   variant='outline'
                   size='lg'
-                  onClick={() => setVisibleCount((prev) => prev + LOAD_MORE_SIZE)}
+                  onClick={() =>
+                    setVisibleCount((prev) => prev + LOAD_MORE_SIZE)
+                  }
                   className='gap-2'
                 >
                   <ChevronDown className='h-4 w-4' />
-                  Show more ({Math.min(LOAD_MORE_SIZE, filteredProducts.length - visibleCount)} more)
+                  Show more (
+                  {Math.min(
+                    LOAD_MORE_SIZE,
+                    filteredProducts.length - visibleCount
+                  )}{' '}
+                  more)
                 </Button>
               )}
             </div>
@@ -285,5 +386,19 @@ export default function InventoryPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function InventoryPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='flex min-h-[40vh] items-center justify-center'>
+          <Loader2 className='h-8 w-8 animate-spin text-primary' />
+        </div>
+      }
+    >
+      <InventoryCatalog />
+    </Suspense>
   );
 }

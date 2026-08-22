@@ -390,7 +390,7 @@ export default function LoginPage() {
         return;
       }
       await refreshUser();
-      router.push('/inventory');
+      router.push('/home');
     } catch (error) {
       console.error('Error ensuring user profile:', error);
       setError('Could not complete sign-in. Please try again.');
@@ -661,7 +661,7 @@ export default function LoginPage() {
         onCancel={() => {
           setShowAdminPasskeyDialog(false);
           setPendingUser(null);
-          router.push('/inventory');
+          router.push('/home');
         }}
       />
     </div>

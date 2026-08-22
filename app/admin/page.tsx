@@ -27,7 +27,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -77,6 +77,8 @@ import {
   Loader2,
   LayoutGrid,
   LayoutList,
+  MessageCircle,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
@@ -121,6 +123,10 @@ import {
   resolveWarehouseRowToProduct,
 } from '@/lib/warehouse-data';
 import { formatOrderLabel } from '@/lib/order-display';
+import {
+  openWhatsAppToCustomer,
+  shouldOpenCustomerWhatsApp,
+} from '@/lib/whatsapp-order';
 import { generateInventoryProductCode } from '@/lib/product-code';
 import {
   INVENTORY_IMAGE_ACCEPT,
@@ -155,6 +161,11 @@ import {
 } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  AdminOverviewPanel,
+  AdminSegmentNav,
+  type OverviewModalKey,
+} from '@/components/admin-overview-panel';
 import {
   parseLocalYmd,
   totalLeaveDaysInYear,
@@ -210,6 +221,15 @@ export default function AdminDashboard() {
   const [productFilter, setProductFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<string>('inventory');
+  const [adminSection, setAdminSection] = useState<
+    'overview' | 'operations' | 'analytics' | 'administration'
+  >('overview');
+  const [overviewModal, setOverviewModal] = useState<OverviewModalKey | null>(
+    null
+  );
+  const [staffHrPane, setStaffHrPane] = useState<
+    'profile' | 'loans' | 'activity'
+  >('profile');
   const [manageOrdersPaymentsOpen, setManageOrdersPaymentsOpen] =
     useState(false);
   const [expandedManageOrderIds, setExpandedManageOrderIds] = useState<
@@ -351,9 +371,6 @@ export default function AdminDashboard() {
     useState<string>('all');
   const [inventorySubCategoryFilter, setInventorySubCategoryFilter] =
     useState<string>('all');
-  const [productCountView, setProductCountView] = useState<
-    'wholesale' | 'storeroom'
-  >('wholesale');
   const [paymentDialogOrder, setPaymentDialogOrder] = useState<Order | null>(
     null
   );
@@ -413,15 +430,6 @@ export default function AdminDashboard() {
         inventorySortMode
       ),
     [allStoreroomRows, inventoryLetterFilter, inventorySortMode]
-  );
-
-  const wholesaleProductCount = useMemo(
-    () => products.filter((p) => !p.isHidden).length,
-    [products]
-  );
-  const storeroomProductCount = useMemo(
-    () => products.filter((p) => (p.storeroomStock ?? 0) > 0).length,
-    [products]
   );
 
   const ordersForPaymentsTab = useMemo(
@@ -557,6 +565,7 @@ export default function AdminDashboard() {
     setLoanDedForm({ amount: '', date: today, note: '' });
     setLoanPayForm({ amount: '', date: today, note: '' });
     setStaffActiveLoanId(staffHrDraft.loanAccounts[0]?.id ?? null);
+    setStaffHrPane('profile');
   }, [staffHrDraft?.id]);
 
   const openOrderEditDialog = (order: Order) => {
@@ -1053,6 +1062,32 @@ export default function AdminDashboard() {
     void updateOrderStatus(order.id, 'cancelled');
   };
 
+  const extraPhonesForOrder = (order: Order) => {
+    const account = users.find((u) => u.id === order.userId);
+    const pharmacy = order.pharmacyId
+      ? pharmacies.find((p) => p.id === order.pharmacyId)
+      : undefined;
+    return [account?.phone, account?.pharmacyPhone, pharmacy?.phone];
+  };
+
+  const openCustomerStatusWhatsApp = (
+    order: Order,
+    status: Order['status'],
+    existingWindow?: Window | null
+  ) => {
+    const ok = openWhatsAppToCustomer(
+      order,
+      status,
+      extraPhonesForOrder(order),
+      existingWindow
+    );
+    if (!ok) {
+      toast.message(
+        'No customer phone on this order — WhatsApp was not opened. They can still confirm in the app.'
+      );
+    }
+  };
+
   const updateOrderStatus = async (
     orderId: string,
     newStatus: Order['status']
@@ -1061,13 +1096,17 @@ export default function AdminDashboard() {
       toast.error('Database not available');
       return;
     }
-    try {
-      const order = orders.find((o) => o.id === orderId);
-      if (!order) {
-        toast.error('Order not found');
-        return;
-      }
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) {
+      toast.error('Order not found');
+      return;
+    }
 
+    const notifyWa =
+      shouldOpenCustomerWhatsApp(newStatus) && order.status !== newStatus;
+    const waWin = notifyWa ? window.open('about:blank', '_blank') : null;
+
+    try {
       await updateDoc(doc(db, 'orders', orderId), {
         status: newStatus,
         updatedAt: Date.now(),
@@ -1157,7 +1196,15 @@ export default function AdminDashboard() {
       }
 
       toast.success(`Order status updated`);
+      if (notifyWa) {
+        openCustomerStatusWhatsApp(
+          { ...order, status: newStatus },
+          newStatus,
+          waWin
+        );
+      }
     } catch (error) {
+      waWin?.close();
       console.error('Error updating order status:', error);
       toast.error('Failed to update status');
     }
@@ -1165,18 +1212,30 @@ export default function AdminDashboard() {
 
   const handleConfirmSendProforma = async () => {
     if (!db || !proformaDialogOrder) return;
+    const orderToNotify = proformaDialogOrder;
+    const waWin = window.open('about:blank', '_blank');
     setSendingProforma(true);
     try {
-      await updateDoc(doc(db, 'orders', proformaDialogOrder.id), {
+      await updateDoc(doc(db, 'orders', orderToNotify.id), {
         status: 'proforma_sent',
         proformaNote: proformaNoteDraft.trim() || DEFAULT_PROFORMA_NOTE,
         proformaSentAt: Date.now(),
         updatedAt: Date.now(),
       });
-      await notifyClientProformaReady(db, proformaDialogOrder);
+      await notifyClientProformaReady(db, orderToNotify);
       toast.success('Proforma sent to customer');
       setProformaDialogOrder(null);
+      openCustomerStatusWhatsApp(
+        {
+          ...orderToNotify,
+          status: 'proforma_sent',
+          proformaNote: proformaNoteDraft.trim() || DEFAULT_PROFORMA_NOTE,
+        },
+        'proforma_sent',
+        waWin
+      );
     } catch (e) {
+      waWin?.close();
       console.error(e);
       toast.error('Failed to send proforma');
     } finally {
@@ -1850,218 +1909,128 @@ export default function AdminDashboard() {
     }
   };
 
+  const goToAdminSection = (
+    section: 'overview' | 'operations' | 'analytics' | 'administration'
+  ) => {
+    setAdminSection(section);
+    if (section === 'operations') {
+      if (!['inventory', 'orders', 'history'].includes(activeTab)) {
+        setActiveTab('inventory');
+      }
+    } else if (section === 'analytics') {
+      setActiveTab('analytics');
+    } else if (section === 'administration') {
+      if (!['staff', 'pharmacies', 'settings'].includes(activeTab)) {
+        setActiveTab(isSuperAdmin ? 'staff' : 'pharmacies');
+      }
+    }
+  };
+
+  const openOperationsFromOverview = (
+    tab: 'orders' | 'inventory' | 'history',
+    status?: string
+  ) => {
+    if (status) setStatusFilter(status);
+    setActiveTab(tab);
+    setAdminSection('operations');
+  };
+
   return (
     <div className='space-y-6 sm:space-y-8 w-full min-w-0 max-w-full overflow-x-hidden'>
       <div className='flex flex-col sm:flex-row justify-between sm:items-center gap-3'>
-        <h1 className='text-2xl sm:text-3xl font-serif font-bold text-primary'>
-          Admin Dashboard
-        </h1>
-        <div className='flex gap-2 shrink-0'>
-          <Button
-            onClick={() => openProductDialog()}
-            className='w-full sm:w-auto'
-            size='sm'
-          >
-            <Plus className='mr-2 h-4 w-4 shrink-0' /> Add Product
-          </Button>
+        <div>
+          <p className='text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+            Leetonia Admin
+          </p>
+          <h1 className='text-2xl sm:text-3xl font-serif font-bold text-primary'>
+            {adminSection === 'overview'
+              ? 'Overview'
+              : adminSection === 'operations'
+                ? 'Operations'
+                : adminSection === 'analytics'
+                  ? 'Analytics'
+                  : 'Administration'}
+          </h1>
+          <p className='text-sm text-muted-foreground mt-0.5'>
+            {adminSection === 'overview'
+              ? 'What’s happening across orders, inventory, and the business.'
+              : adminSection === 'operations'
+                ? 'Inventory, live orders, and history.'
+                : adminSection === 'analytics'
+                  ? 'Revenue, clients, expiry, and what is or isn’t selling.'
+                  : 'Staff, pharmacies, and settings.'}
+          </p>
         </div>
-      </div>
-
-      <div className='grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4'>
-        <Card
-          className='cursor-pointer hover:shadow-md transition-shadow'
-          onClick={() => {
-            setStatusFilter('pending');
-            setActiveTab('orders');
-          }}
-        >
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Pending
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold text-yellow-600'>
-              {orders.filter((o) => o.status === 'pending').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card
-          className='cursor-pointer hover:shadow-md transition-shadow'
-          onClick={() => {
-            setStatusFilter('proforma_sent');
-            setActiveTab('orders');
-          }}
-        >
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Proforma with customer
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold text-blue-600'>
-              {orders.filter((o) => o.status === 'proforma_sent').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card
-          className='cursor-pointer hover:shadow-md transition-shadow'
-          onClick={() => {
-            setStatusFilter('client_finalized');
-            setActiveTab('orders');
-          }}
-        >
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Awaiting invoice / packing
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold text-green-600'>
-              {orders.filter((o) => o.status === 'client_finalized').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card
-          className='cursor-pointer hover:shadow-md transition-shadow'
-          onClick={() => {
-            setStatusFilter('processing');
-            setActiveTab('orders');
-          }}
-        >
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Processing
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold text-purple-600'>
-              {orders.filter((o) => o.status === 'processing').length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className='grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
-        <Card>
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Completed Today
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold text-green-600'>
-              {
-                orders.filter(
-                  (o) =>
-                    o.status === 'completed' &&
-                    new Date(o.updatedAt).toDateString() ===
-                      new Date().toDateString()
-                ).length
-              }
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Low Stock Items
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold text-yellow-600'>
-              {products.filter((p) => p.stock < 10).length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-sm font-medium text-muted-foreground'>
-              Total Products
-            </CardTitle>
-            <div className='flex gap-1 pt-1'>
-              <Button
-                type='button'
-                size='sm'
-                variant={
-                  productCountView === 'wholesale' ? 'default' : 'outline'
-                }
-                className='h-7 px-2 text-xs'
-                onClick={() => setProductCountView('wholesale')}
-              >
-                Wholesale
-              </Button>
-              <Button
-                type='button'
-                size='sm'
-                variant={
-                  productCountView === 'storeroom' ? 'default' : 'outline'
-                }
-                className='h-7 px-2 text-xs'
-                onClick={() => setProductCountView('storeroom')}
-              >
-                Storeroom
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {productCountView === 'wholesale'
-                ? wholesaleProductCount
-                : storeroomProductCount}
-            </div>
-            <p className='text-xs text-muted-foreground mt-1'>
-              {productCountView === 'wholesale'
-                ? 'Visible on storefront (not hidden)'
-                : 'With storeroom / warehouse stock on hand'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full min-w-0 max-w-full overflow-x-hidden'>
-        <TabsList className='w-full justify-start h-auto min-h-11 bg-muted/50 p-1 flex flex-wrap gap-1'>
-          <TabsTrigger
-            value='inventory'
-            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
-          >
-            Manage Inventory
-          </TabsTrigger>
-          <TabsTrigger
-            value='orders'
-            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
-          >
-            Manage Orders
-          </TabsTrigger>
-          <TabsTrigger
-            value='history'
-            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
-          >
-            Order History
-          </TabsTrigger>
-          <TabsTrigger
-            value='analytics'
-            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
-          >
-            Analytics
-          </TabsTrigger>
-          {isSuperAdmin && (
-            <TabsTrigger
-              value='staff'
-              className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
+        {adminSection === 'operations' && activeTab === 'inventory' && (
+          <div className='flex gap-2 shrink-0'>
+            <Button
+              onClick={() => openProductDialog()}
+              className='w-full sm:w-auto'
+              size='sm'
             >
-              Staff
-            </TabsTrigger>
-          )}
-          <TabsTrigger
-            value='pharmacies'
-            className='h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm shrink-0'
-          >
-            <Building2 className='inline h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 align-text-bottom' />
-            Pharmacies
-          </TabsTrigger>
-        </TabsList>
+              <Plus className='mr-2 h-4 w-4 shrink-0' /> Add Product
+            </Button>
+          </div>
+        )}
+      </div>
 
+      <AdminSegmentNav
+        value={adminSection}
+        onChange={(value) =>
+          goToAdminSection(
+            value as 'overview' | 'operations' | 'analytics' | 'administration'
+          )
+        }
+        items={[
+          { value: 'overview', label: 'Overview' },
+          { value: 'operations', label: 'Operations' },
+          { value: 'analytics', label: 'Analytics' },
+          { value: 'administration', label: 'Administration' },
+        ]}
+      />
+
+      {adminSection === 'overview' && (
+        <AdminOverviewPanel
+          orders={orders}
+          products={products}
+          getUserName={getUserName}
+          modal={overviewModal}
+          onOpenModal={setOverviewModal}
+          onCloseModal={() => setOverviewModal(null)}
+          onOpenOperations={openOperationsFromOverview}
+          onOpenAnalytics={() => {
+            setAdminSection('analytics');
+            setActiveTab('analytics');
+          }}
+        />
+      )}
+
+      {adminSection === 'operations' && (
+        <AdminSegmentNav
+          value={activeTab}
+          onChange={setActiveTab}
+          items={[
+            { value: 'inventory', label: 'Inventory' },
+            { value: 'orders', label: 'Orders' },
+            { value: 'history', label: 'Order History' },
+          ]}
+        />
+      )}
+
+      {adminSection === 'administration' && (
+        <AdminSegmentNav
+          value={activeTab}
+          onChange={setActiveTab}
+          items={[
+            ...(isSuperAdmin ? [{ value: 'staff', label: 'Staff' }] : []),
+            { value: 'pharmacies', label: 'Pharmacies' },
+            { value: 'settings', label: 'Settings' },
+          ]}
+        />
+      )}
+
+      {adminSection !== 'overview' && (
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full min-w-0 max-w-full overflow-x-hidden'>
         <TabsContent
           value='orders'
           className='mt-6 space-y-6 w-full min-w-0 max-w-full overflow-x-hidden'
@@ -2412,6 +2381,16 @@ export default function AdminDashboard() {
                         >
                           {order.status.replace(/_/g, ' ')}
                         </Badge>
+                        <Button
+                          variant='outline'
+                          className='w-full'
+                          onClick={() =>
+                            openCustomerStatusWhatsApp(order, order.status)
+                          }
+                        >
+                          <MessageCircle className='mr-2 h-4 w-4' />
+                          WhatsApp customer
+                        </Button>
                         {order.status === 'proforma_sent' && (
                           <p className='text-xs text-muted-foreground'>
                             Waiting for the customer to confirm the proforma.
@@ -3303,11 +3282,11 @@ export default function AdminDashboard() {
         <TabsContent value='staff' className='mt-6 space-y-6'>
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <div>
-              <h2 className='text-2xl font-serif font-bold'>Staff Management</h2>
+              <h2 className='text-2xl font-serif font-bold'>Staff</h2>
               <p className='text-sm text-muted-foreground max-w-xl'>
-                HR records for loans, payroll deductions, and leave. Grant
-                dashboard access separately so people can sign in to the staff
-                app.
+                Team directory, dashboard permissions, and leave. Open a member
+                to manage loans and financial history — loans are not a separate
+                top-level section.
               </p>
             </div>
             <div className='flex flex-wrap gap-2'>
@@ -3354,10 +3333,10 @@ export default function AdminDashboard() {
                 >
                   <ChevronDown className='mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180' />
                   <div className='min-w-0 flex-1'>
-                    <CardTitle className='text-base'>Team (HR)</CardTitle>
+                    <CardTitle className='text-base'>Team</CardTitle>
                     <CardDescription>
-                      Loans, deductions, payments, and leave — super admin
-                      only. Expand for the full list ({staffHrMembers.length}).
+                      Directory of staff. Open Manage for profile, permissions,
+                      loan management, and activity ({staffHrMembers.length}).
                     </CardDescription>
                   </div>
                 </button>
@@ -4319,7 +4298,60 @@ export default function AdminDashboard() {
             )}
           </div>
         </TabsContent>
+
+        <TabsContent value='settings' className='mt-6 space-y-6'>
+          <div>
+            <h2 className='text-2xl font-serif font-bold'>Settings</h2>
+            <p className='text-sm text-muted-foreground max-w-xl mt-1'>
+              Account, notifications, and system configuration will live here.
+              Roles, credit lines, and pharmacy records stay under Staff and
+              Pharmacies.
+            </p>
+          </div>
+          <div className='grid gap-3 sm:grid-cols-2'>
+            <Card className='border-border/60 shadow-none'>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2 text-base'>
+                  <Settings className='h-4 w-4' />
+                  Account
+                </CardTitle>
+                <CardDescription>
+                  Admin profile and sign-in live on your Account page in the
+                  storefront menu.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className='border-border/60 shadow-none'>
+              <CardHeader>
+                <CardTitle className='text-base'>Notifications</CardTitle>
+                <CardDescription>
+                  Customer order alerts already go out in-app when status
+                  changes. Extra channels can be configured here later.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className='border-border/60 shadow-none'>
+              <CardHeader>
+                <CardTitle className='text-base'>Roles &amp; permissions</CardTitle>
+                <CardDescription>
+                  Grant dashboard access and staff permissions from
+                  Administration → Staff.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className='border-border/60 shadow-none'>
+              <CardHeader>
+                <CardTitle className='text-base'>System</CardTitle>
+                <CardDescription>
+                  Inventory, orders, and pharmacies are the live configuration
+                  for this wholesale portal.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
+      )}
 
       <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
         <DialogContent className='max-h-[90vh] overflow-y-auto w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] sm:max-w-lg'>
@@ -5069,17 +5101,33 @@ export default function AdminDashboard() {
       >
         <DialogContent className='flex max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl'>
           <DialogHeader className='shrink-0 px-6 pt-6 pb-2'>
-            <DialogTitle>Manage team member</DialogTitle>
+            <DialogTitle>
+              {staffHrDraft?.name || 'Manage team member'}
+            </DialogTitle>
             <DialogDescription>
-              Update profile, leave, and loan balance. Deductions, payments, and
-              each Save details create dated lines in the loan ledger.
+              Profile, leave, and loan management for this staff member.
             </DialogDescription>
           </DialogHeader>
           {staffHrDraft && (
+            <div className='px-6 pt-2'>
+              <AdminSegmentNav
+                value={staffHrPane}
+                onChange={(value) =>
+                  setStaffHrPane(value as 'profile' | 'loans' | 'activity')
+                }
+                items={[
+                  { value: 'profile', label: 'Profile' },
+                  { value: 'loans', label: 'Loan Management' },
+                  { value: 'activity', label: 'Activity' },
+                ]}
+              />
+            </div>
+          )}
+          {staffHrDraft && (
             <ScrollArea className='h-[min(72vh,calc(100vh-11rem))] max-h-[72vh] w-full shrink-0 px-6'>
               <div className='space-y-6 py-2 pb-6 pr-3'>
-                <div className='grid gap-3 sm:grid-cols-2'>
-                  <div className='space-y-1'>
+                <div className={`grid gap-3 sm:grid-cols-2 ${staffHrPane === 'activity' ? 'hidden' : ''}`}>
+                  <div className={`space-y-1 ${staffHrPane !== 'profile' ? 'hidden' : ''}`}>
                     <Label htmlFor='hr-name'>Name</Label>
                     <Input
                       id='hr-name'
@@ -5092,7 +5140,7 @@ export default function AdminDashboard() {
                       }
                     />
                   </div>
-                  <div className='space-y-1'>
+                  <div className={`space-y-1 ${staffHrPane !== 'profile' ? 'hidden' : ''}`}>
                     <Label htmlFor='hr-role'>Role / title</Label>
                     <Input
                       id='hr-role'
@@ -5105,7 +5153,7 @@ export default function AdminDashboard() {
                       }
                     />
                   </div>
-                  <div className='space-y-1 sm:col-span-2'>
+                  <div className={`space-y-1 sm:col-span-2 ${staffHrPane !== 'profile' ? 'hidden' : ''}`}>
                     <Label htmlFor='hr-phone'>Phone</Label>
                     <Input
                       id='hr-phone'
@@ -5118,7 +5166,7 @@ export default function AdminDashboard() {
                       }
                     />
                   </div>
-                  <div className='space-y-1 sm:col-span-2 flex flex-wrap items-end gap-2'>
+                  <div className={`space-y-1 sm:col-span-2 flex flex-wrap items-end gap-2 ${staffHrPane !== 'loans' ? 'hidden' : ''}`}>
                     <div className='space-y-1 min-w-[220px] flex-1'>
                       <Label>Loan you are editing</Label>
                       <Select
@@ -5154,8 +5202,7 @@ export default function AdminDashboard() {
                   </div>
                   {staffHrActiveLoan ? (
                     <>
-                      <div className='space-y-1'>
-                        <Label htmlFor='hr-principal'>Loan principal (₵)</Label>
+                      <div className={`space-y-1 ${staffHrPane !== 'loans' ? 'hidden' : ''}`}>
                         <Input
                           id='hr-principal'
                           inputMode='decimal'
@@ -5182,8 +5229,7 @@ export default function AdminDashboard() {
                           }}
                         />
                       </div>
-                      <div className='space-y-1'>
-                        <Label>Outstanding (₵)</Label>
+                      <div className={`space-y-1 ${staffHrPane !== 'loans' ? 'hidden' : ''}`}>
                         <p className='text-lg font-semibold tabular-nums rounded-md border bg-muted/30 px-3 py-2'>
                           ₵{staffHrActiveLoan.loanOutstandingGHS.toFixed(2)}
                         </p>
@@ -5195,6 +5241,7 @@ export default function AdminDashboard() {
                     </>
                   ) : null}
                 </div>
+                <div className={staffHrPane === 'activity' ? 'hidden' : ''}>
                 <Button type='button' onClick={handleSaveStaffHrDetails}>
                   Save details
                 </Button>
@@ -5204,9 +5251,10 @@ export default function AdminDashboard() {
                   changed since the last snapshot (outstanding changes via
                   pay/deduct below).
                 </p>
+                </div>
 
                 {staffHrActiveLoan ? (
-                  <div className='rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3'>
+                  <div className={`rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3 ${staffHrPane !== 'loans' ? 'hidden' : ''}`}>
                     <p className='text-sm font-medium'>
                       Pay toward &quot;{staffHrActiveLoan.name}&quot;
                     </p>
@@ -5268,9 +5316,10 @@ export default function AdminDashboard() {
                   </div>
                 ) : null}
 
-                <Separator />
+                <Separator className={staffHrPane === 'activity' ? 'hidden' : ''} />
 
-                <Collapsible defaultOpen={false}>
+                <div className={staffHrPane !== 'activity' ? 'hidden' : ''}>
+                <Collapsible defaultOpen>
                   <CollapsibleTrigger className='group flex w-full flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/25 px-3 py-2.5 text-left text-sm font-medium hover:bg-muted/40'>
                     <span className='flex items-center gap-2'>
                       <ChevronDown className='h-4 w-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180' />
@@ -5351,9 +5400,9 @@ export default function AdminDashboard() {
                     </ul>
                   </CollapsibleContent>
                 </Collapsible>
+                </div>
 
-                <Separator />
-
+                <div className={staffHrPane !== 'profile' ? 'hidden' : ''}>
                 <Collapsible defaultOpen={false}>
                   <CollapsibleTrigger className='group flex w-full items-center gap-2 rounded-lg border bg-muted/25 px-3 py-2.5 text-left text-sm font-medium hover:bg-muted/40'>
                     <ChevronDown className='h-4 w-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180' />
@@ -5485,10 +5534,9 @@ export default function AdminDashboard() {
                   </ul>
                   </CollapsibleContent>
                 </Collapsible>
+                </div>
 
-                <Separator />
-
-                <div className='space-y-4'>
+                <div className={`space-y-4 ${staffHrPane !== 'loans' ? 'hidden' : ''}`}>
                   <h3 className='text-sm font-semibold'>
                     Payroll / monthly deduction (selected loan)
                   </h3>
@@ -5550,8 +5598,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <Separator />
-
+                <div className={staffHrPane !== 'profile' ? 'hidden' : ''}>
                 <Button
                   type='button'
                   variant='destructive'
@@ -5559,6 +5606,7 @@ export default function AdminDashboard() {
                 >
                   Remove HR record
                 </Button>
+                </div>
               </div>
             </ScrollArea>
           )}

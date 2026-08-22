@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { doc, getDoc, setDoc, updateDoc, type UpdateData } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
@@ -23,7 +22,6 @@ import {
   normalizeGhanaPhoneToE164,
   isValidGhanaE164,
 } from '@/lib/ghana-phone';
-import { ArrowLeft, User } from 'lucide-react';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -188,24 +186,16 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className='space-y-8 max-w-xl'>
-      <div className='flex items-center gap-4'>
-        <Button variant='ghost' size='sm' asChild>
-          <Link href='/inventory'>
-            <ArrowLeft className='mr-2 h-4 w-4' />
-            Back
-          </Link>
-        </Button>
-        <div className='flex items-center gap-2'>
-          <User className='h-8 w-8 text-primary' />
-          <h1 className='text-2xl font-serif font-bold text-primary'>
-            Your profile
-          </h1>
-        </div>
+    <div className='mx-auto max-w-xl space-y-6'>
+      <div className='text-center'>
+        <h1 className='font-serif text-2xl font-bold text-primary'>Account</h1>
+        <p className='mt-1 text-sm text-muted-foreground'>
+          Your pharmacy profile and contact details
+        </p>
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className='text-center'>
           <CardTitle>Account details</CardTitle>
           <CardDescription>
             Signed in with <strong>{providerLabel(provider)}</strong>.
@@ -313,6 +303,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          <div className='flex justify-center pt-2'>
           <Button
             className='w-full sm:w-auto'
             onClick={() => void handleSave()}
@@ -320,6 +311,7 @@ export default function ProfilePage() {
           >
             {saving ? 'Saving…' : 'Save changes'}
           </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

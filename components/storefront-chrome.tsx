@@ -1,10 +1,15 @@
 'use client';
 
 import type React from 'react';
+import { Suspense } from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { StorefrontTopBar } from '@/components/storefront-top-bar';
 import { SidebarProvider, useSidebar } from '@/components/sidebar-context';
 import { useAuth } from '@/lib/auth-context';
+
+function StorefrontNavFallback() {
+  return <header className='sticky top-0 z-40 h-12 w-full bg-background md:h-14' />;
+}
 
 function LayoutContent({
   children,
@@ -21,7 +26,9 @@ function LayoutContent({
   if (useStorefrontNav) {
     return (
       <div className='flex min-h-screen flex-col bg-background'>
-        <StorefrontTopBar />
+        <Suspense fallback={<StorefrontNavFallback />}>
+          <StorefrontTopBar />
+        </Suspense>
         <main className='w-full min-w-0 flex-1'>
           <div className='w-full px-4 pt-1 pb-2 md:px-8 md:pt-2 md:pb-4'>{children}</div>
         </main>

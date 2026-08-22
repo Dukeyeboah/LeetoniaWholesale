@@ -14,6 +14,7 @@ import {
   Bell,
   User,
   Menu,
+  Home,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,25 +40,29 @@ export function StorefrontTopBar() {
   const scrollTimer = useRef<number | null>(null);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const showClientRoutes = (!isAdmin && !isStaff) || viewMode === 'client';
+  const showAdminRoutes = isAdmin && viewMode === 'admin';
+  const showStaffRoutes = isStaff && viewMode === 'staff';
+  const customerPortal = Boolean(user && showClientRoutes);
+  const homeHref = customerPortal ? '/home' : '/inventory';
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
-
     const setNavHeight = (hidden: boolean) => {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches;
       document.documentElement.style.setProperty(
         '--storefront-nav-h',
-        hidden && isMobile() ? '0px' : '3rem'
+        hidden && isMobile ? '0px' : '3.5rem'
       );
     };
 
     setNavHeight(false);
 
     const onScroll = () => {
-      if (!isMobile()) {
+      if (!window.matchMedia('(max-width: 767px)').matches) {
         setNavHidden(false);
         setNavHeight(false);
         return;
@@ -75,23 +80,21 @@ export function StorefrontTopBar() {
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (scrollTimer.current) window.clearTimeout(scrollTimer.current);
-      document.documentElement.style.setProperty('--storefront-nav-h', '3rem');
+      document.documentElement.style.setProperty('--storefront-nav-h', '3.5rem');
     };
   }, []);
 
-  const showClientRoutes = (!isAdmin && !isStaff) || viewMode === 'client';
-  const showAdminRoutes = isAdmin && viewMode === 'admin';
-  const showStaffRoutes = isStaff && viewMode === 'staff';
+  const primaryLinks = customerPortal
+    ? [
+        { name: 'Home', path: '/home', icon: Home },
+        { name: 'Products', path: '/inventory', icon: Package },
+        { name: 'Orders', path: '/orders', icon: ClipboardList },
+        { name: 'Account', path: '/profile', icon: User },
+      ]
+    : [{ name: 'Products', path: '/inventory', icon: Package }];
 
-  const routes = [
-    { name: 'Inventory', path: '/inventory', icon: Package, show: true },
-    { name: 'My Cart', path: '/cart', icon: ShoppingCart, show: showClientRoutes },
-    {
-      name: 'My Orders',
-      path: '/orders',
-      icon: ClipboardList,
-      show: showClientRoutes,
-    },
+  const menuRoutes = [
+    ...primaryLinks,
     {
       name: 'Admin Dashboard',
       path: '/admin',
@@ -104,7 +107,12 @@ export function StorefrontTopBar() {
       icon: LayoutDashboard,
       show: showStaffRoutes,
     },
-  ];
+  ].filter((r) => ('show' in r ? r.show : true));
+
+  const isActive = (path: string) =>
+    path === '/inventory'
+      ? pathname === '/inventory'
+      : pathname === path || pathname.startsWith(`${path}/`);
 
   return (
     <header
@@ -112,10 +120,10 @@ export function StorefrontTopBar() {
         navHidden ? '-translate-y-full' : 'translate-y-0'
       }`}
     >
-      <div className='flex h-12 items-center gap-2 px-4 md:px-6'>
+      <div className='relative flex h-14 items-center px-4 md:px-6'>
         <Link
-          href='/inventory'
-          className='flex min-w-0 flex-1 items-center gap-2.5 overflow-hidden'
+          href={homeHref}
+          className='relative z-10 flex min-w-0 shrink-0 items-center gap-2.5 overflow-hidden'
         >
           <span className='relative h-9 w-9 shrink-0 overflow-hidden rounded-md'>
             <Image
@@ -126,12 +134,48 @@ export function StorefrontTopBar() {
               priority
             />
           </span>
-          <span className='truncate font-serif text-base font-bold text-primary sm:text-lg'>
+          <span className='hidden truncate font-serif text-base font-bold text-primary sm:inline sm:text-lg'>
             Leetonia Wholesale
           </span>
         </Link>
 
-        <div className='flex shrink-0 items-center gap-1'>
+        <nav className='pointer-events-none absolute inset-x-0 hidden justify-center sm:flex'>
+          <div className='pointer-events-auto flex items-center gap-6 md:gap-10'>
+            {primaryLinks.map((link) => (
+              <Link
+                key={link.path}
+                href={link.path}
+                className={`text-sm font-medium tracking-wide transition-colors ${
+                  isActive(link.path)
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+        </nav>
+
+        <div className='relative z-10 ml-auto flex shrink-0 items-center gap-0.5'>
+          {user && (
+            <Link
+              href='/notifications'
+              aria-label={
+                unreadCount > 0
+                  ? `Notifications, ${unreadCount} unread`
+                  : 'Notifications'
+              }
+              className='relative inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-accent'
+            >
+              <Bell className='h-5 w-5' />
+              {unreadCount > 0 && (
+                <span className='absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-white'>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
           <Link
             href='/cart'
             aria-label={
@@ -163,7 +207,7 @@ export function StorefrontTopBar() {
                   <>
                     <DropdownMenuLabel className='font-normal'>
                       <p className='truncate text-sm font-medium'>
-                        {user.name || 'User'}
+                        {user.pharmacyName || user.name || 'User'}
                       </p>
                       <p className='truncate text-xs font-normal text-muted-foreground'>
                         {user.email || user.phone || '—'}
@@ -172,14 +216,13 @@ export function StorefrontTopBar() {
                     <DropdownMenuSeparator />
                   </>
                 )}
-                {routes
-                  .filter((r) => r.show)
-                  .map((route) => (
+                <div className='sm:hidden'>
+                  {primaryLinks.map((route) => (
                     <DropdownMenuItem key={route.path} asChild>
                       <Link
                         href={route.path}
                         className={
-                          pathname === route.path ? 'font-medium' : undefined
+                          isActive(route.path) ? 'font-medium' : undefined
                         }
                       >
                         <route.icon />
@@ -187,30 +230,27 @@ export function StorefrontTopBar() {
                       </Link>
                     </DropdownMenuItem>
                   ))}
-                {user && (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href='/notifications'>
-                        <Bell />
-                        Notifications
-                        {unreadCount > 0 && (
-                          <Badge
-                            variant='destructive'
-                            className='ml-auto h-5 min-w-5 px-1 text-xs'
-                          >
-                            {unreadCount > 9 ? '9+' : unreadCount}
-                          </Badge>
-                        )}
+                  {primaryLinks.length > 0 && <DropdownMenuSeparator />}
+                </div>
+                {menuRoutes
+                  .filter((route) =>
+                    primaryLinks.some((l) => l.path === route.path)
+                      ? false
+                      : true
+                  )
+                  .map((route) => (
+                    <DropdownMenuItem key={route.path} asChild>
+                      <Link
+                        href={route.path}
+                        className={
+                          isActive(route.path) ? 'font-medium' : undefined
+                        }
+                      >
+                        <route.icon />
+                        {route.name}
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href='/profile'>
-                        <User />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
+                  ))}
                 {isAdmin && (
                   <>
                     <DropdownMenuSeparator />
