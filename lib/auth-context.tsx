@@ -10,6 +10,7 @@ import type { User } from '@/types';
 import { useRouter } from 'next/navigation';
 import { inferSignInProvider } from '@/lib/auth-providers';
 import { clearBrowserCartOnLogout } from '@/hooks/use-cart';
+import { getAuthIntentGate } from '@/lib/auth-intent-gate';
 
 interface AuthContextType {
   user: User | null;
@@ -102,31 +103,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const userDocRef = doc(db, 'users', firebaseUser.uid);
           const userDoc = await getDoc(userDocRef);
 
-          if (userDoc.exists()) {
-            let userData = userDoc.data() as User;
-            if (!userData.signInProvider) {
-              const inferred = inferSignInProvider(firebaseUser);
-              try {
-                await updateDoc(userDocRef, { signInProvider: inferred });
-                userData = { ...userData, signInProvider: inferred };
-              } catch (e) {
-                console.error('Backfill signInProvider failed', e);
+          // Sign-up/sign-in gates may have already signed this user out.
+          if (auth.currentUser?.uid !== firebaseUser.uid) {
+            setUser(null);
+          } else if (userDoc.exists()) {
+            // Creating an account must not log an existing user in — they
+            // should see the "already have an account" prompt and use Log in.
+            if (getAuthIntentGate() === 'signup') {
+              setUser(null);
+            } else {
+              let userData = userDoc.data() as User;
+              if (!userData.signInProvider) {
+                const inferred = inferSignInProvider(firebaseUser);
+                try {
+                  await updateDoc(userDocRef, { signInProvider: inferred });
+                  userData = { ...userData, signInProvider: inferred };
+                } catch (e) {
+                  console.error('Backfill signInProvider failed', e);
+                }
               }
+              applyFirebaseUser(firebaseUser, userData);
             }
-            applyFirebaseUser(firebaseUser, userData);
           } else {
-            // Profiles are created only via explicit sign-up on /login (not here).
+            // Profiles are created only via explicit sign-up (not here).
             setUser(null);
           }
         } catch (error) {
           console.error('Error fetching user profile:', error);
-          // Fallback for when Firestore fails (e.g. missing permissions/rules)
-          setUser({
-            id: firebaseUser.uid,
-            email: firebaseUser.email || '',
-            role: 'client',
-            createdAt: Date.now(),
-          });
+          if (
+            auth.currentUser?.uid !== firebaseUser.uid ||
+            getAuthIntentGate()
+          ) {
+            setUser(null);
+          } else {
+            // Fallback for when Firestore fails (e.g. missing permissions/rules)
+            setUser({
+              id: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              role: 'client',
+              createdAt: Date.now(),
+            });
+          }
         }
       } else {
         setUser(null);

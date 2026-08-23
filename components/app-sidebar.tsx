@@ -352,7 +352,7 @@ export function AppSidebar() {
     <>
       {/* Desktop Sidebar */}
       <div
-        className={`hidden border-r bg-sidebar md:block fixed inset-y-0 z-30 transition-all duration-300 ${
+        className={`hidden border-r bg-sidebar md:block fixed inset-y-0 z-30 overflow-visible transition-all duration-300 ${
           isCollapsed ? 'w-20' : 'w-64 lg:w-72'
         }`}
       >
@@ -360,7 +360,8 @@ export function AppSidebar() {
         <Button
           variant='ghost'
           size='icon'
-          className='absolute -right-3 top-20 h-6 w-6 rounded-full border bg-background shadow-sm hover:bg-secondary z-10'
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className='absolute right-0 top-[4.5rem] z-40 h-6 w-6 translate-x-1/2 -translate-y-1/2 rounded-full border bg-background shadow-md hover:bg-secondary'
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           {isCollapsed ? (

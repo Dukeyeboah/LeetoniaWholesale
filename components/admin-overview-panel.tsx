@@ -40,30 +40,51 @@ type SnapshotCard = {
   hint?: string;
 };
 
+const SNAPSHOT_TONES = {
+  orders: {
+    panel: 'border-sky-200/80 bg-sky-50/90',
+    title: 'text-sky-800',
+    card: 'border-sky-200/70 bg-white/85 hover:bg-white',
+  },
+  inventory: {
+    panel: 'border-emerald-200/80 bg-emerald-50/90',
+    title: 'text-emerald-800',
+    card: 'border-emerald-200/70 bg-white/85 hover:bg-white',
+  },
+  business: {
+    panel: 'border-amber-200/80 bg-amber-50/90',
+    title: 'text-amber-900',
+    card: 'border-amber-200/70 bg-white/85 hover:bg-white',
+  },
+} as const;
+
 function SnapshotGroup({
   title,
+  tone,
   cards,
   onOpen,
 }: {
   title: string;
+  tone: keyof typeof SNAPSHOT_TONES;
   cards: SnapshotCard[];
   onOpen: (key: OverviewModalKey) => void;
 }) {
+  const colors = SNAPSHOT_TONES[tone];
   return (
-    <div className='space-y-2'>
-      <h2 className='text-xs font-semibold tracking-wide text-muted-foreground'>
+    <div className={`h-full rounded-2xl border p-3 ${colors.panel}`}>
+      <h2 className={`mb-2 text-xs font-semibold tracking-wide ${colors.title}`}>
         {title}
       </h2>
-      <div className='grid grid-cols-2 gap-2 sm:grid-cols-4'>
+      <div className='grid grid-cols-2 gap-2'>
         {cards.map((card) => (
           <button
             key={card.key}
             type='button'
             onClick={() => onOpen(card.key)}
-            className='rounded-xl border border-border/60 bg-card px-3 py-3 text-left shadow-none transition-shadow hover:shadow-sm'
+            className={`rounded-xl border px-3 py-2.5 text-left shadow-none transition-shadow hover:shadow-sm ${colors.card}`}
           >
             <p className='text-xs text-muted-foreground'>{card.label}</p>
-            <p className='mt-1 font-serif text-2xl font-semibold tabular-nums leading-none'>
+            <p className='mt-1 font-serif text-xl font-semibold tabular-nums leading-none lg:text-2xl'>
               {card.value}
             </p>
             {card.hint ? (
@@ -121,10 +142,10 @@ export function AdminOverviewPanel({
   const clientIds = new Set(orders.map((o) => o.userId).filter(Boolean));
   const recentOrders = [...orders]
     .sort((a, b) => b.createdAt - a.createdAt)
-    .slice(0, 8);
+    .slice(0, 24);
   const recentActivity = [...orders]
     .sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt))
-    .slice(0, 8);
+    .slice(0, 24);
 
   const modalCopy: Record<
     OverviewModalKey,
@@ -206,72 +227,77 @@ export function AdminOverviewPanel({
           : [];
 
   return (
-    <div className='space-y-8'>
-      <SnapshotGroup
-        title='Orders'
-        onOpen={onOpenModal}
-        cards={[
-          { key: 'pending', label: 'Pending', value: String(pending.length) },
-          { key: 'proforma', label: 'Pro Forma', value: String(proforma.length) },
-          {
-            key: 'processing',
-            label: 'Processing',
-            value: String(processing.length),
-          },
-          {
-            key: 'completed',
-            label: 'Completed',
-            value: String(completed.length),
-          },
-        ]}
-      />
-      <SnapshotGroup
-        title='Inventory'
-        onOpen={onOpenModal}
-        cards={[
-          {
-            key: 'products',
-            label: 'Total Products',
-            value: visibleProducts.length.toLocaleString(),
-          },
-          {
-            key: 'low_stock',
-            label: 'Low Stock',
-            value: String(lowStock.length),
-          },
-          {
-            key: 'expiring',
-            label: 'Expiring Soon',
-            value: String(expiring.length),
-            hint: 'Next 90 days',
-          },
-        ]}
-      />
-      <SnapshotGroup
-        title='Business'
-        onOpen={onOpenModal}
-        cards={[
-          {
-            key: 'revenue',
-            label: 'Revenue',
-            value: `₵${revenue.toFixed(0)}`,
-            hint: 'Completed orders',
-          },
-          {
-            key: 'clients',
-            label: 'Active Clients',
-            value: String(clientIds.size),
-          },
-        ]}
-      />
+    <div className='flex flex-col gap-3'>
+      <div className='grid gap-3 lg:grid-cols-3'>
+        <SnapshotGroup
+          title='Orders'
+          tone='orders'
+          onOpen={onOpenModal}
+          cards={[
+            { key: 'pending', label: 'Pending', value: String(pending.length) },
+            { key: 'proforma', label: 'Pro Forma', value: String(proforma.length) },
+            {
+              key: 'processing',
+              label: 'Processing',
+              value: String(processing.length),
+            },
+            {
+              key: 'completed',
+              label: 'Completed',
+              value: String(completed.length),
+            },
+          ]}
+        />
+        <SnapshotGroup
+          title='Inventory'
+          tone='inventory'
+          onOpen={onOpenModal}
+          cards={[
+            {
+              key: 'products',
+              label: 'Total Products',
+              value: visibleProducts.length.toLocaleString(),
+            },
+            {
+              key: 'low_stock',
+              label: 'Low Stock',
+              value: String(lowStock.length),
+            },
+            {
+              key: 'expiring',
+              label: 'Expiring Soon',
+              value: String(expiring.length),
+              hint: 'Next 90 days',
+            },
+          ]}
+        />
+        <SnapshotGroup
+          title='Business'
+          tone='business'
+          onOpen={onOpenModal}
+          cards={[
+            {
+              key: 'revenue',
+              label: 'Revenue',
+              value: `₵${revenue.toFixed(0)}`,
+              hint: 'Completed orders',
+            },
+            {
+              key: 'clients',
+              label: 'Active Clients',
+              value: String(clientIds.size),
+            },
+          ]}
+        />
+      </div>
 
-      <div className='grid gap-4 lg:grid-cols-2'>
-        <Card className='border-border/60 shadow-none'>
-          <CardHeader className='pb-3'>
-            <CardTitle className='font-serif text-lg'>Recent Orders</CardTitle>
+      <div className='grid gap-3 lg:grid-cols-2'>
+        <Card className='flex flex-col gap-2 overflow-hidden border-border/60 py-3 shadow-none'>
+          <CardHeader className='shrink-0 space-y-1 px-4 py-0'>
+            <CardTitle className='font-serif text-base'>Recent Orders</CardTitle>
             <CardDescription>Latest submissions</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className='h-44 overflow-y-auto overscroll-contain px-4 pt-0'>
             {recentOrders.length === 0 ? (
               <p className='text-sm text-muted-foreground'>No orders yet.</p>
             ) : (
@@ -299,12 +325,12 @@ export function AdminOverviewPanel({
             )}
           </CardContent>
         </Card>
-        <Card className='border-border/60 shadow-none'>
-          <CardHeader className='pb-3'>
-            <CardTitle className='font-serif text-lg'>Recent Activity</CardTitle>
+        <Card className='flex flex-col gap-2 overflow-hidden border-border/60 py-3 shadow-none'>
+          <CardHeader className='shrink-0 space-y-1 px-4 py-0'>
+            <CardTitle className='font-serif text-base'>Recent Activity</CardTitle>
             <CardDescription>Latest order status changes</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className='h-44 overflow-y-auto overscroll-contain px-4 pt-0'>
             {recentActivity.length === 0 ? (
               <p className='text-sm text-muted-foreground'>No activity yet.</p>
             ) : (
@@ -412,22 +438,37 @@ export function AdminSegmentNav({
   items,
   value,
   onChange,
+  className,
+  tone = 'default',
 }: {
   items: { value: string; label: string }[];
   value: string;
   onChange: (value: string) => void;
+  className?: string;
+  tone?: 'default' | 'accent';
 }) {
+  const isAccent = tone === 'accent';
   return (
-    <div className='flex w-full flex-wrap gap-1 rounded-xl border border-border/60 bg-muted/40 p-1'>
+    <div
+      className={`flex w-full flex-wrap gap-1 rounded-xl border p-1 ${
+        isAccent
+          ? 'border-teal-200/80 bg-teal-50/80'
+          : 'border-border/60 bg-muted/40'
+      } ${className ?? ''}`}
+    >
       {items.map((item) => (
         <button
           key={item.value}
           type='button'
           onClick={() => onChange(item.value)}
-          className={`h-10 min-w-[7rem] flex-1 rounded-lg px-3 text-sm font-medium transition-colors ${
+          className={`h-9 min-w-[6.5rem] flex-1 rounded-lg px-3 text-sm font-medium transition-colors ${
             value === item.value
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
+              ? isAccent
+                ? 'bg-teal-700 text-white shadow-sm'
+                : 'bg-background text-foreground shadow-sm'
+              : isAccent
+                ? 'text-teal-900/70 hover:bg-teal-100/80 hover:text-teal-950'
+                : 'text-muted-foreground hover:text-foreground'
           }`}
         >
           {item.label}

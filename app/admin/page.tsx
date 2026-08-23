@@ -53,24 +53,31 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import {
   Plus,
   Edit,
   Trash2,
-  Filter,
   Search,
-  BarChart3,
   TrendingUp,
   TrendingDown,
-  Users,
   UserPlus,
   AlertTriangle,
   Download,
   Printer,
-  Calendar,
-  Building2,
   Camera,
   ChevronDown,
   Sparkles,
@@ -79,6 +86,7 @@ import {
   LayoutList,
   MessageCircle,
   Settings,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
@@ -109,6 +117,8 @@ import type { User } from '@/types';
 import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from '@/lib/categories';
 import { createOrderStatusNotification } from '@/lib/notifications';
 import { printOrderInvoice } from '@/lib/print-invoice';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { paymentMethodLabel } from '@/lib/payment-method-label';
 import {
   INVENTORY_LETTER_OPTIONS,
@@ -204,6 +214,50 @@ function printAnalyticsHtml(title: string, bodyHtml: string) {
   w.document.close();
   w.focus();
   w.print();
+}
+
+function downloadAnalyticsPdf(
+  title: string,
+  filename: string,
+  headers: string[],
+  rows: string[][]
+) {
+  const doc = new jsPDF();
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.text(title, 14, 16);
+  autoTable(doc, {
+    startY: 22,
+    head: [headers],
+    body: rows,
+    theme: 'striped',
+    headStyles: { fillColor: [22, 101, 52] },
+    styles: { fontSize: 9, cellPadding: 3 },
+  });
+  doc.save(filename.endsWith('.pdf') ? filename : `${filename}.pdf`);
+}
+
+function AnalyticsDownloadMenu({
+  onCsv,
+  onPdf,
+}: {
+  onCsv: () => void;
+  onPdf: () => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button type='button' variant='outline' size='sm' className='h-8'>
+          <Download className='mr-1.5 h-3.5 w-3.5' />
+          Download
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align='end'>
+        <DropdownMenuItem onClick={onCsv}>CSV</DropdownMenuItem>
+        <DropdownMenuItem onClick={onPdf}>PDF</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 export default function AdminDashboard() {
@@ -318,6 +372,7 @@ export default function AdminDashboard() {
   const [pharmacySegmentFilter, setPharmacySegmentFilter] = useState<
     'all' | 'credit' | 'cash'
   >('all');
+  const [pharmacyFilterName, setPharmacyFilterName] = useState(false);
   const [pharmacySortMode, setPharmacySortMode] = useState<'default' | 'az'>(
     'default'
   );
@@ -371,6 +426,12 @@ export default function AdminDashboard() {
     useState<string>('all');
   const [inventorySubCategoryFilter, setInventorySubCategoryFilter] =
     useState<string>('all');
+  const [inventorySearchQuery, setInventorySearchQuery] = useState('');
+  const [inventoryFilters, setInventoryFilters] = useState({
+    name: false,
+    category: false,
+    type: false,
+  });
   const [paymentDialogOrder, setPaymentDialogOrder] = useState<Order | null>(
     null
   );
@@ -394,20 +455,31 @@ export default function AdminDashboard() {
 
   const inventoryProductsFiltered = useMemo(() => {
     let list = sortedInventoryProducts;
-    if (inventoryLetterFilter !== 'all') {
+    const q = inventorySearchQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.description?.toLowerCase().includes(q) ?? false) ||
+          (p.code?.toLowerCase().includes(q) ?? false)
+      );
+    }
+    if (inventoryFilters.name && inventoryLetterFilter !== 'all') {
       list = list.filter(
         (p) => getFirstCharacterGroup(p.name || '') === inventoryLetterFilter
       );
     }
-    if (inventoryCategoryFilter !== 'all') {
+    if (inventoryFilters.category && inventoryCategoryFilter !== 'all') {
       list = list.filter((p) => p.category === inventoryCategoryFilter);
     }
-    if (inventorySubCategoryFilter !== 'all') {
+    if (inventoryFilters.type && inventorySubCategoryFilter !== 'all') {
       list = list.filter((p) => p.subCategory === inventorySubCategoryFilter);
     }
     return list;
   }, [
     sortedInventoryProducts,
+    inventorySearchQuery,
+    inventoryFilters,
     inventoryLetterFilter,
     inventoryCategoryFilter,
     inventorySubCategoryFilter,
@@ -422,15 +494,29 @@ export default function AdminDashboard() {
     () => indexInventoryByNormalizedLabel(products),
     [products]
   );
-  const warehouseRowsFiltered = useMemo(
-    () =>
-      filterSortWarehouseRows(
-        allStoreroomRows,
-        inventoryLetterFilter,
-        inventorySortMode
-      ),
-    [allStoreroomRows, inventoryLetterFilter, inventorySortMode]
-  );
+  const warehouseRowsFiltered = useMemo(() => {
+    const letter = inventoryFilters.name ? inventoryLetterFilter : 'all';
+    let rows = filterSortWarehouseRows(
+      allStoreroomRows,
+      letter,
+      inventorySortMode
+    );
+    const q = inventorySearchQuery.trim().toLowerCase();
+    if (q) {
+      rows = rows.filter(
+        (row) =>
+          row.description.toLowerCase().includes(q) ||
+          String(row.code).toLowerCase().includes(q)
+      );
+    }
+    return rows;
+  }, [
+    allStoreroomRows,
+    inventoryLetterFilter,
+    inventorySortMode,
+    inventorySearchQuery,
+    inventoryFilters,
+  ]);
 
   const ordersForPaymentsTab = useMemo(
     () => [...orders].sort((a, b) => b.createdAt - a.createdAt),
@@ -1614,12 +1700,9 @@ export default function AdminDashboard() {
   const [analyticsTopSort, setAnalyticsTopSort] = useState<
     'quantity' | 'revenue'
   >('quantity');
-  const [analyticsTopOffset, setAnalyticsTopOffset] = useState(0);
-  const [analyticsLeastOffset, setAnalyticsLeastOffset] = useState(0);
-
-  useEffect(() => {
-    setAnalyticsTopOffset(0);
-  }, [analyticsTopSort]);
+  const [analyticsExpiryWindow, setAnalyticsExpiryWindow] = useState<
+    1 | 3 | 6
+  >(1);
 
   // Analytics calculations
   const productSales = useMemo(
@@ -1658,63 +1741,23 @@ export default function AdminDashboard() {
       ? topSellingRanked.byQuantity
       : topSellingRanked.byRevenue;
 
-  const topSellingPage = topSellingProductsList.slice(
-    analyticsTopOffset,
-    analyticsTopOffset + 50
-  );
-
   const leastSellingProducts = useMemo(
     () =>
       [...productSales].filter((p) => p.soldQuantity === 0).slice(0, 100),
     [productSales]
   );
 
-  const leastSellingPage = leastSellingProducts.slice(
-    analyticsLeastOffset,
-    analyticsLeastOffset + 50
-  );
-
-  const analyticsExpiring1Mo = useMemo(
-    () =>
-      products.filter((p) => {
-        if (!p.expiryDate) return false;
-        const expiry = new Date(p.expiryDate);
-        const oneMonthFromNow = new Date();
-        oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
-        return expiry <= oneMonthFromNow && expiry > new Date();
-      }),
-    [products]
-  );
-
-  const analyticsExpiring3Mo = useMemo(
-    () =>
-      products.filter((p) => {
-        if (!p.expiryDate) return false;
-        const expiry = new Date(p.expiryDate);
-        const threeMonthsFromNow = new Date();
-        threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
-        return (
-          expiry <= threeMonthsFromNow &&
-          expiry > new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        );
-      }),
-    [products]
-  );
-
-  const analyticsExpiring6Mo = useMemo(
-    () =>
-      products.filter((p) => {
-        if (!p.expiryDate) return false;
-        const expiry = new Date(p.expiryDate);
-        const sixMonthsFromNow = new Date();
-        sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
-        return (
-          expiry <= sixMonthsFromNow &&
-          expiry > new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-        );
-      }),
-    [products]
-  );
+  const analyticsExpiringList = useMemo(() => {
+    const now = Date.now();
+    const end = new Date();
+    end.setMonth(end.getMonth() + analyticsExpiryWindow);
+    const endMs = end.getTime();
+    return products.filter((p) => {
+      if (!p.expiryDate) return false;
+      const t = new Date(p.expiryDate).getTime();
+      return t > now && t <= endMs;
+    });
+  }, [products, analyticsExpiryWindow]);
 
   const totalRevenue = orders
     .filter(analyticsOrderIncluded)
@@ -1745,7 +1788,7 @@ export default function AdminDashboard() {
     } else if (pharmacySegmentFilter === 'cash') {
       list = list.filter((p) => !pharmacyUsesCreditLine(p));
     }
-    if (pharmacyLetterFilter !== 'all') {
+    if (pharmacyFilterName && pharmacyLetterFilter !== 'all') {
       list = list.filter(
         (p) => getFirstCharacterGroup(p.name) === pharmacyLetterFilter
       );
@@ -1760,6 +1803,7 @@ export default function AdminDashboard() {
     pharmacies,
     pharmacySearchQuery,
     pharmacySegmentFilter,
+    pharmacyFilterName,
     pharmacyLetterFilter,
     pharmacySortMode,
   ]);
@@ -1936,58 +1980,70 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className='space-y-6 sm:space-y-8 w-full min-w-0 max-w-full overflow-x-hidden'>
-      <div className='flex flex-col sm:flex-row justify-between sm:items-center gap-3'>
-        <div>
-          <p className='text-xs font-medium uppercase tracking-wide text-muted-foreground'>
-            Leetonia Admin
-          </p>
-          <h1 className='text-2xl sm:text-3xl font-serif font-bold text-primary'>
-            {adminSection === 'overview'
-              ? 'Overview'
-              : adminSection === 'operations'
-                ? 'Operations'
-                : adminSection === 'analytics'
-                  ? 'Analytics'
-                  : 'Administration'}
-          </h1>
-          <p className='text-sm text-muted-foreground mt-0.5'>
-            {adminSection === 'overview'
-              ? 'What’s happening across orders, inventory, and the business.'
-              : adminSection === 'operations'
-                ? 'Inventory, live orders, and history.'
-                : adminSection === 'analytics'
-                  ? 'Revenue, clients, expiry, and what is or isn’t selling.'
-                  : 'Staff, pharmacies, and settings.'}
-          </p>
-        </div>
-        {adminSection === 'operations' && activeTab === 'inventory' && (
-          <div className='flex gap-2 shrink-0'>
-            <Button
-              onClick={() => openProductDialog()}
-              className='w-full sm:w-auto'
-              size='sm'
-            >
-              <Plus className='mr-2 h-4 w-4 shrink-0' /> Add Product
-            </Button>
-          </div>
-        )}
+    <div className='w-full min-w-0'>
+      <div className='mb-4'>
+        <h1 className='text-2xl font-serif font-bold text-primary'>
+          {adminSection === 'overview'
+            ? 'Overview'
+            : adminSection === 'operations'
+              ? 'Operations'
+              : adminSection === 'analytics'
+                ? 'Analytics'
+                : 'Administration'}
+        </h1>
+        <p className='mt-0.5 text-sm text-muted-foreground'>
+          {adminSection === 'overview'
+            ? 'What’s happening across orders, inventory, and the business.'
+            : adminSection === 'operations'
+              ? 'Inventory, live orders, and history.'
+              : adminSection === 'analytics'
+                ? 'Revenue, clients, expiry, and what is or isn’t selling.'
+                : 'Staff, pharmacies, and settings.'}
+        </p>
       </div>
 
-      <AdminSegmentNav
-        value={adminSection}
-        onChange={(value) =>
-          goToAdminSection(
-            value as 'overview' | 'operations' | 'analytics' | 'administration'
-          )
-        }
-        items={[
-          { value: 'overview', label: 'Overview' },
-          { value: 'operations', label: 'Operations' },
-          { value: 'analytics', label: 'Analytics' },
-          { value: 'administration', label: 'Administration' },
-        ]}
-      />
+      <div className='sticky top-14 z-20 -mx-3 mb-4 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:-mx-4 sm:px-4 md:top-0 md:-mx-8 md:px-8'>
+        <AdminSegmentNav
+          value={adminSection}
+          onChange={(value) =>
+            goToAdminSection(
+              value as 'overview' | 'operations' | 'analytics' | 'administration'
+            )
+          }
+          items={[
+            { value: 'overview', label: 'Overview' },
+            { value: 'operations', label: 'Operations' },
+            { value: 'analytics', label: 'Analytics' },
+            { value: 'administration', label: 'Administration' },
+          ]}
+        />
+
+        {adminSection === 'operations' && (
+          <AdminSegmentNav
+            tone='accent'
+            value={activeTab}
+            onChange={setActiveTab}
+            items={[
+              { value: 'inventory', label: 'Inventory' },
+              { value: 'orders', label: 'Orders' },
+              { value: 'history', label: 'Order History' },
+            ]}
+          />
+        )}
+
+        {adminSection === 'administration' && (
+          <AdminSegmentNav
+            tone='accent'
+            value={activeTab}
+            onChange={setActiveTab}
+            items={[
+              ...(isSuperAdmin ? [{ value: 'staff', label: 'Staff' }] : []),
+              { value: 'pharmacies', label: 'Pharmacies' },
+              { value: 'settings', label: 'Settings' },
+            ]}
+          />
+        )}
+      </div>
 
       {adminSection === 'overview' && (
         <AdminOverviewPanel
@@ -2005,38 +2061,14 @@ export default function AdminDashboard() {
         />
       )}
 
-      {adminSection === 'operations' && (
-        <AdminSegmentNav
-          value={activeTab}
-          onChange={setActiveTab}
-          items={[
-            { value: 'inventory', label: 'Inventory' },
-            { value: 'orders', label: 'Orders' },
-            { value: 'history', label: 'Order History' },
-          ]}
-        />
-      )}
-
-      {adminSection === 'administration' && (
-        <AdminSegmentNav
-          value={activeTab}
-          onChange={setActiveTab}
-          items={[
-            ...(isSuperAdmin ? [{ value: 'staff', label: 'Staff' }] : []),
-            { value: 'pharmacies', label: 'Pharmacies' },
-            { value: 'settings', label: 'Settings' },
-          ]}
-        />
-      )}
-
       {adminSection !== 'overview' && (
       <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full min-w-0 max-w-full overflow-x-hidden'>
         <TabsContent
           value='orders'
-          className='mt-6 space-y-6 w-full min-w-0 max-w-full overflow-x-hidden'
+          className='mt-3 space-y-6 w-full min-w-0 max-w-full overflow-x-hidden'
         >
           {/* Status Filter Tabs */}
-          <div className='flex flex-wrap gap-2 border-b pb-4'>
+          <div className='flex flex-wrap justify-center gap-2 border-b pb-4'>
             <Button
               variant={statusFilter === 'all' ? 'default' : 'outline'}
               size='sm'
@@ -2550,7 +2582,7 @@ export default function AdminDashboard() {
 
         <TabsContent
           value='history'
-          className='mt-6 space-y-6 w-full min-w-0 max-w-full overflow-x-hidden'
+          className='mt-3 space-y-6 w-full min-w-0 max-w-full overflow-x-hidden'
         >
           <div className='flex flex-col md:flex-row gap-4 items-center justify-between'>
             <h2 className='text-2xl font-serif font-bold'>Order History</h2>
@@ -2760,526 +2792,371 @@ export default function AdminDashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value='analytics' className='mt-6 space-y-6'>
-          <p className='text-sm text-muted-foreground max-w-3xl'>
-            Revenue and units sold include completed orders only, matching stock
-            removed when an order is completed. Expiry sections use your current
-            inventory list.
-          </p>
-          <div className='grid gap-4 md:grid-cols-4'>
-            <Card>
-              <CardHeader className='pb-2'>
-                <CardTitle className='text-sm font-medium text-muted-foreground'>
-                  Total Revenue
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold text-green-600'>
-                  ₵{totalRevenue.toFixed(2)}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className='pb-2'>
-                <CardTitle className='text-sm font-medium text-muted-foreground'>
-                  Total Orders
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>{orders.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className='pb-2'>
-                <CardTitle className='text-sm font-medium text-muted-foreground'>
-                  Completed Orders
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>
-                  {completedOrders.length}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className='pb-2'>
-                <CardTitle className='text-sm font-medium text-muted-foreground'>
-                  Active Clients
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>
-                  {new Set(orders.map((o) => o.userId)).size}
-                </div>
-              </CardContent>
-            </Card>
+        <TabsContent value='analytics' className='mt-3 flex flex-col gap-3'>
+          <div className='grid grid-cols-2 gap-2 lg:grid-cols-4'>
+            <div className='rounded-2xl border border-emerald-200/80 bg-emerald-50/90 px-3 py-2.5'>
+              <p className='text-xs text-emerald-800'>Revenue</p>
+              <p className='mt-1 font-serif text-xl font-semibold tabular-nums leading-none lg:text-2xl'>
+                ₵{totalRevenue.toFixed(0)}
+              </p>
+              <p className='mt-1 text-[11px] text-muted-foreground'>
+                Completed orders
+              </p>
+            </div>
+            <div className='rounded-2xl border border-sky-200/80 bg-sky-50/90 px-3 py-2.5'>
+              <p className='text-xs text-sky-800'>Total Orders</p>
+              <p className='mt-1 font-serif text-xl font-semibold tabular-nums leading-none lg:text-2xl'>
+                {orders.length}
+              </p>
+            </div>
+            <div className='rounded-2xl border border-violet-200/80 bg-violet-50/90 px-3 py-2.5'>
+              <p className='text-xs text-violet-800'>Completed</p>
+              <p className='mt-1 font-serif text-xl font-semibold tabular-nums leading-none lg:text-2xl'>
+                {completedOrders.length}
+              </p>
+            </div>
+            <div className='rounded-2xl border border-amber-200/80 bg-amber-50/90 px-3 py-2.5'>
+              <p className='text-xs text-amber-900'>Active Clients</p>
+              <p className='mt-1 font-serif text-xl font-semibold tabular-nums leading-none lg:text-2xl'>
+                {new Set(orders.map((o) => o.userId)).size}
+              </p>
+            </div>
           </div>
 
-          {/* Expiry + rankings: collapsible, scroll, export */}
-          <div className='grid gap-6 md:grid-cols-3'>
-            {(
-              [
-                {
-                  key: '1mo',
-                  title: 'Expiring in 1 Month',
-                  icon: (
-                    <AlertTriangle className='h-5 w-5 shrink-0 text-red-600' />
-                  ),
-                  list: analyticsExpiring1Mo,
-                  csvName: 'analytics-expiring-1-month.csv',
-                },
-                {
-                  key: '3mo',
-                  title: 'Expiring in 3 Months',
-                  icon: (
-                    <Calendar className='h-5 w-5 shrink-0 text-orange-600' />
-                  ),
-                  list: analyticsExpiring3Mo,
-                  csvName: 'analytics-expiring-3-months.csv',
-                },
-                {
-                  key: '6mo',
-                  title: 'Expiring in 6 Months',
-                  icon: (
-                    <Calendar className='h-5 w-5 shrink-0 text-blue-600' />
-                  ),
-                  list: analyticsExpiring6Mo,
-                  csvName: 'analytics-expiring-6-months.csv',
-                },
-              ] as const
-            ).map((block) => (
-              <Card key={block.key} className='overflow-hidden'>
-                <Collapsible defaultOpen>
-                  <CardHeader className='space-y-3 pb-2'>
-                    <CollapsibleTrigger asChild>
-                      <button
-                        type='button'
-                        className='group flex w-full items-center gap-2 text-left'
-                      >
-                        <ChevronDown className='h-4 w-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180' />
-                        {block.icon}
-                        <CardTitle className='text-base'>
-                          {block.title}{' '}
-                          <span className='text-muted-foreground font-normal'>
-                            ({block.list.length})
-                          </span>
-                        </CardTitle>
-                      </button>
-                    </CollapsibleTrigger>
-                    <div className='flex flex-wrap gap-2'>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='sm'
-                        onClick={() =>
-                          downloadCsv(block.csvName, [
-                            ['Product', 'Expiry', 'Days left'],
-                            ...block.list.map((p) => [
-                              p.name,
-                              format(
-                                new Date(p.expiryDate!),
-                                'yyyy-MM-dd'
-                              ),
-                              String(
-                                Math.ceil(
-                                  (p.expiryDate! - Date.now()) /
-                                    (1000 * 60 * 60 * 24)
-                                )
-                              ),
-                            ]),
-                          ])
-                        }
-                      >
-                        Download CSV
-                      </Button>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='sm'
-                        onClick={() =>
-                          printAnalyticsHtml(
-                            block.title,
-                            `<table><thead><tr><th>Product</th><th>Expiry</th><th>Days</th></tr></thead><tbody>${block.list
-                              .map(
-                                (p) =>
-                                  `<tr><td>${p.name}</td><td>${format(
-                                    new Date(p.expiryDate!),
-                                    'MMM d, yyyy'
-                                  )}</td><td>${Math.ceil(
-                                    (p.expiryDate! - Date.now()) /
-                                      (1000 * 60 * 60 * 24)
-                                  )}</td></tr>`
-                              )
-                              .join('')}</tbody></table>`
-                          )
-                        }
-                      >
-                        Print
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CollapsibleContent>
-                    <CardContent className='pt-0'>
-                      <div className='max-h-64 overflow-y-auto space-y-2 pr-1'>
-                        {block.list.length === 0 ? (
-                          <p className='text-muted-foreground text-center py-6 text-sm'>
-                            No products in this window
-                          </p>
-                        ) : (
-                          block.list.map((product) => (
-                            <div
-                              key={product.id}
-                              className='flex justify-between items-center p-2 border rounded text-sm'
-                            >
-                              <div>
-                                <p className='font-medium'>{product.name}</p>
-                                <p className='text-xs text-muted-foreground'>
-                                  {format(
-                                    new Date(product.expiryDate!),
-                                    'MMM d, yyyy'
-                                  )}
-                                </p>
-                              </div>
-                              <Badge
-                                variant={
-                                  block.key === '1mo'
-                                    ? 'destructive'
-                                    : 'outline'
-                                }
-                                className='text-xs'
-                              >
-                                {Math.ceil(
-                                  (product.expiryDate! - Date.now()) /
-                                    (1000 * 60 * 60 * 24)
-                                )}{' '}
-                                days
-                              </Badge>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </CardContent>
-                  </CollapsibleContent>
-                </Collapsible>
-              </Card>
-            ))}
-          </div>
-
-          <div className='grid gap-6 md:grid-cols-2'>
-            <Card className='overflow-hidden'>
-              <Collapsible defaultOpen>
-                <CardHeader className='space-y-3'>
-                  <CollapsibleTrigger asChild>
-                    <button
-                      type='button'
-                      className='group flex w-full items-center gap-2 text-left'
-                    >
-                      <ChevronDown className='h-4 w-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180' />
-                      <CardTitle className='flex items-center gap-2 text-base'>
-                        <TrendingUp className='h-5 w-5 text-green-600' />
-                        Top selling (up to 100)
-                      </CardTitle>
-                    </button>
-                  </CollapsibleTrigger>
-                  <div className='flex flex-wrap items-center gap-2'>
-                    <div className='flex rounded-md border p-0.5 bg-muted/30'>
-                      <Button
-                        type='button'
-                        size='sm'
-                        variant={
-                          analyticsTopSort === 'quantity'
-                            ? 'default'
-                            : 'ghost'
-                        }
-                        className='h-8'
-                        onClick={() => setAnalyticsTopSort('quantity')}
-                      >
-                        By quantity
-                      </Button>
-                      <Button
-                        type='button'
-                        size='sm'
-                        variant={
-                          analyticsTopSort === 'revenue' ? 'default' : 'ghost'
-                        }
-                        className='h-8'
-                        onClick={() => setAnalyticsTopSort('revenue')}
-                      >
-                        By value
-                      </Button>
-                    </div>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      onClick={() =>
-                        downloadCsv(
-                          `top-selling-${analyticsTopSort}.csv`,
-                          [
-                            ['Rank', 'Product', 'Units', 'Revenue GHS'],
-                            ...topSellingProductsList.map((row, i) => [
-                              String(i + 1),
-                              row.product.name,
-                              String(row.soldQuantity),
-                              row.revenue.toFixed(2),
-                            ]),
-                          ]
-                        )
-                      }
-                    >
-                      CSV
-                    </Button>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      onClick={() =>
-                        printAnalyticsHtml(
-                          `Top selling (${analyticsTopSort})`,
-                          `<p>Sort: ${analyticsTopSort}</p><table><thead><tr><th>#</th><th>Product</th><th>Units</th><th>Revenue</th></tr></thead><tbody>${topSellingProductsList
-                            .map(
-                              (row, i) =>
-                                `<tr><td>${i + 1}</td><td>${
-                                  row.product.name
-                                }</td><td>${row.soldQuantity}</td><td>₵${row.revenue.toFixed(
-                                  2
-                                )}</td></tr>`
-                            )
-                            .join('')}</tbody></table>`
-                        )
-                      }
-                    >
-                      Print
-                    </Button>
-                  </div>
-                  <p className='text-xs text-muted-foreground'>
-                    Showing {analyticsTopOffset + 1}–
-                    {Math.min(
-                      analyticsTopOffset + 50,
-                      topSellingProductsList.length
-                    )}{' '}
-                    of {topSellingProductsList.length}
+          <div className='grid gap-3 lg:grid-cols-3'>
+            <div className='flex min-h-0 flex-col overflow-hidden rounded-2xl border border-rose-200/80 bg-rose-50/90 p-3'>
+              <div className='mb-2 flex flex-wrap items-center justify-between gap-2'>
+                <div>
+                  <h2 className='text-xs font-semibold tracking-wide text-rose-800'>
+                    Expiring soon
+                  </h2>
+                  <p className='text-[11px] text-muted-foreground'>
+                    {analyticsExpiringList.length} product
+                    {analyticsExpiringList.length === 1 ? '' : 's'} in window
                   </p>
-                </CardHeader>
-                <CollapsibleContent>
-                  <CardContent className='pt-0'>
-                    {topSellingProductsList.length === 0 ? (
-                      <p className='text-muted-foreground text-center py-6'>
-                        No sales data yet
-                      </p>
-                    ) : (
-                      <>
-                        <div className='max-h-80 overflow-y-auto space-y-2 pr-1'>
-                          {topSellingPage.map(
-                            ({ product, soldQuantity, revenue }, idx) => (
-                              <div
-                                key={product.id}
-                                className='flex justify-between items-center p-2 border rounded'
-                              >
-                                <div>
-                                  <p className='font-medium'>
-                                    <span className='text-muted-foreground mr-2'>
-                                      {analyticsTopOffset + idx + 1}.
-                                    </span>
-                                    {product.name}
-                                  </p>
-                                  <p className='text-xs text-muted-foreground'>
-                                    {soldQuantity} units · ₵
-                                    {revenue.toFixed(2)} revenue
-                                  </p>
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </div>
-                        <div className='flex flex-wrap gap-2 mt-3'>
-                          <Button
-                            type='button'
-                            variant='outline'
-                            size='sm'
-                            disabled={analyticsTopOffset <= 0}
-                            onClick={() =>
-                              setAnalyticsTopOffset((o) =>
-                                Math.max(0, o - 50)
+                </div>
+                <div className='flex flex-wrap items-center gap-1.5'>
+                  <AnalyticsDownloadMenu
+                    onCsv={() =>
+                      downloadCsv(
+                        `analytics-expiring-${analyticsExpiryWindow}-month.csv`,
+                        [
+                          ['Product', 'Expiry', 'Days left'],
+                          ...analyticsExpiringList.map((p) => [
+                            p.name,
+                            format(new Date(p.expiryDate!), 'yyyy-MM-dd'),
+                            String(
+                              Math.ceil(
+                                (p.expiryDate! - Date.now()) /
+                                  (1000 * 60 * 60 * 24)
                               )
-                            }
-                          >
-                            Previous 50
-                          </Button>
-                          <Button
-                            type='button'
-                            variant='outline'
-                            size='sm'
-                            disabled={
-                              analyticsTopOffset + 50 >=
-                              topSellingProductsList.length
-                            }
-                            onClick={() =>
-                              setAnalyticsTopOffset((o) => o + 50)
-                            }
-                          >
-                            Next 50
-                          </Button>
-                          <Button
-                            type='button'
-                            variant='secondary'
-                            size='sm'
-                            onClick={() => {
-                              setAnalyticsTopOffset(0);
-                            }}
-                          >
-                            Start
-                          </Button>
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
-
-            <Card className='overflow-hidden'>
-              <Collapsible defaultOpen>
-                <CardHeader className='space-y-3'>
-                  <CollapsibleTrigger asChild>
-                    <button
-                      type='button'
-                      className='group flex w-full items-center gap-2 text-left'
-                    >
-                      <ChevronDown className='h-4 w-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180' />
-                      <CardTitle className='flex items-center gap-2 text-base'>
-                        <TrendingDown className='h-5 w-5 text-yellow-600' />
-                        Not selling (0 units, up to 100)
-                      </CardTitle>
-                    </button>
-                  </CollapsibleTrigger>
-                  <div className='flex flex-wrap gap-2'>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      onClick={() =>
-                        downloadCsv('products-not-selling.csv', [
-                          ['Rank', 'Product'],
-                          ...leastSellingProducts.map((row, i) => [
-                            String(i + 1),
-                            row.product.name,
+                            ),
                           ]),
-                        ])
-                      }
-                    >
-                      CSV
-                    </Button>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      onClick={() =>
-                        printAnalyticsHtml(
-                          'Products not selling',
-                          `<table><thead><tr><th>#</th><th>Product</th></tr></thead><tbody>${leastSellingProducts
-                            .map(
-                              (row, i) =>
-                                `<tr><td>${i + 1}</td><td>${row.product.name}</td></tr>`
+                        ]
+                      )
+                    }
+                    onPdf={() =>
+                      downloadAnalyticsPdf(
+                        `Expiring in ${analyticsExpiryWindow} month${
+                          analyticsExpiryWindow === 1 ? '' : 's'
+                        }`,
+                        `analytics-expiring-${analyticsExpiryWindow}-month.pdf`,
+                        ['Product', 'Expiry', 'Days left'],
+                        analyticsExpiringList.map((p) => [
+                          p.name,
+                          format(new Date(p.expiryDate!), 'yyyy-MM-dd'),
+                          String(
+                            Math.ceil(
+                              (p.expiryDate! - Date.now()) /
+                                (1000 * 60 * 60 * 24)
                             )
-                            .join('')}</tbody></table>`
-                        )
-                      }
-                    >
-                      Print
-                    </Button>
-                  </div>
-                  <p className='text-xs text-muted-foreground'>
-                    {leastSellingProducts.length} products · view{' '}
-                    {analyticsLeastOffset + 1}–
-                    {Math.min(
-                      analyticsLeastOffset + 50,
-                      leastSellingProducts.length
-                    )}
+                          ),
+                        ])
+                      )
+                    }
+                  />
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    className='h-8'
+                    onClick={() =>
+                      printAnalyticsHtml(
+                        `Expiring in ${analyticsExpiryWindow} month${
+                          analyticsExpiryWindow === 1 ? '' : 's'
+                        }`,
+                        `<table><thead><tr><th>Product</th><th>Expiry</th><th>Days</th></tr></thead><tbody>${analyticsExpiringList
+                          .map(
+                            (p) =>
+                              `<tr><td>${p.name}</td><td>${format(
+                                new Date(p.expiryDate!),
+                                'MMM d, yyyy'
+                              )}</td><td>${Math.ceil(
+                                (p.expiryDate! - Date.now()) /
+                                  (1000 * 60 * 60 * 24)
+                              )}</td></tr>`
+                          )
+                          .join('')}</tbody></table>`
+                      )
+                    }
+                  >
+                    <Printer className='mr-1.5 h-3.5 w-3.5' />
+                    Print
+                  </Button>
+                </div>
+              </div>
+              <div className='mb-2 flex rounded-lg border border-rose-200/70 bg-white/70 p-0.5'>
+                {([1, 3, 6] as const).map((months) => (
+                  <button
+                    key={months}
+                    type='button'
+                    onClick={() => setAnalyticsExpiryWindow(months)}
+                    className={`h-7 flex-1 rounded-md text-xs font-medium transition-colors ${
+                      analyticsExpiryWindow === months
+                        ? 'bg-rose-700 text-white shadow-sm'
+                        : 'text-rose-900/70 hover:text-rose-950'
+                    }`}
+                  >
+                    {months} mo
+                  </button>
+                ))}
+              </div>
+              <div className='h-44 overflow-y-auto overscroll-contain rounded-xl border border-rose-200/60 bg-white/85 p-2'>
+                {analyticsExpiringList.length === 0 ? (
+                  <p className='py-6 text-center text-sm text-muted-foreground'>
+                    No products expiring in this window
                   </p>
-                </CardHeader>
-                <CollapsibleContent>
-                  <CardContent className='pt-0'>
-                    {leastSellingProducts.length === 0 ? (
-                      <p className='text-muted-foreground text-center py-6'>
-                        All tracked products have sales
-                      </p>
-                    ) : (
-                      <>
-                        <div className='max-h-80 overflow-y-auto space-y-2 pr-1'>
-                          {leastSellingPage.map(({ product }, idx) => (
-                            <div
-                              key={product.id}
-                              className='flex justify-between items-center p-2 border rounded'
-                            >
-                              <div>
-                                <p className='font-medium'>
-                                  <span className='text-muted-foreground mr-2'>
-                                    {analyticsLeastOffset + idx + 1}.
-                                  </span>
-                                  {product.name}
-                                </p>
-                                <p className='text-xs text-muted-foreground'>
-                                  0 units sold
-                                </p>
-                              </div>
-                              <Badge
-                                variant='outline'
-                                className='text-yellow-600'
-                              >
-                                No sales
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                        <div className='flex flex-wrap gap-2 mt-3'>
-                          <Button
-                            type='button'
-                            variant='outline'
-                            size='sm'
-                            disabled={analyticsLeastOffset <= 0}
-                            onClick={() =>
-                              setAnalyticsLeastOffset((o) =>
-                                Math.max(0, o - 50)
-                              )
-                            }
+                ) : (
+                  <ul className='space-y-1.5'>
+                    {analyticsExpiringList.map((product) => {
+                      const days = Math.ceil(
+                        (product.expiryDate! - Date.now()) /
+                          (1000 * 60 * 60 * 24)
+                      );
+                      return (
+                        <li
+                          key={product.id}
+                          className='flex items-center justify-between gap-2 rounded-lg border border-rose-100 px-2 py-1.5 text-sm'
+                        >
+                          <div className='min-w-0'>
+                            <p className='truncate font-medium'>{product.name}</p>
+                            <p className='text-[11px] text-muted-foreground'>
+                              {format(
+                                new Date(product.expiryDate!),
+                                'MMM d, yyyy'
+                              )}
+                            </p>
+                          </div>
+                          <Badge
+                            variant={days <= 30 ? 'destructive' : 'outline'}
+                            className='shrink-0 text-[11px]'
                           >
-                            Previous 50
-                          </Button>
-                          <Button
-                            type='button'
-                            variant='outline'
-                            size='sm'
-                            disabled={
-                              analyticsLeastOffset + 50 >=
-                              leastSellingProducts.length
-                            }
-                            onClick={() =>
-                              setAnalyticsLeastOffset((o) => o + 50)
-                            }
-                          >
-                            Next 50
-                          </Button>
-                          <Button
-                            type='button'
-                            variant='secondary'
-                            size='sm'
-                            onClick={() => setAnalyticsLeastOffset(0)}
-                          >
-                            Start
-                          </Button>
-                        </div>
-                      </>
+                            {days} days
+                          </Badge>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </div>
+
+            <div className='flex min-h-0 flex-col overflow-hidden rounded-2xl border border-emerald-200/80 bg-emerald-50/90 p-3'>
+              <div className='mb-2 flex flex-wrap items-center justify-between gap-2'>
+                <h2 className='flex items-center gap-1.5 text-xs font-semibold tracking-wide text-emerald-800'>
+                  <TrendingUp className='h-3.5 w-3.5' />
+                  Top selling
+                </h2>
+                <div className='flex flex-wrap items-center gap-1.5'>
+                  <div className='flex rounded-lg border border-emerald-200/70 bg-white/70 p-0.5'>
+                    <button
+                      type='button'
+                      onClick={() => setAnalyticsTopSort('quantity')}
+                      className={`h-7 rounded-md px-2 text-xs font-medium ${
+                        analyticsTopSort === 'quantity'
+                          ? 'bg-emerald-700 text-white shadow-sm'
+                          : 'text-emerald-900/70 hover:text-emerald-950'
+                      }`}
+                    >
+                      Qty
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => setAnalyticsTopSort('revenue')}
+                      className={`h-7 rounded-md px-2 text-xs font-medium ${
+                        analyticsTopSort === 'revenue'
+                          ? 'bg-emerald-700 text-white shadow-sm'
+                          : 'text-emerald-900/70 hover:text-emerald-950'
+                      }`}
+                    >
+                      Value
+                    </button>
+                  </div>
+                  <AnalyticsDownloadMenu
+                    onCsv={() =>
+                      downloadCsv(`top-selling-${analyticsTopSort}.csv`, [
+                        ['Rank', 'Product', 'Units', 'Revenue GHS'],
+                        ...topSellingProductsList.map((row, i) => [
+                          String(i + 1),
+                          row.product.name,
+                          String(row.soldQuantity),
+                          row.revenue.toFixed(2),
+                        ]),
+                      ])
+                    }
+                    onPdf={() =>
+                      downloadAnalyticsPdf(
+                        `Top selling (${analyticsTopSort})`,
+                        `top-selling-${analyticsTopSort}.pdf`,
+                        ['Rank', 'Product', 'Units', 'Revenue GHS'],
+                        topSellingProductsList.map((row, i) => [
+                          String(i + 1),
+                          row.product.name,
+                          String(row.soldQuantity),
+                          row.revenue.toFixed(2),
+                        ])
+                      )
+                    }
+                  />
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    className='h-8'
+                    onClick={() =>
+                      printAnalyticsHtml(
+                        `Top selling (${analyticsTopSort})`,
+                        `<p>Sort: ${analyticsTopSort}</p><table><thead><tr><th>#</th><th>Product</th><th>Units</th><th>Revenue</th></tr></thead><tbody>${topSellingProductsList
+                          .map(
+                            (row, i) =>
+                              `<tr><td>${i + 1}</td><td>${
+                                row.product.name
+                              }</td><td>${row.soldQuantity}</td><td>₵${row.revenue.toFixed(
+                                2
+                              )}</td></tr>`
+                          )
+                          .join('')}</tbody></table>`
+                      )
+                    }
+                  >
+                    <Printer className='mr-1.5 h-3.5 w-3.5' />
+                    Print
+                  </Button>
+                </div>
+              </div>
+              <div className='h-44 overflow-y-auto overscroll-contain rounded-xl border border-emerald-200/60 bg-white/85 p-2'>
+                {topSellingProductsList.length === 0 ? (
+                  <p className='py-6 text-center text-sm text-muted-foreground'>
+                    No sales data yet
+                  </p>
+                ) : (
+                  <ul className='space-y-1.5'>
+                    {topSellingProductsList.map(
+                      ({ product, soldQuantity, revenue }, idx) => (
+                        <li
+                          key={product.id}
+                          className='flex items-center justify-between gap-2 rounded-lg border border-emerald-100 px-2 py-1.5 text-sm'
+                        >
+                          <p className='min-w-0 truncate font-medium'>
+                            <span className='mr-1.5 text-muted-foreground'>
+                              {idx + 1}.
+                            </span>
+                            {product.name}
+                          </p>
+                          <p className='shrink-0 text-[11px] tabular-nums text-muted-foreground'>
+                            {soldQuantity} · ₵{revenue.toFixed(0)}
+                          </p>
+                        </li>
+                      )
                     )}
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
+                  </ul>
+                )}
+              </div>
+            </div>
+
+            <div className='flex min-h-0 flex-col overflow-hidden rounded-2xl border border-amber-200/80 bg-amber-50/90 p-3'>
+              <div className='mb-2 flex flex-wrap items-center justify-between gap-2'>
+                <h2 className='flex items-center gap-1.5 text-xs font-semibold tracking-wide text-amber-900'>
+                  <TrendingDown className='h-3.5 w-3.5' />
+                  Lowest selling
+                </h2>
+                <div className='flex flex-wrap items-center gap-1.5'>
+                  <AnalyticsDownloadMenu
+                    onCsv={() =>
+                      downloadCsv('products-not-selling.csv', [
+                        ['Rank', 'Product'],
+                        ...leastSellingProducts.map((row, i) => [
+                          String(i + 1),
+                          row.product.name,
+                        ]),
+                      ])
+                    }
+                    onPdf={() =>
+                      downloadAnalyticsPdf(
+                        'Lowest selling (0 units)',
+                        'products-not-selling.pdf',
+                        ['Rank', 'Product'],
+                        leastSellingProducts.map((row, i) => [
+                          String(i + 1),
+                          row.product.name,
+                        ])
+                      )
+                    }
+                  />
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    className='h-8'
+                    onClick={() =>
+                      printAnalyticsHtml(
+                        'Lowest selling (0 units)',
+                        `<table><thead><tr><th>#</th><th>Product</th></tr></thead><tbody>${leastSellingProducts
+                          .map(
+                            (row, i) =>
+                              `<tr><td>${i + 1}</td><td>${row.product.name}</td></tr>`
+                          )
+                          .join('')}</tbody></table>`
+                      )
+                    }
+                  >
+                    <Printer className='mr-1.5 h-3.5 w-3.5' />
+                    Print
+                  </Button>
+                </div>
+              </div>
+              <div className='h-44 overflow-y-auto overscroll-contain rounded-xl border border-amber-200/60 bg-white/85 p-2'>
+                {leastSellingProducts.length === 0 ? (
+                  <p className='py-6 text-center text-sm text-muted-foreground'>
+                    All tracked products have sales
+                  </p>
+                ) : (
+                  <ul className='space-y-1.5'>
+                    {leastSellingProducts.map(({ product }, idx) => (
+                      <li
+                        key={product.id}
+                        className='flex items-center justify-between gap-2 rounded-lg border border-amber-100 px-2 py-1.5 text-sm'
+                      >
+                        <p className='min-w-0 truncate font-medium'>
+                          <span className='mr-1.5 text-muted-foreground'>
+                            {idx + 1}.
+                          </span>
+                          {product.name}
+                        </p>
+                        <Badge variant='outline' className='shrink-0 text-[11px] text-amber-800'>
+                          0 units
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
           </div>
         </TabsContent>
 
         {isSuperAdmin && (
-        <TabsContent value='staff' className='mt-6 space-y-6'>
+        <TabsContent value='staff' className='mt-3 space-y-6'>
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <div>
               <h2 className='text-2xl font-serif font-bold'>Staff</h2>
@@ -3325,7 +3202,7 @@ export default function AdminDashboard() {
           </div>
 
           <Card className='overflow-hidden'>
-            <Collapsible defaultOpen>
+            <Collapsible defaultOpen={false}>
               <CollapsibleTrigger asChild>
                 <button
                   type='button'
@@ -3615,105 +3492,188 @@ export default function AdminDashboard() {
         </TabsContent>
         )}
 
-        <TabsContent value='pharmacies' className='mt-6 space-y-6'>
-          <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
-            <div>
-              <h2 className='text-2xl font-serif font-bold'>Pharmacies</h2>
-              <p className='text-sm text-muted-foreground mt-1 max-w-2xl'>
-                Credit pharmacies have a limit, <strong>outstanding</strong> (unpaid
-                from completed orders on account), and <strong>available</strong>{' '}
-                headroom. Outstanding increases when an order is marked complete with
-                an unpaid balance, and decreases when payments are recorded. Edit caps
-                and outstanding in <strong>Manage pharmacy</strong>. Default credit
-                limit is ₵{DEFAULT_CREDIT_LIMIT_GHS.toLocaleString()}. Only super
-                admins can add or delete pharmacy records.
-              </p>
+        <TabsContent value='pharmacies' className='mt-3 space-y-4'>
+          <div>
+            <h2 className='text-2xl font-serif font-bold'>Pharmacies</h2>
+            <p className='mt-1 text-sm text-muted-foreground'>
+              Credit pharmacies have a limit, <strong>outstanding</strong> (unpaid
+              from completed orders on account), and <strong>available</strong>{' '}
+              headroom. Outstanding increases when an order is marked complete with
+              an unpaid balance, and decreases when payments are recorded. Edit caps
+              and outstanding in <strong>Manage pharmacy</strong>. Default credit
+              limit is ₵{DEFAULT_CREDIT_LIMIT_GHS.toLocaleString()}. Only super
+              admins can add or delete pharmacy records.
+            </p>
+          </div>
+
+          <div className='flex flex-col gap-2'>
+            <div className='flex flex-wrap items-center gap-2'>
+              <div className='relative min-w-0 flex-1'>
+                <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                <Input
+                  placeholder='Search pharmacies…'
+                  className='h-8 rounded-full border-border/70 bg-white pl-9 shadow-sm'
+                  value={pharmacySearchQuery}
+                  onChange={(e) => setPharmacySearchQuery(e.target.value)}
+                  aria-label='Search pharmacies'
+                />
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    className={`h-8 shrink-0 rounded-full px-3 text-xs font-medium ${
+                      pharmacyFilterName || pharmacySegmentFilter !== 'all'
+                        ? '!bg-control border-primary/20 text-foreground'
+                        : 'border-border/70 bg-white text-foreground shadow-sm'
+                    }`}
+                  >
+                    <SlidersHorizontal className='mr-1.5 h-3.5 w-3.5' />
+                    {(() => {
+                      const parts = [
+                        pharmacyFilterName ? 'Name' : null,
+                        pharmacySegmentFilter === 'credit' ? 'Credit' : null,
+                        pharmacySegmentFilter === 'cash' ? 'Cash' : null,
+                      ].filter(Boolean);
+                      if (parts.length === 0) return 'Filter';
+                      if (parts.length === 1) return parts[0];
+                      return `${parts[0]} +${parts.length - 1}`;
+                    })()}
+                    <ChevronDown className='ml-1 h-3.5 w-3.5 opacity-70' />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align='end' className='w-72 space-y-4'>
+                  <p className='text-xs font-semibold tracking-wide text-muted-foreground'>
+                    FILTER
+                  </p>
+                  <div className='flex items-center gap-2'>
+                    <Checkbox
+                      id='pharmacy-filter-name'
+                      checked={pharmacyFilterName}
+                      onCheckedChange={(checked) => {
+                        const on = checked === true;
+                        setPharmacyFilterName(on);
+                        if (!on) setPharmacyLetterFilter('all');
+                      }}
+                    />
+                    <Label htmlFor='pharmacy-filter-name' className='font-normal'>
+                      Name
+                    </Label>
+                  </div>
+                  <div className='space-y-2'>
+                    <p className='text-sm font-medium'>Billing</p>
+                    <RadioGroup
+                      value={pharmacySegmentFilter}
+                      onValueChange={(value) =>
+                        setPharmacySegmentFilter(
+                          value as 'all' | 'credit' | 'cash'
+                        )
+                      }
+                      className='gap-2'
+                    >
+                      {(
+                        [
+                          ['all', 'All pharmacies'],
+                          ['credit', 'Credit pharmacies'],
+                          ['cash', 'Cash pharmacies'],
+                        ] as const
+                      ).map(([value, label]) => (
+                        <div key={value} className='flex items-center gap-2'>
+                          <RadioGroupItem
+                            value={value}
+                            id={`pharmacy-filter-${value}`}
+                          />
+                          <Label
+                            htmlFor={`pharmacy-filter-${value}`}
+                            className='font-normal'
+                          >
+                            {label}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                    <p className='text-xs text-muted-foreground'>
+                      Name can be combined with Credit or Cash.
+                    </p>
+                  </div>
+                  <div className='space-y-2'>
+                    <p className='text-sm font-medium'>Sort</p>
+                    <Select
+                      value={pharmacySortMode}
+                      onValueChange={(v) =>
+                        setPharmacySortMode(v as 'default' | 'az')
+                      }
+                    >
+                      <SelectTrigger className='h-8'>
+                        <SelectValue placeholder='Sort' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='default'>Default order</SelectItem>
+                        <SelectItem value='az'>Alphabetical (A–Z)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {pharmacyFilterName && (
+                    <p className='text-xs text-muted-foreground'>
+                      Name is on. Choose a letter below — it applies together
+                      with Credit or Cash if those are selected.
+                    </p>
+                  )}
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='sm'
+                    className='w-full'
+                    onClick={() => {
+                      setPharmacyFilterName(false);
+                      setPharmacySegmentFilter('all');
+                      setPharmacyLetterFilter('all');
+                      setPharmacySearchQuery('');
+                      setPharmacySortMode('default');
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                </PopoverContent>
+              </Popover>
+              {isSuperAdmin && (
+                <Button
+                  type='button'
+                  size='sm'
+                  onClick={() => setAddPharmacyOpen(true)}
+                  className='ml-auto shrink-0'
+                >
+                  <Plus className='mr-2 h-4 w-4' />
+                  Add pharmacy
+                </Button>
+              )}
             </div>
-            {isSuperAdmin && (
-              <Button
-                type='button'
-                onClick={() => setAddPharmacyOpen(true)}
-                className='shrink-0'
-              >
-                <Plus className='mr-2 h-4 w-4' />
-                Add pharmacy
-              </Button>
+            {pharmacyFilterName && (
+              <div className='grid grid-cols-[repeat(14,minmax(0,1fr))] gap-px sm:flex sm:flex-wrap sm:gap-1.5'>
+                {INVENTORY_LETTER_OPTIONS.map((letter) => (
+                  <Button
+                    key={letter}
+                    type='button'
+                    variant='secondary'
+                    size='sm'
+                    className={`h-6 w-full rounded-full border-0 p-0 text-[10px] font-medium shadow-none sm:h-8 sm:w-auto sm:min-w-[2rem] sm:px-2 sm:text-sm ${
+                      pharmacyLetterFilter === letter
+                        ? '!bg-control text-foreground'
+                        : 'bg-secondary/70 text-foreground'
+                    }`}
+                    onClick={() => setPharmacyLetterFilter(letter)}
+                  >
+                    {letter === 'all' ? 'All' : letter}
+                  </Button>
+                ))}
+              </div>
             )}
           </div>
 
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle>Directory &amp; limits</CardTitle>
-              <CardDescription>
-                Filter by billing segment, narrow by first letter, sort A–Z like
-                inventory.
-              </CardDescription>
-            </CardHeader>
+          <Card className='border-border/60 py-4 shadow-none'>
             <CardContent className='space-y-4'>
-              <div className='flex flex-wrap gap-2 items-center'>
-                <span className='text-sm text-muted-foreground'>Show:</span>
-                {(
-                  [
-                    ['all', 'All'],
-                    ['credit', 'Credit pharmacies'],
-                    ['cash', 'Cash pharmacies'],
-                  ] as const
-                ).map(([val, label]) => (
-                  <Button
-                    key={val}
-                    type='button'
-                    size='sm'
-                    variant={pharmacySegmentFilter === val ? 'default' : 'outline'}
-                    onClick={() => setPharmacySegmentFilter(val)}
-                  >
-                    {label}
-                  </Button>
-                ))}
-                <Select
-                  value={pharmacySortMode}
-                  onValueChange={(v) =>
-                    setPharmacySortMode(v as 'default' | 'az')
-                  }
-                >
-                  <SelectTrigger className='w-full sm:w-[200px]'>
-                    <SelectValue placeholder='Sort' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='default'>Default order</SelectItem>
-                    <SelectItem value='az'>Alphabetical (A–Z)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className='flex flex-wrap items-center gap-2 w-full min-w-0'>
-                <span className='text-sm text-muted-foreground shrink-0'>
-                  Starts with:
-                </span>
-                <div className='flex flex-wrap gap-1.5'>
-                  {INVENTORY_LETTER_OPTIONS.map((letter) => (
-                    <Button
-                      key={letter}
-                      type='button'
-                      variant={
-                        pharmacyLetterFilter === letter ? 'default' : 'outline'
-                      }
-                      size='sm'
-                      className='min-w-[2rem] h-8 px-2 font-medium'
-                      onClick={() => setPharmacyLetterFilter(letter)}
-                    >
-                      {letter === 'all' ? 'All' : letter}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <div className='relative max-w-md'>
-                <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-                <Input
-                  placeholder='Search pharmacies by name or id…'
-                  className='pl-9'
-                  value={pharmacySearchQuery}
-                  onChange={(e) => setPharmacySearchQuery(e.target.value)}
-                />
-              </div>
               <div className='md:hidden rounded-md border divide-y min-w-0'>
                 {pharmaciesLoading ? (
                   <AdminLoadingPanel
@@ -4046,10 +4006,11 @@ export default function AdminDashboard() {
 
         <TabsContent
           value='inventory'
-          className='mt-6 space-y-4 w-full min-w-0 max-w-full overflow-x-hidden'
+          className='mt-3 space-y-4 w-full min-w-0 max-w-full overflow-x-hidden'
         >
           <div className='flex flex-col gap-3 w-full min-w-0'>
-            <div className='flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center'>
+            <div className='flex flex-wrap items-center gap-2 w-full min-w-0'>
+              <div className='flex min-w-0 flex-1 flex-wrap items-center gap-2'>
               <span className='text-sm text-muted-foreground shrink-0'>View:</span>
               <div className='flex flex-wrap gap-2 items-center'>
               <Tooltip>
@@ -4078,7 +4039,16 @@ export default function AdminDashboard() {
                     variant={
                       inventoryListMode === 'storeroom' ? 'default' : 'outline'
                     }
-                    onClick={() => setInventoryListMode('storeroom')}
+                    onClick={() => {
+                      setInventoryListMode('storeroom');
+                      setInventoryFilters((prev) => ({
+                        ...prev,
+                        category: false,
+                        type: false,
+                      }));
+                      setInventoryCategoryFilter('all');
+                      setInventorySubCategoryFilter('all');
+                    }}
                   >
                     Warehouse
                   </Button>
@@ -4126,87 +4096,229 @@ export default function AdminDashboard() {
               </Tooltip>
               </div>
             </div>
-            <Select
-              value={inventorySortMode}
-              onValueChange={(v) =>
-                setInventorySortMode(v as 'default' | 'az' | 'code')
-              }
+            </div>
+            <Button
+              onClick={() => openProductDialog()}
+              className='ml-auto shrink-0'
+              size='sm'
             >
-              <SelectTrigger className='w-full sm:w-[220px]'>
-                <SelectValue placeholder='Sort' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='default'>All (default order)</SelectItem>
-                <SelectItem value='az'>Alphabetical (A–Z)</SelectItem>
-                <SelectItem value='code'>By product code</SelectItem>
-              </SelectContent>
-            </Select>
+              <Plus className='mr-2 h-4 w-4 shrink-0' /> Add Product
+            </Button>
+            </div>
+            <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
+              <div className='relative min-w-0 w-full sm:flex-1'>
+                <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                <Input
+                  placeholder='Search products…'
+                  className='h-8 rounded-full border-border/70 bg-white pl-9 shadow-sm'
+                  value={inventorySearchQuery}
+                  onChange={(e) => setInventorySearchQuery(e.target.value)}
+                  aria-label='Search inventory'
+                />
+              </div>
+              <div className='flex min-w-0 items-center justify-between gap-2 sm:justify-end'>
+                {inventoryListMode === 'storefront' &&
+                  inventoryFilters.category && (
+                    <div className='min-w-0 max-w-[11rem] shrink'>
+                      <Select
+                        value={inventoryCategoryFilter}
+                        onValueChange={setInventoryCategoryFilter}
+                      >
+                        <SelectTrigger className='inline-flex h-8 min-w-0 w-full cursor-pointer items-center overflow-hidden rounded-full border border-border/70 bg-white px-2.5 text-xs font-medium shadow-sm'>
+                          <SelectValue placeholder='All categories' />
+                        </SelectTrigger>
+                        <SelectContent className='max-h-[min(20rem,70vh)]'>
+                          <SelectItem value='all'>All categories</SelectItem>
+                          {PRODUCT_CATEGORIES.map((cat) => (
+                            <SelectItem key={cat} value={cat}>
+                              {cat}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                {inventoryListMode === 'storefront' && inventoryFilters.type && (
+                    <div className='min-w-0 max-w-[9rem] shrink'>
+                      <Select
+                        value={inventorySubCategoryFilter}
+                        onValueChange={setInventorySubCategoryFilter}
+                      >
+                        <SelectTrigger className='inline-flex h-8 min-w-0 w-full cursor-pointer items-center overflow-hidden rounded-full border border-border/70 bg-white px-2.5 text-xs font-medium shadow-sm'>
+                          <SelectValue placeholder='All types' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value='all'>All types</SelectItem>
+                          {PRODUCT_SUBCATEGORIES.map((sub) => (
+                            <SelectItem key={sub} value={sub}>
+                              {sub}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      size='sm'
+                      className={`h-8 shrink-0 rounded-full px-3 text-xs font-medium ${
+                        inventoryFilters.name ||
+                        inventoryFilters.category ||
+                        inventoryFilters.type ||
+                        inventoryLetterFilter !== 'all' ||
+                        inventoryCategoryFilter !== 'all' ||
+                        inventorySubCategoryFilter !== 'all'
+                          ? '!bg-control border-primary/20 text-foreground'
+                          : 'border-border/70 bg-white text-foreground shadow-sm'
+                      }`}
+                    >
+                      <SlidersHorizontal className='mr-1.5 h-3.5 w-3.5' />
+                      {(() => {
+                        const parts = [
+                          inventoryFilters.name ? 'Name' : null,
+                          inventoryFilters.category ? 'Category' : null,
+                          inventoryFilters.type ? 'Type' : null,
+                        ].filter(Boolean);
+                        if (parts.length === 0) return 'Filter';
+                        if (parts.length === 1) return parts[0];
+                        return `${parts[0]} +${parts.length - 1}`;
+                      })()}
+                      <ChevronDown className='ml-1 h-3.5 w-3.5 opacity-70' />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align='end' className='w-72 space-y-4'>
+                    <p className='text-xs font-semibold tracking-wide text-muted-foreground'>
+                      FILTER
+                    </p>
+                    <div className='space-y-2'>
+                      <p className='text-sm font-medium'>Combine filters</p>
+                      {(inventoryListMode === 'storefront'
+                        ? ([
+                            ['name', 'Name'],
+                            ['category', 'Category'],
+                            ['type', 'Type'],
+                          ] as const)
+                        : ([['name', 'Name']] as const)
+                      ).map(([key, label]) => (
+                        <div key={key} className='flex items-center gap-2'>
+                          <Checkbox
+                            id={`admin-inv-filter-${key}`}
+                            checked={inventoryFilters[key]}
+                            onCheckedChange={(checked) => {
+                              const on = checked === true;
+                              setInventoryFilters((prev) => ({
+                                ...prev,
+                                [key]: on,
+                              }));
+                              if (!on && key === 'name')
+                                setInventoryLetterFilter('all');
+                              if (!on && key === 'category')
+                                setInventoryCategoryFilter('all');
+                              if (!on && key === 'type')
+                                setInventorySubCategoryFilter('all');
+                            }}
+                          />
+                          <Label
+                            htmlFor={`admin-inv-filter-${key}`}
+                            className='font-normal'
+                          >
+                            {label}
+                          </Label>
+                        </div>
+                      ))}
+                      <p className='text-xs text-muted-foreground'>
+                        Turn on Name with Category or Type to browse letters
+                        inside that group.
+                      </p>
+                    </div>
+                    <div className='space-y-2'>
+                      <p className='text-sm font-medium'>Sort</p>
+                      <Select
+                        value={inventorySortMode}
+                        onValueChange={(v) =>
+                          setInventorySortMode(v as 'default' | 'az' | 'code')
+                        }
+                      >
+                        <SelectTrigger className='h-8'>
+                          <SelectValue placeholder='Sort' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value='default'>
+                            All (default order)
+                          </SelectItem>
+                          <SelectItem value='az'>Alphabetical (A–Z)</SelectItem>
+                          <SelectItem value='code'>By product code</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {inventoryFilters.name && (
+                      <p className='text-xs text-muted-foreground'>
+                        Name is on. Choose a letter below — it applies together
+                        with Category or Type if those are also on.
+                      </p>
+                    )}
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='sm'
+                      className='w-full'
+                      onClick={() => {
+                        setInventoryFilters({
+                          name: false,
+                          category: false,
+                          type: false,
+                        });
+                        setInventoryLetterFilter('all');
+                        setInventoryCategoryFilter('all');
+                        setInventorySubCategoryFilter('all');
+                        setInventorySearchQuery('');
+                        setInventorySortMode('default');
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+                <p className='ml-auto shrink-0 text-xs tabular-nums text-muted-foreground sm:ml-0 sm:text-sm'>
+                  {inventoryListMode === 'storefront'
+                    ? `${inventoryProductsFiltered.length.toLocaleString()} product${
+                        inventoryProductsFiltered.length === 1 ? '' : 's'
+                      }`
+                    : `${warehouseRowsFiltered.length.toLocaleString()} row${
+                        warehouseRowsFiltered.length === 1 ? '' : 's'
+                      }`}
+                </p>
+              </div>
+            </div>
+            {inventoryFilters.name && (
+              <div className='grid grid-cols-[repeat(14,minmax(0,1fr))] gap-px sm:flex sm:flex-wrap sm:gap-1.5'>
+                {INVENTORY_LETTER_OPTIONS.map((letter) => (
+                  <Button
+                    key={letter}
+                    type='button'
+                    variant='secondary'
+                    size='sm'
+                    className={`h-6 w-full rounded-full border-0 p-0 text-[10px] font-medium shadow-none sm:h-8 sm:w-auto sm:min-w-[2rem] sm:px-2 sm:text-sm ${
+                      inventoryLetterFilter === letter
+                        ? '!bg-control text-foreground'
+                        : 'bg-secondary/70 text-foreground'
+                    }`}
+                    onClick={() => setInventoryLetterFilter(letter)}
+                  >
+                    {letter === 'all' ? 'All' : letter}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
           <p className='text-xs text-muted-foreground max-w-3xl'>
             {inventoryListMode === 'storefront'
               ? 'Wholesale — what clients see when ordering (not warehouse stock). Hide/show and sellable shelf stock apply here only.'
               : `Warehouse list from data/storeroom.json (${allStoreroomRows.length} lines). Prices and quantities reflect the file; live counts come from inventory after sync (pnpm reset-storeroom --apply). Rows with zero warehouse quantity are faded.`}
           </p>
-
-          {inventoryListMode === 'storefront' && (
-            <div className='flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3'>
-              <Select
-                value={inventoryCategoryFilter}
-                onValueChange={setInventoryCategoryFilter}
-              >
-                <SelectTrigger className='w-full sm:w-[220px] h-9'>
-                  <SelectValue placeholder='Category' />
-                </SelectTrigger>
-                <SelectContent className='max-h-[min(20rem,70vh)]'>
-                  <SelectItem value='all'>All categories</SelectItem>
-                  {PRODUCT_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={inventorySubCategoryFilter}
-                onValueChange={setInventorySubCategoryFilter}
-              >
-                <SelectTrigger className='w-full sm:w-[200px] h-9'>
-                  <SelectValue placeholder='Type' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='all'>All types</SelectItem>
-                  {PRODUCT_SUBCATEGORIES.map((sub) => (
-                    <SelectItem key={sub} value={sub}>
-                      {sub}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <div className='flex flex-wrap items-center gap-2'>
-            <span className='text-sm text-muted-foreground shrink-0'>
-              Starts with:
-            </span>
-            <div className='flex flex-wrap gap-1.5 max-w-full'>
-              {INVENTORY_LETTER_OPTIONS.map((letter) => (
-                <Button
-                  key={letter}
-                  type='button'
-                  variant={
-                    inventoryLetterFilter === letter ? 'default' : 'outline'
-                  }
-                  size='sm'
-                  className='min-w-[2rem] h-8 px-2 font-medium'
-                  onClick={() => setInventoryLetterFilter(letter)}
-                >
-                  {letter === 'all' ? 'All' : letter}
-                </Button>
-              ))}
-            </div>
-          </div>
-          </div>
 
           <div className='rounded-md border bg-card relative min-h-[12rem] w-full min-w-0 max-w-full overflow-hidden'>
             {inventoryLoading && (
@@ -4254,7 +4366,7 @@ export default function AdminDashboard() {
                 {!inventoryLoading &&
                   inventoryProductsFiltered.length === 0 && (
                     <div className='p-8 text-center text-sm text-muted-foreground'>
-                      No products match this letter filter.
+                      No products match this search or filter.
                     </div>
                   )}
               </>
@@ -4262,7 +4374,7 @@ export default function AdminDashboard() {
               <>
                 {warehouseRowsFiltered.length === 0 ? (
                   <div className='p-8 text-center text-sm text-muted-foreground'>
-                    No warehouse rows match this letter filter.
+                    No warehouse rows match this search or filter.
                   </div>
                 ) : (
                   <div
@@ -4299,7 +4411,7 @@ export default function AdminDashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value='settings' className='mt-6 space-y-6'>
+        <TabsContent value='settings' className='mt-3 space-y-6'>
           <div>
             <h2 className='text-2xl font-serif font-bold'>Settings</h2>
             <p className='text-sm text-muted-foreground max-w-xl mt-1'>

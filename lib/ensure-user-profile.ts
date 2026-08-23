@@ -5,19 +5,29 @@ import type { User } from '@/types';
 import { isAdminEmail } from '@/lib/admin-config';
 import { omitUndefinedFields } from '@/lib/firestore-sanitize';
 import { inferSignInProvider } from '@/lib/auth-providers';
+import { clearAuthIntentGate, type AuthIntent } from '@/lib/auth-intent-gate';
 
-export type AuthIntent = 'signin' | 'signup';
+export type { AuthIntent };
+
+export type AuthGateReason = 'no_account' | 'account_exists' | 'other';
 
 export const SIGN_IN_NO_ACCOUNT_MESSAGE =
-  'No account found. Switch to Create account to register first.';
+  "You don't have an account yet. Create one first — Google and other sign-in methods only work after you've signed up.";
 
 export const SIGN_UP_ACCOUNT_EXISTS_MESSAGE =
-  'An account already exists with these details. Switch to Sign in.';
+  'This account is already registered. You cannot sign up again — log in instead.';
 
 export type EnsureUserProfileResult =
   | { outcome: 'success' }
   | { outcome: 'admin_passkey' }
-  | { outcome: 'rejected'; message: string };
+  | { outcome: 'rejected'; reason: AuthGateReason; message: string };
+
+function rejected(
+  reason: AuthGateReason,
+  message: string
+): EnsureUserProfileResult {
+  return { outcome: 'rejected', reason, message };
+}
 
 /**
  * After Firebase Auth succeeds, sync Firestore `users/{uid}`.
@@ -28,47 +38,57 @@ export async function ensureUserProfileAfterAuth(
   intent: AuthIntent,
   options?: { phoneE164?: string }
 ): Promise<EnsureUserProfileResult> {
-  if (!db || !auth) {
-    return { outcome: 'rejected', message: 'Database unavailable.' };
-  }
+  try {
+    if (!db || !auth) {
+      return rejected('other', 'Database unavailable.');
+    }
 
-  const userDocRef = doc(db, 'users', firebaseUser.uid);
-  const userDoc = await getDoc(userDocRef);
-  const email = firebaseUser.email || '';
-  const phoneE164 = options?.phoneE164 || firebaseUser.phoneNumber || '';
+    const userDocRef = doc(db, 'users', firebaseUser.uid);
+    const userDoc = await getDoc(userDocRef);
+    const email = firebaseUser.email || '';
+    const phoneE164 = options?.phoneE164 || firebaseUser.phoneNumber || '';
 
-  if (userDoc.exists()) {
-    const userData = userDoc.data() as User;
-    const hasPrivilegedRole =
-      userData.role === 'admin' || userData.role === 'super_admin';
+    if (userDoc.exists()) {
+      const userData = userDoc.data() as User;
+      const hasPrivilegedRole =
+        userData.role === 'admin' || userData.role === 'super_admin';
 
-    if (intent === 'signup') {
+      if (intent === 'signup') {
+        if (isAdminEmail(email) && !hasPrivilegedRole) {
+          return { outcome: 'admin_passkey' };
+        }
+        await signOut(auth);
+        return rejected('account_exists', SIGN_UP_ACCOUNT_EXISTS_MESSAGE);
+      }
+
       if (isAdminEmail(email) && !hasPrivilegedRole) {
         return { outcome: 'admin_passkey' };
       }
-      return { outcome: 'rejected', message: SIGN_UP_ACCOUNT_EXISTS_MESSAGE };
+
+      if (phoneE164 && !userData.phone) {
+        await setDoc(userDocRef, { phone: phoneE164 }, { merge: true });
+      }
+      return { outcome: 'success' };
     }
 
-    if (isAdminEmail(email) && !hasPrivilegedRole) {
-      return { outcome: 'admin_passkey' };
+    // No Firestore profile yet
+    if (intent === 'signin') {
+      if (isAdminEmail(email)) {
+        return createNewUserProfile(firebaseUser, email, phoneE164, true);
+      }
+      await signOut(auth);
+      return rejected('no_account', SIGN_IN_NO_ACCOUNT_MESSAGE);
     }
 
-    if (phoneE164 && !userData.phone) {
-      await setDoc(userDocRef, { phone: phoneE164 }, { merge: true });
-    }
-    return { outcome: 'success' };
+    return createNewUserProfile(
+      firebaseUser,
+      email,
+      phoneE164,
+      isAdminEmail(email)
+    );
+  } finally {
+    clearAuthIntentGate();
   }
-
-  // No Firestore profile yet
-  if (intent === 'signin') {
-    if (isAdminEmail(email)) {
-      return createNewUserProfile(firebaseUser, email, phoneE164, true);
-    }
-    await signOut(auth);
-    return { outcome: 'rejected', message: SIGN_IN_NO_ACCOUNT_MESSAGE };
-  }
-
-  return createNewUserProfile(firebaseUser, email, phoneE164, isAdminEmail(email));
 }
 
 async function createNewUserProfile(
@@ -78,7 +98,7 @@ async function createNewUserProfile(
   needsAdminPasskey: boolean
 ): Promise<EnsureUserProfileResult> {
   if (!db) {
-    return { outcome: 'rejected', message: 'Database unavailable.' };
+    return rejected('other', 'Database unavailable.');
   }
 
   const userDocRef = doc(db, 'users', firebaseUser.uid);
@@ -110,16 +130,12 @@ async function createNewUserProfile(
         ? String((e as { code: string }).code)
         : '';
     if (code === 'permission-denied') {
-      return {
-        outcome: 'rejected',
-        message:
-          'Could not create your account (Firestore permissions). Deploy the latest firestore.rules and try again.',
-      };
+      return rejected(
+        'other',
+        'Could not create your account (Firestore permissions). Deploy the latest firestore.rules and try again.'
+      );
     }
-    return {
-      outcome: 'rejected',
-      message: 'Could not create your account. Please try again.',
-    };
+    return rejected('other', 'Could not create your account. Please try again.');
   }
   if (needsAdminPasskey) {
     return { outcome: 'admin_passkey' };

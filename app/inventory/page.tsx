@@ -21,7 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import type { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
@@ -35,8 +35,6 @@ import {
 const INITIAL_PAGE_SIZE = 50;
 const LOAD_MORE_SIZE = 50;
 
-type DiscoveryMethod = 'name' | 'category' | 'type';
-
 function InventoryCatalog() {
   const { products, loading, offline } = useInventory();
   const { addToCart } = useCart();
@@ -47,7 +45,11 @@ function InventoryCatalog() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [subCategoryFilter, setSubCategoryFilter] = useState('all');
   const [letterFilter, setLetterFilter] = useState<InventoryLetterFilter>('all');
-  const [searchBy, setSearchBy] = useState<DiscoveryMethod | ''>('');
+  const [discoveryFilters, setDiscoveryFilters] = useState({
+    name: false,
+    category: false,
+    type: false,
+  });
   const [isMounted, setIsMounted] = useState(false);
   const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
 
@@ -57,7 +59,13 @@ function InventoryCatalog() {
 
   useEffect(() => {
     setVisibleCount(INITIAL_PAGE_SIZE);
-  }, [searchQuery, categoryFilter, subCategoryFilter, letterFilter, searchBy]);
+  }, [
+    searchQuery,
+    categoryFilter,
+    subCategoryFilter,
+    letterFilter,
+    discoveryFilters,
+  ]);
 
   const displayProducts = products.filter((p) => !p.isHidden);
 
@@ -74,15 +82,15 @@ function InventoryCatalog() {
       product.name.toLowerCase().includes(q) ||
       product.description?.toLowerCase().includes(q);
     const matchesCategory =
-      searchBy !== 'category' ||
+      !discoveryFilters.category ||
       categoryFilter === 'all' ||
       product.category === categoryFilter;
     const matchesSubCategory =
-      searchBy !== 'type' ||
+      !discoveryFilters.type ||
       subCategoryFilter === 'all' ||
       product.subCategory === subCategoryFilter;
     const matchesLetter =
-      searchBy !== 'name' ||
+      !discoveryFilters.name ||
       letterFilter === 'all' ||
       getFirstCharacterGroup(product.name || '') === letterFilter;
     return matchesSearch && matchesCategory && matchesSubCategory && matchesLetter;
@@ -91,7 +99,9 @@ function InventoryCatalog() {
   const productsToShow = filteredProducts.slice(0, visibleCount);
   const hasMore = visibleCount < filteredProducts.length;
   const filtersActive =
-    Boolean(searchBy) ||
+    discoveryFilters.name ||
+    discoveryFilters.category ||
+    discoveryFilters.type ||
     Boolean(searchQuery.trim()) ||
     letterFilter !== 'all' ||
     categoryFilter !== 'all' ||
@@ -102,7 +112,7 @@ function InventoryCatalog() {
   };
 
   const clearFilters = () => {
-    setSearchBy('');
+    setDiscoveryFilters({ name: false, category: false, type: false });
     setLetterFilter('all');
     setCategoryFilter('all');
     setSubCategoryFilter('all');
@@ -110,13 +120,6 @@ function InventoryCatalog() {
     if (searchParams.get('q')) {
       router.replace('/inventory', { scroll: false });
     }
-  };
-
-  const onSearchByChange = (value: DiscoveryMethod) => {
-    setSearchBy(value);
-    if (value !== 'name') setLetterFilter('all');
-    if (value !== 'category') setCategoryFilter('all');
-    if (value !== 'type') setSubCategoryFilter('all');
   };
 
   const idleFill = 'border-border/70 bg-white text-foreground shadow-sm';
@@ -194,12 +197,12 @@ function InventoryCatalog() {
             />
           </div>
           <div className='flex min-w-0 items-center justify-between gap-2 sm:justify-end'>
-            {isMounted && searchBy === 'category' && (
+            {isMounted && discoveryFilters.category && (
               <div className='min-w-0 max-w-[11rem] shrink'>
                 {renderCategorySelect()}
               </div>
             )}
-            {isMounted && searchBy === 'type' && (
+            {isMounted && discoveryFilters.type && (
               <div className='min-w-0 max-w-[9rem] shrink'>
                 {renderTypeSelect()}
               </div>
@@ -211,7 +214,9 @@ function InventoryCatalog() {
                   variant='outline'
                   size='sm'
                   className={`h-8 shrink-0 rounded-full px-3 text-xs font-medium ${
-                    searchBy ||
+                    discoveryFilters.name ||
+                    discoveryFilters.category ||
+                    discoveryFilters.type ||
                     categoryFilter !== 'all' ||
                     subCategoryFilter !== 'all' ||
                     letterFilter !== 'all'
@@ -220,13 +225,16 @@ function InventoryCatalog() {
                   }`}
                 >
                   <SlidersHorizontal className='mr-1.5 h-3.5 w-3.5' />
-                  {searchBy === 'name'
-                    ? 'Name'
-                    : searchBy === 'category'
-                      ? 'Category'
-                      : searchBy === 'type'
-                        ? 'Type'
-                        : 'Filter'}
+                  {(() => {
+                    const parts = [
+                      discoveryFilters.name ? 'Name' : null,
+                      discoveryFilters.category ? 'Category' : null,
+                      discoveryFilters.type ? 'Type' : null,
+                    ].filter(Boolean);
+                    if (parts.length === 0) return 'Filter';
+                    if (parts.length === 1) return parts[0];
+                    return `${parts[0]} +${parts.length - 1}`;
+                  })()}
                   <ChevronDown className='ml-1 h-3.5 w-3.5 opacity-70' />
                 </Button>
               </PopoverTrigger>
@@ -235,38 +243,40 @@ function InventoryCatalog() {
                   FILTER
                 </p>
                 <div className='space-y-2'>
-                  <p className='text-sm font-medium'>Search by</p>
-                  <RadioGroup
-                    value={searchBy || undefined}
-                    onValueChange={(value) =>
-                      onSearchByChange(value as DiscoveryMethod)
-                    }
-                    className='gap-2'
-                  >
-                    {(
-                      [
-                        ['name', 'Name'],
-                        ['category', 'Category'],
-                        ['type', 'Type'],
-                      ] as const
-                    ).map(([value, label]) => (
-                      <div key={value} className='flex items-center gap-2'>
-                        <RadioGroupItem value={value} id={`filter-${value}`} />
-                        <Label htmlFor={`filter-${value}`} className='font-normal'>
-                          {label}
-                          {searchBy === value ? (
-                            <span className='ml-2 text-xs text-muted-foreground'>
-                              on
-                            </span>
-                          ) : null}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-                {searchBy === 'name' && (
+                  <p className='text-sm font-medium'>Combine filters</p>
+                  {(
+                    [
+                      ['name', 'Name'],
+                      ['category', 'Category'],
+                      ['type', 'Type'],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <div key={key} className='flex items-center gap-2'>
+                      <Checkbox
+                        id={`filter-${key}`}
+                        checked={discoveryFilters[key]}
+                        onCheckedChange={(checked) => {
+                          const on = checked === true;
+                          setDiscoveryFilters((prev) => ({ ...prev, [key]: on }));
+                          if (!on && key === 'name') setLetterFilter('all');
+                          if (!on && key === 'category') setCategoryFilter('all');
+                          if (!on && key === 'type') setSubCategoryFilter('all');
+                        }}
+                      />
+                      <Label htmlFor={`filter-${key}`} className='font-normal'>
+                        {label}
+                      </Label>
+                    </div>
+                  ))}
                   <p className='text-xs text-muted-foreground'>
-                    Name is on. Choose a letter below to browse the catalog.
+                    Turn on Name with Category or Type to browse letters inside
+                    that group.
+                  </p>
+                </div>
+                {discoveryFilters.name && (
+                  <p className='text-xs text-muted-foreground'>
+                    Name is on. Choose a letter below — it applies together with
+                    Category or Type if those are also on.
                   </p>
                 )}
                 <Button
@@ -290,7 +300,7 @@ function InventoryCatalog() {
           </div>
         </div>
 
-        {searchBy === 'name' && (
+        {discoveryFilters.name && (
           <div className='grid grid-cols-[repeat(14,minmax(0,1fr))] gap-px sm:flex sm:flex-wrap sm:justify-center sm:gap-1.5'>
             {INVENTORY_LETTER_OPTIONS.map((letter) => (
               <Button
