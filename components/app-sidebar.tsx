@@ -357,20 +357,22 @@ export function AppSidebar() {
         }`}
       >
         <NavContent collapsed={isCollapsed} />
-        <Button
-          variant='ghost'
-          size='icon'
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className='absolute right-0 top-[4.5rem] z-40 h-6 w-6 translate-x-1/2 -translate-y-1/2 rounded-full border bg-background shadow-md hover:bg-secondary'
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          {isCollapsed ? (
-            <ChevronRight className='h-3 w-3' />
-          ) : (
-            <ChevronLeft className='h-3 w-3' />
-          )}
-        </Button>
       </div>
+      <Button
+        variant='ghost'
+        size='icon'
+        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        className={`fixed top-[4.5rem] z-[45] hidden h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border bg-background shadow-md transition-[left] duration-300 hover:bg-secondary md:inline-flex ${
+          isCollapsed ? 'left-20' : 'left-64 lg:left-72'
+        }`}
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
+        {isCollapsed ? (
+          <ChevronRight className='h-3 w-3' />
+        ) : (
+          <ChevronLeft className='h-3 w-3' />
+        )}
+      </Button>
 
       {/* Mobile Sheet - only render after mount to avoid Radix ID hydration mismatch */}
       {mounted ? (
