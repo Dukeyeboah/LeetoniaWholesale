@@ -11,7 +11,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { format } from 'date-fns';
-import { ArrowRight, ClipboardList } from 'lucide-react';
+import { ArrowRight, ClipboardList, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/hooks/use-cart';
 import { useNotifications } from '@/hooks/use-notifications';
@@ -45,11 +45,49 @@ const PROCESSING_STATUSES = new Set<Order['status']>([
   'customer_confirmed',
 ]);
 
+const STAT_CARDS = [
+  {
+    label: 'Total Orders',
+    key: 'total' as const,
+    className: 'border-sky-200/80 bg-sky-50/90',
+    labelClass: 'text-sky-800',
+  },
+  {
+    label: 'Pending',
+    key: 'pending' as const,
+    className: 'border-amber-200/80 bg-amber-50/90',
+    labelClass: 'text-amber-900',
+  },
+  {
+    label: 'Processing',
+    key: 'processing' as const,
+    className: 'border-violet-200/80 bg-violet-50/90',
+    labelClass: 'text-violet-800',
+  },
+  {
+    label: 'Completed',
+    key: 'completed' as const,
+    className: 'border-emerald-200/80 bg-emerald-50/90',
+    labelClass: 'text-emerald-800',
+  },
+] as const;
+
+function PanelLoading({ label }: { label: string }) {
+  return (
+    <div className='flex flex-col items-center justify-center gap-2 py-8'>
+      <Loader2 className='h-6 w-6 animate-spin text-primary' aria-hidden />
+      <p className='text-xs text-muted-foreground'>{label}</p>
+    </div>
+  );
+}
+
 export default function CustomerHomePage() {
   const { user, loading: authLoading, isAdmin, viewMode } = useAuth();
   const showPrice = isAdmin || viewMode === 'admin';
-  const { cart } = useCart();
-  const { notifications } = useNotifications(user?.id);
+  const { cart, isInitialized: cartReady } = useCart();
+  const { notifications, loading: activityLoading } = useNotifications(
+    user?.id
+  );
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
@@ -127,36 +165,29 @@ export default function CustomerHomePage() {
   }
 
   return (
-    <div className='space-y-5'>
-      <div>
-        <p className='text-xs text-muted-foreground'>Dashboard</p>
+    <div className='flex min-h-0 flex-col gap-3 lg:h-[calc(100dvh-var(--storefront-nav-h,3.5rem)-var(--storefront-banner-h,0px)-1.25rem)] lg:overflow-hidden'>
+      <div className='shrink-0'>
         <h1 className='font-serif text-2xl font-bold text-primary'>
           Welcome back, {pharmacyName}
         </h1>
       </div>
 
-      <div className='grid grid-cols-2 gap-2 lg:grid-cols-4'>
-        {(
-          [
-            ['Total Orders', stats.total],
-            ['Pending', stats.pending],
-            ['Processing', stats.processing],
-            ['Completed', stats.completed],
-          ] as const
-        ).map(([label, value]) => (
-          <Card key={label} className='border-border/60 py-3 shadow-none'>
-            <CardHeader className='px-4 py-0'>
-              <CardDescription className='text-xs'>{label}</CardDescription>
-              <CardTitle className='font-serif text-2xl tabular-nums'>
-                {ordersLoading ? '—' : value}
-              </CardTitle>
-            </CardHeader>
-          </Card>
+      <div className='grid shrink-0 grid-cols-2 gap-2 lg:grid-cols-4'>
+        {STAT_CARDS.map((card) => (
+          <div
+            key={card.label}
+            className={`rounded-2xl border px-3 py-2.5 ${card.className}`}
+          >
+            <p className={`text-xs ${card.labelClass}`}>{card.label}</p>
+            <p className='mt-1 font-serif text-xl font-semibold tabular-nums leading-none lg:text-2xl'>
+              {ordersLoading ? '—' : stats[card.key]}
+            </p>
+          </div>
         ))}
       </div>
 
-      <Card className='border-border/60 shadow-none'>
-        <CardHeader className='flex flex-row items-center justify-between space-y-0 px-4 py-3'>
+      <Card className='flex min-h-0 flex-1 flex-col gap-2 overflow-hidden border-border/60 py-3 shadow-none'>
+        <CardHeader className='flex shrink-0 flex-row items-center justify-between space-y-0 px-4 py-0'>
           <div>
             <CardTitle className='font-serif text-lg'>Current Orders</CardTitle>
             <CardDescription>Orders still in progress</CardDescription>
@@ -168,12 +199,9 @@ export default function CustomerHomePage() {
             </Link>
           </Button>
         </CardHeader>
-        <CardContent className='max-h-44 overflow-y-auto px-4 pb-3 pt-0'>
+        <CardContent className='min-h-0 max-h-56 flex-1 overflow-y-auto overscroll-contain px-4 pt-0 lg:max-h-none'>
           {ordersLoading ? (
-            <div className='space-y-2'>
-              <Skeleton className='h-8 w-full' />
-              <Skeleton className='h-8 w-full' />
-            </div>
+            <PanelLoading label='Loading orders…' />
           ) : currentOrders.length === 0 ? (
             <div className='flex flex-col items-center py-4 text-center'>
               <ClipboardList className='mb-2 h-7 w-7 text-muted-foreground/50' />
@@ -231,19 +259,23 @@ export default function CustomerHomePage() {
         </CardContent>
       </Card>
 
-      <div className='grid gap-3 md:grid-cols-2'>
-        <Card className='border-border/60 shadow-none'>
-          <CardHeader className='px-4 py-3'>
+      <div className='grid min-h-0 flex-1 gap-3 md:grid-cols-2'>
+        <Card className='flex min-h-0 flex-col gap-2 overflow-hidden border-border/60 py-3 shadow-none'>
+          <CardHeader className='shrink-0 space-y-1 px-4 py-0'>
             <CardTitle className='font-serif text-lg'>Cart</CardTitle>
             <CardDescription>
-              {cartProducts === 0
-                ? 'Your cart is empty'
-                : `${cartProducts} product${cartProducts === 1 ? '' : 's'} · ${cartItems} item${cartItems === 1 ? '' : 's'}`}
+              {!cartReady
+                ? 'Loading your cart'
+                : cartProducts === 0
+                  ? 'Your cart is empty'
+                  : `${cartProducts} product${cartProducts === 1 ? '' : 's'} · ${cartItems} item${cartItems === 1 ? '' : 's'}`}
             </CardDescription>
           </CardHeader>
-          <CardContent className='flex max-h-44 flex-col px-4 pb-3 pt-0'>
-            <div className='min-h-0 flex-1 overflow-y-auto'>
-              {cartProducts === 0 ? (
+          <CardContent className='flex min-h-0 flex-1 flex-col px-4 pt-0'>
+            <div className='min-h-0 max-h-56 flex-1 overflow-y-auto overscroll-contain lg:max-h-none'>
+              {!cartReady ? (
+                <PanelLoading label='Loading cart…' />
+              ) : cartProducts === 0 ? (
                 <p className='text-sm text-muted-foreground'>
                   Add products from the catalog when you are ready to order.
                 </p>
@@ -263,7 +295,7 @@ export default function CustomerHomePage() {
                 </ul>
               )}
             </div>
-            <div className='pt-3'>
+            <div className='shrink-0 pt-3'>
               <Button asChild size='sm'>
                 <Link href={cartProducts === 0 ? '/inventory' : '/cart'}>
                   {cartProducts === 0 ? (
@@ -280,8 +312,8 @@ export default function CustomerHomePage() {
           </CardContent>
         </Card>
 
-        <Card className='border-border/60 shadow-none'>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 px-4 py-3'>
+        <Card className='flex min-h-0 flex-col gap-2 overflow-hidden border-border/60 py-3 shadow-none'>
+          <CardHeader className='flex shrink-0 flex-row items-center justify-between space-y-0 px-4 py-0'>
             <div>
               <CardTitle className='font-serif text-lg'>
                 Recent activity
@@ -292,8 +324,10 @@ export default function CustomerHomePage() {
               <Link href='/notifications'>All</Link>
             </Button>
           </CardHeader>
-          <CardContent className='max-h-44 overflow-y-auto px-4 pb-3 pt-0'>
-            {recent.length === 0 ? (
+          <CardContent className='min-h-0 max-h-56 flex-1 overflow-y-auto overscroll-contain px-4 pt-0 lg:max-h-none'>
+            {activityLoading ? (
+              <PanelLoading label='Loading activity…' />
+            ) : recent.length === 0 ? (
               <p className='text-sm text-muted-foreground'>
                 No recent updates yet.
               </p>

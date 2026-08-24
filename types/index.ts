@@ -88,6 +88,13 @@ export interface User {
   pharmacyPhone?: string;
   /** Set after post-auth onboarding (name, job role, pharmacy). */
   pharmacyProfileComplete?: boolean;
+  /**
+   * B2B affiliation review after onboarding.
+   * Missing on older accounts is treated as approved.
+   */
+  pharmacyAffiliationStatus?: 'pending' | 'approved' | 'rejected';
+  pharmacyAffiliationRequestedAt?: number;
+  pharmacyAffiliationReviewedAt?: number;
   // Staff-specific permissions (only for staff role)
   permissions?: StaffPermissions;
 }

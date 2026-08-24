@@ -34,12 +34,12 @@ export function StorefrontTopBar() {
   const pathname = usePathname();
   const { user, logout, isAdmin, isStaff, viewMode, setViewMode } = useAuth();
   const { unreadCount } = useNotifications(user?.id);
-  const { cart } = useCart();
+  const { cart, isInitialized: cartReady } = useCart();
   const [mounted, setMounted] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
   const scrollTimer = useRef<number | null>(null);
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = cart.length;
   const showClientRoutes = (!isAdmin && !isStaff) || viewMode === 'client';
   const showAdminRoutes = isAdmin && viewMode === 'admin';
   const showStaffRoutes = isStaff && viewMode === 'staff';
@@ -179,12 +179,14 @@ export function StorefrontTopBar() {
           <Link
             href='/cart'
             aria-label={
-              cartCount > 0 ? `Open cart, ${cartCount} items` : 'Open cart'
+              cartCount > 0
+                ? `Open cart, ${cartCount} product${cartCount === 1 ? '' : 's'}`
+                : 'Open cart'
             }
             className='relative inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-accent'
           >
             <ShoppingCart className='h-5 w-5' />
-            {cartCount > 0 && (
+            {cartReady && cartCount > 0 && (
               <span className='absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground'>
                 {cartCount > 99 ? '99+' : cartCount}
               </span>

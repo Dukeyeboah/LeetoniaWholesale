@@ -42,7 +42,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   };
 
   return (
-    <Card className='overflow-hidden py-0 gap-0 border-border/50 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer'>
+    <Card className='h-full overflow-hidden border-border/50 bg-white py-0 gap-0 shadow-sm transition-[transform,box-shadow] duration-200 ease-out hover:z-10 hover:scale-[1.03] hover:shadow-md flex flex-col cursor-pointer origin-center'>
       <div className='aspect-[4/3] relative bg-secondary/20 flex items-center justify-center text-muted-foreground overflow-hidden'>
         {product.imageUrl && !imageError ? (
           <LazyImage

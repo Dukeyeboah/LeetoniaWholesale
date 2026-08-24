@@ -1,11 +1,15 @@
 'use client';
 
 import type React from 'react';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { StorefrontTopBar } from '@/components/storefront-top-bar';
 import { SidebarProvider, useSidebar } from '@/components/sidebar-context';
 import { useAuth } from '@/lib/auth-context';
+import {
+  PENDING_VERIFICATION_MESSAGE,
+  REJECTED_AFFILIATION_MESSAGE,
+} from '@/lib/pharmacy-affiliation';
 
 function StorefrontNavFallback() {
   return <header className='sticky top-0 z-40 h-12 w-full bg-background md:h-14' />;
@@ -19,9 +23,25 @@ function LayoutContent({
   wide?: boolean;
 }) {
   const { isCollapsed } = useSidebar();
-  const { isAdmin, isStaff, viewMode } = useAuth();
+  const { isAdmin, isStaff, viewMode, pharmacyAffiliation } = useAuth();
   const useStorefrontNav =
     (!isAdmin && !isStaff) || viewMode === 'client';
+  const affiliationBanner =
+    pharmacyAffiliation === 'pending'
+      ? PENDING_VERIFICATION_MESSAGE
+      : pharmacyAffiliation === 'rejected'
+        ? REJECTED_AFFILIATION_MESSAGE
+        : null;
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      '--storefront-banner-h',
+      affiliationBanner ? '2.75rem' : '0px'
+    );
+    return () => {
+      document.documentElement.style.setProperty('--storefront-banner-h', '0px');
+    };
+  }, [affiliationBanner]);
 
   if (useStorefrontNav) {
     return (
@@ -29,6 +49,14 @@ function LayoutContent({
         <Suspense fallback={<StorefrontNavFallback />}>
           <StorefrontTopBar />
         </Suspense>
+        {affiliationBanner ? (
+          <div
+            role='status'
+            className='border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm text-amber-950'
+          >
+            {affiliationBanner}
+          </div>
+        ) : null}
         <main className='w-full min-w-0 flex-1'>
           <div className='w-full px-4 pt-1 pb-2 md:px-8 md:pt-2 md:pb-4'>{children}</div>
         </main>

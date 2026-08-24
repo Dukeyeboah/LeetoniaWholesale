@@ -19,6 +19,10 @@ import { toast } from 'sonner';
 import { omitUndefinedFields } from '@/lib/firestore-sanitize';
 import { inferSignInProvider, type SignInProvider } from '@/lib/auth-providers';
 import {
+  PENDING_VERIFICATION_MESSAGE,
+  REJECTED_AFFILIATION_MESSAGE,
+} from '@/lib/pharmacy-affiliation';
+import {
   normalizeGhanaPhoneToE164,
   isValidGhanaE164,
 } from '@/lib/ghana-phone';
@@ -37,7 +41,7 @@ function providerLabel(p: SignInProvider): string {
 }
 
 export default function ProfilePage() {
-  const { user, loading, refreshUser } = useAuth();
+  const { user, loading, refreshUser, pharmacyAffiliation } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
   const [jobRole, setJobRole] = useState('');
@@ -192,6 +196,12 @@ export default function ProfilePage() {
         <p className='mt-1 text-sm text-muted-foreground'>
           Your pharmacy profile and contact details
         </p>
+        {pharmacyAffiliation === 'pending' ? (
+          <p className='mt-2 text-sm text-amber-800'>{PENDING_VERIFICATION_MESSAGE}</p>
+        ) : null}
+        {pharmacyAffiliation === 'rejected' ? (
+          <p className='mt-2 text-sm text-destructive'>{REJECTED_AFFILIATION_MESSAGE}</p>
+        ) : null}
       </div>
 
       <Card>

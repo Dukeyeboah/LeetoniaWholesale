@@ -11,6 +11,11 @@ import { useRouter } from 'next/navigation';
 import { inferSignInProvider } from '@/lib/auth-providers';
 import { clearBrowserCartOnLogout } from '@/hooks/use-cart';
 import { getAuthIntentGate } from '@/lib/auth-intent-gate';
+import {
+  clientCanPlaceWholesaleOrders,
+  clientPharmacyAffiliation,
+  type ClientPharmacyAffiliation,
+} from '@/lib/pharmacy-affiliation';
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +25,10 @@ interface AuthContextType {
   isStaff: boolean;
   /** Client (or staff) must complete pharmacy onboarding before shopping. */
   needsClientPharmacyProfile: boolean;
+  /** Client onboarding / affiliation review. Null for staff and admin. */
+  pharmacyAffiliation: ClientPharmacyAffiliation | null;
+  /** Clients may browse while pending; checkout requires approved affiliation. */
+  canPlaceWholesaleOrders: boolean;
   refreshUser: () => Promise<void>;
   viewMode: 'admin' | 'client' | 'staff';
   setViewMode: (mode: 'admin' | 'client' | 'staff') => void;
@@ -34,6 +43,8 @@ const AuthContext = createContext<AuthContextType>({
   isSuperAdmin: false,
   isStaff: false,
   needsClientPharmacyProfile: false,
+  pharmacyAffiliation: null,
+  canPlaceWholesaleOrders: false,
   refreshUser: async () => {},
   viewMode: 'client',
   setViewMode: () => {},
@@ -65,11 +76,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const needsClientPharmacyProfile = Boolean(
-    user &&
-      user.role === 'client' &&
-      user.pharmacyProfileComplete !== true
-  );
+  const pharmacyAffiliation = clientPharmacyAffiliation(user);
+  const needsClientPharmacyProfile = pharmacyAffiliation === 'incomplete';
+  const canPlaceWholesaleOrders = clientCanPlaceWholesaleOrders(user);
 
   useEffect(() => {
     if (!auth || !db) {
@@ -190,6 +199,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isSuperAdmin: user?.role === 'super_admin',
         isStaff: user?.role === 'staff',
         needsClientPharmacyProfile,
+        pharmacyAffiliation,
+        canPlaceWholesaleOrders,
         refreshUser,
         viewMode:
           user?.role === 'admin' || user?.role === 'super_admin'

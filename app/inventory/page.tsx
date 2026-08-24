@@ -358,7 +358,7 @@ function InventoryCatalog() {
         </div>
       ) : (
         <div className='space-y-6'>
-          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3'>
+          <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 py-1'>
             {productsToShow.map((product) => (
               <ProductCard
                 key={product.id}

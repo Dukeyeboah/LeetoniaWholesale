@@ -32,6 +32,13 @@ export class PharmacyLimitError extends Error {
   }
 }
 
+export class PharmacyAffiliationError extends Error {
+  constructor(message = 'Pharmacy affiliation is not approved') {
+    super(message);
+    this.name = 'PharmacyAffiliationError';
+  }
+}
+
 async function getSuperAdminUserIds(db: Firestore): Promise<string[]> {
   const q = query(
     collection(db, 'users'),
@@ -104,6 +111,19 @@ export async function placeOrderWithPharmacyLimit(
     await runTransaction(db, async (transaction) => {
       const pRef = doc(db, 'pharmacies', pharmacyId);
       const pSnap = await transaction.get(pRef);
+      const userRef = doc(db, 'users', orderPayload.userId);
+      const userSnap = await transaction.get(userRef);
+
+      if (userSnap.exists()) {
+        const u = userSnap.data();
+        if (u.role === 'client') {
+          const complete = u.pharmacyProfileComplete === true;
+          const status = u.pharmacyAffiliationStatus;
+          if (!complete || status === 'pending' || status === 'rejected') {
+            throw new PharmacyAffiliationError();
+          }
+        }
+      }
 
       if (pSnap.exists() && pharmacyRequiresCreditCapacityCheck(pSnap.data())) {
         const d = pSnap.data();
@@ -141,6 +161,9 @@ export async function placeOrderWithPharmacyLimit(
       });
     });
   } catch (e: unknown) {
+    if (e instanceof PharmacyAffiliationError) {
+      throw e;
+    }
     if (isPharmacyLimitError(e)) {
       const pRef = doc(db, 'pharmacies', pharmacyId);
       const pSnap = await getDoc(pRef);

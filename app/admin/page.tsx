@@ -13,8 +13,6 @@ import {
   addDoc,
   deleteDoc,
   collection,
-  getDocs,
-  getDoc,
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -87,6 +85,8 @@ import {
   MessageCircle,
   Settings,
   SlidersHorizontal,
+  Check,
+  X,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
@@ -115,7 +115,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 import type { User } from '@/types';
 import { PRODUCT_CATEGORIES, PRODUCT_SUBCATEGORIES } from '@/lib/categories';
-import { createOrderStatusNotification } from '@/lib/notifications';
+import { createNotification, createOrderStatusNotification } from '@/lib/notifications';
 import { printOrderInvoice } from '@/lib/print-invoice';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -568,19 +568,17 @@ export default function AdminDashboard() {
       }
     );
 
-    // Fetch users once
-    const fetchUsers = async () => {
-      if (!db) return;
-      try {
-        const usersSnapshot = await getDocs(collection(db, 'users'));
+    const unsubUsers = onSnapshot(
+      collection(db, 'users'),
+      (snapshot) => {
         setUsers(
-          usersSnapshot.docs.map((d) => ({ id: d.id, ...d.data() } as User))
+          snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as User))
         );
-      } catch (error) {
-        console.error('Error fetching users:', error);
+      },
+      (err) => {
+        console.error('users listener', err);
       }
-    };
-    fetchUsers();
+    );
 
     const unsubPharmacies = onSnapshot(
       collection(db, 'pharmacies'),
@@ -602,6 +600,7 @@ export default function AdminDashboard() {
     return () => {
       unsubOrders();
       unsubInventory();
+      unsubUsers();
       unsubPharmacies();
     };
   }, []);
@@ -1808,6 +1807,21 @@ export default function AdminDashboard() {
     pharmacySortMode,
   ]);
 
+  const pendingPharmacyRequests = useMemo(
+    () =>
+      users
+        .filter(
+          (u) =>
+            u.role === 'client' && u.pharmacyAffiliationStatus === 'pending'
+        )
+        .sort(
+          (a, b) =>
+            (b.pharmacyAffiliationRequestedAt ?? b.createdAt ?? 0) -
+            (a.pharmacyAffiliationRequestedAt ?? a.createdAt ?? 0)
+        ),
+    [users]
+  );
+
   const openPharmacySuperEdit = (p: Pharmacy) => {
     const isCredit = pharmacyUsesCreditLine(p);
     setPharmacySuperDraft({
@@ -1950,6 +1964,63 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error verifying pharmacy:', error);
       toast.error('Failed to update pharmacy');
+    }
+  };
+
+  const handleApprovePharmacyRequest = async (u: User) => {
+    if (!db || !isAdmin) return;
+    try {
+      await updateDoc(doc(db, 'users', u.id), {
+        pharmacyAffiliationStatus: 'approved',
+        pharmacyAffiliationReviewedAt: Date.now(),
+      });
+      if (u.pharmacyId) {
+        const pharmacy = pharmacies.find((p) => p.id === u.pharmacyId);
+        if (pharmacy?.pendingVerification === true) {
+          await updateDoc(doc(db, 'pharmacies', u.pharmacyId), {
+            pendingVerification: false,
+            verifiedAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+        }
+      }
+      await createNotification(
+        u.id,
+        'system',
+        'Account verified',
+        'Your pharmacy affiliation has been confirmed. You can now place wholesale orders.'
+      );
+      toast.success(`Approved ${u.name || u.email || 'account'}`);
+    } catch (error) {
+      console.error('Error approving pharmacy request:', error);
+      toast.error('Failed to approve request');
+    }
+  };
+
+  const handleRejectPharmacyRequest = async (u: User) => {
+    if (!db || !isAdmin) return;
+    if (
+      !window.confirm(
+        `Reject pharmacy affiliation for ${u.name || u.email || 'this user'}? Their account will be kept and they will be notified.`
+      )
+    ) {
+      return;
+    }
+    try {
+      await updateDoc(doc(db, 'users', u.id), {
+        pharmacyAffiliationStatus: 'rejected',
+        pharmacyAffiliationReviewedAt: Date.now(),
+      });
+      await createNotification(
+        u.id,
+        'system',
+        'Affiliation not confirmed',
+        'Your pharmacy affiliation was not confirmed. Contact Leetonia Wholesale if you believe this is a mistake.'
+      );
+      toast.success('Request rejected. The user account was kept.');
+    } catch (error) {
+      console.error('Error rejecting pharmacy request:', error);
+      toast.error('Failed to reject request');
     }
   };
 
@@ -3505,6 +3576,98 @@ export default function AdminDashboard() {
               admins can add or delete pharmacy records.
             </p>
           </div>
+
+          <Card className='border-amber-200/80 bg-amber-50/60 py-4 shadow-none'>
+            <CardHeader className='px-4 py-0'>
+              <CardTitle className='font-serif text-lg'>
+                Pending pharmacy requests
+              </CardTitle>
+              <CardDescription>
+                New accounts wait here until you confirm the pharmacy
+                affiliation. Approve to let them order; reject keeps the
+                account and notifies them.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='max-h-56 overflow-y-auto overscroll-contain px-4 pb-0 pt-3'>
+              {pendingPharmacyRequests.length === 0 ? (
+                <p className='text-sm text-muted-foreground'>
+                  No pending requests.
+                </p>
+              ) : (
+                <ul className='space-y-3'>
+                  {pendingPharmacyRequests.map((u) => {
+                    const pharmacy = pharmacies.find(
+                      (p) => p.id === u.pharmacyId
+                    );
+                    const newPharmacy = pharmacy?.pendingVerification === true;
+                    return (
+                      <li
+                        key={u.id}
+                        className='rounded-xl border border-amber-200/80 bg-white/80 p-3'
+                      >
+                        <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+                          <div className='min-w-0 space-y-1'>
+                            <p className='font-medium'>
+                              {u.name || u.email || 'Unnamed user'}
+                            </p>
+                            <p className='text-sm text-muted-foreground'>
+                              {[u.jobRole, u.email, u.phone]
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </p>
+                            <p className='text-sm'>
+                              {u.pharmacyName || pharmacy?.name || 'Pharmacy'}
+                              {newPharmacy ? (
+                                <Badge variant='outline' className='ml-2'>
+                                  New pharmacy
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant='outline'
+                                  className='ml-2 bg-emerald-50 text-emerald-800 border-emerald-200'
+                                >
+                                  Existing pharmacy
+                                </Badge>
+                              )}
+                            </p>
+                            <p className='text-xs text-muted-foreground'>
+                              {[u.pharmacyLocation, u.pharmacyPhone]
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </p>
+                          </div>
+                          {isAdmin && (
+                            <div className='flex shrink-0 gap-2'>
+                              <Button
+                                size='sm'
+                                onClick={() =>
+                                  void handleApprovePharmacyRequest(u)
+                                }
+                              >
+                                <Check className='mr-1 h-3.5 w-3.5' />
+                                Approve
+                              </Button>
+                              <Button
+                                size='sm'
+                                variant='outline'
+                                className='text-destructive border-destructive/30 hover:bg-destructive/10'
+                                onClick={() =>
+                                  void handleRejectPharmacyRequest(u)
+                                }
+                              >
+                                <X className='mr-1 h-3.5 w-3.5' />
+                                Reject
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
 
           <div className='flex flex-col gap-2'>
             <div className='flex flex-wrap items-center gap-2'>

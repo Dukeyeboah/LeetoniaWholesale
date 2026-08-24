@@ -52,10 +52,15 @@ import {
   toOrderIdPrefix,
 } from '@/lib/pharmacies';
 import {
+  PharmacyAffiliationError,
   PharmacyLimitError,
   placeOrderWithPharmacyLimit,
 } from '@/lib/pharmacy-limits';
 import { notifyAdminsNewOrderRequest } from '@/lib/order-workflow';
+import {
+  PENDING_VERIFICATION_MESSAGE,
+  REJECTED_AFFILIATION_MESSAGE,
+} from '@/lib/pharmacy-affiliation';
 import {
   InsufficientStockError,
   placeAdminOrderWithReservation,
@@ -71,7 +76,7 @@ export default function CartPage() {
     total,
     isInitialized,
   } = useCart();
-  const { user, isAdmin, viewMode, needsClientPharmacyProfile } = useAuth();
+  const { user, isAdmin, viewMode, needsClientPharmacyProfile, pharmacyAffiliation, canPlaceWholesaleOrders } = useAuth();
   const showPrice = isAdmin || viewMode === 'admin';
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,15 +91,26 @@ export default function CartPage() {
     'pickup' | 'delivery' | ''
   >('');
 
+  const checkoutBlockedMessage = () => {
+    if (needsClientPharmacyProfile) {
+      return 'Complete your pharmacy profile before making an order.';
+    }
+    if (pharmacyAffiliation === 'rejected') {
+      return REJECTED_AFFILIATION_MESSAGE;
+    }
+    if (pharmacyAffiliation === 'pending') {
+      return PENDING_VERIFICATION_MESSAGE;
+    }
+    return 'Your account must be verified before you can place an order.';
+  };
+
   const openFulfillmentStep = () => {
     if (!user) {
       setShowSignupDialog(true);
       return;
     }
-    if (needsClientPharmacyProfile) {
-      toast.error(
-        'Complete your pharmacy profile before making an order.'
-      );
+    if (!canPlaceWholesaleOrders) {
+      toast.error(checkoutBlockedMessage());
       return;
     }
     setShowFulfillment(true);
@@ -109,8 +125,8 @@ export default function CartPage() {
       setShowSignupDialog(true);
       return;
     }
-    if (needsClientPharmacyProfile) {
-      toast.error('Complete your pharmacy profile before making an order.');
+    if (!canPlaceWholesaleOrders) {
+      toast.error(checkoutBlockedMessage());
       return;
     }
     if (!db) {
@@ -212,7 +228,9 @@ export default function CartPage() {
     } catch (err) {
       waWin?.close();
       console.error('Checkout error:', err);
-      if (err instanceof PharmacyLimitError) {
+      if (err instanceof PharmacyAffiliationError) {
+        toast.error(checkoutBlockedMessage());
+      } else if (err instanceof PharmacyLimitError) {
         toast.error(
           'This order would exceed your pharmacy’s account credit limit. An admin has been notified — credit can be adjusted under Admin → Pharmacies.'
         );

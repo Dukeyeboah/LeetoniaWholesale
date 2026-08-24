@@ -26,6 +26,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { Check, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  PENDING_VERIFICATION_MESSAGE,
+  notifyAdminsPendingPharmacyRequest,
+} from '@/lib/pharmacy-affiliation';
 
 type PharmOption = {
   id: string;
@@ -73,15 +77,17 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
     const unsub = onSnapshot(
       collection(db, 'pharmacies'),
       (snapshot) => {
-        const fromDb: PharmOption[] = snapshot.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            name: (typeof data.name === 'string' && data.name) || d.id,
-            location: data.location ?? null,
-            phone: data.phone ?? null,
-          };
-        });
+        const fromDb: PharmOption[] = snapshot.docs
+          .filter((d) => d.data().pendingVerification !== true)
+          .map((d) => {
+            const data = d.data();
+            return {
+              id: d.id,
+              name: (typeof data.name === 'string' && data.name) || d.id,
+              location: data.location ?? null,
+              phone: data.phone ?? null,
+            };
+          });
         const merged = mergePharmacyOptions(fromDb).sort((a, b) =>
           formatPharmacyPickerLabel(a).localeCompare(
             formatPharmacyPickerLabel(b),
@@ -164,6 +170,8 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
       let pharmacyId: string;
       let pharmacyName: string;
 
+      let isNewPharmacy = false;
+
       if (pharmacySource === 'list') {
         const fromList = pharmacyOptions.find((p) => p.id === selectedId);
         if (!fromList) {
@@ -194,12 +202,15 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
         const created = await createPharmacyFromSignup(db, added, user.id, {
           location: loc,
           phone: pharmPh,
+          contactPerson: trimmedName,
           customerBillingType: 'cash',
         });
         pharmacyId = created.pharmacyId;
         pharmacyName = created.pharmacyName;
+        isNewPharmacy = true;
       }
 
+      const requestedAt = Date.now();
       await setDoc(
         doc(db, 'users', user.id),
         {
@@ -211,12 +222,22 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
           pharmacyLocation: loc,
           pharmacyPhone: pharmPh,
           pharmacyProfileComplete: true,
+          pharmacyAffiliationStatus: 'pending',
+          pharmacyAffiliationRequestedAt: requestedAt,
         },
         { merge: true }
       );
 
+      await notifyAdminsPendingPharmacyRequest(db, {
+        userName: trimmedName,
+        userEmail: user.email || '',
+        pharmacyName,
+        pharmacyId,
+        isNewPharmacy,
+      });
+
       await refreshUser();
-      toast.success('Profile saved. Welcome!');
+      toast.success(PENDING_VERIFICATION_MESSAGE);
       onComplete();
     } catch (err) {
       console.error(err);

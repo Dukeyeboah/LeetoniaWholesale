@@ -102,6 +102,7 @@ export function slugifyForPharmacyDocId(name: string): string {
 export type CreatePharmacySignupOptions = {
   location?: string;
   phone?: string;
+  contactPerson?: string;
   /** Defaults to cash (pay-as-you-go). Credit list will use `credit` later. */
   customerBillingType?: 'cash' | 'credit';
 };
@@ -119,6 +120,7 @@ export async function createPharmacyFromSignup(
 
   const location = opts?.location?.trim() || null;
   const phone = opts?.phone?.trim() || null;
+  const contactPerson = opts?.contactPerson?.trim() || null;
   const customerBillingType = opts?.customerBillingType ?? 'cash';
   const allowsAccountCredit = customerBillingType === 'credit';
 
@@ -130,6 +132,7 @@ export async function createPharmacyFromSignup(
     name: trimmed,
     location,
     phone,
+    contactPerson,
     customerBillingType,
     allowsAccountCredit,
     creditLimitGHS: 0,

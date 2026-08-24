@@ -43,10 +43,26 @@ service cloud.firestore {
     }
 
     // Self-serve profile: cannot change role/permissions; signInProvider only on first set (backfill).
+    // Affiliation: clients may request (or re-request) pending review; they cannot approve themselves.
+    function userSelfAffiliationUpdateAllowed() {
+      let diffKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return !diffKeys.hasAny([
+          'pharmacyAffiliationStatus',
+          'pharmacyAffiliationRequestedAt',
+          'pharmacyAffiliationReviewedAt'
+        ]) ||
+        (
+          request.resource.data.pharmacyAffiliationStatus == 'pending' &&
+          resource.data.get('pharmacyAffiliationStatus', 'none') in ['none', '', 'pending', 'rejected'] &&
+          !diffKeys.hasAny(['pharmacyAffiliationReviewedAt'])
+        );
+    }
+
     function userSelfProfileUpdateAllowed(userId) {
       let diffKeys = request.resource.data.diff(resource.data).affectedKeys();
       return request.auth.uid == userId &&
         !diffKeys.hasAny(['role', 'permissions']) &&
+        userSelfAffiliationUpdateAllowed() &&
         (
           !diffKeys.hasAny(['signInProvider']) ||
           (
