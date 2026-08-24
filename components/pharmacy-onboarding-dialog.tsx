@@ -30,6 +30,10 @@ import {
   PENDING_VERIFICATION_MESSAGE,
   notifyAdminsPendingPharmacyRequest,
 } from '@/lib/pharmacy-affiliation';
+import {
+  isValidGhanaE164,
+  normalizeGhanaPhoneToE164,
+} from '@/lib/ghana-phone';
 
 type PharmOption = {
   id: string;
@@ -157,7 +161,14 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
       return;
     }
     if (!pharmPh) {
-      toast.error('Enter the pharmacy phone number.');
+      toast.error('Pharmacy phone is required.');
+      return;
+    }
+    const normalizedPharmPhone = normalizeGhanaPhoneToE164(pharmPh);
+    if (!isValidGhanaE164(normalizedPharmPhone)) {
+      toast.error(
+        'Enter a valid Ghana pharmacy phone number (e.g. 0244… or +233…).'
+      );
       return;
     }
     if (!contact) {
@@ -189,7 +200,7 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
         if (pharmSnap.exists()) {
           await setDoc(
             pharmRef,
-            { location: loc, phone: pharmPh, updatedAt: Date.now() },
+            { location: loc, phone: normalizedPharmPhone, updatedAt: Date.now() },
             { merge: true }
           );
         }
@@ -201,7 +212,7 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
         }
         const created = await createPharmacyFromSignup(db, added, user.id, {
           location: loc,
-          phone: pharmPh,
+          phone: normalizedPharmPhone,
           contactPerson: trimmedName,
           customerBillingType: 'cash',
         });
@@ -220,7 +231,7 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
           pharmacyId,
           pharmacyName,
           pharmacyLocation: loc,
-          pharmacyPhone: pharmPh,
+          pharmacyPhone: normalizedPharmPhone,
           pharmacyProfileComplete: true,
           pharmacyAffiliationStatus: 'pending',
           pharmacyAffiliationRequestedAt: requestedAt,
@@ -264,8 +275,9 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
           <DialogHeader>
             <DialogTitle>Set up your profile</DialogTitle>
             <DialogDescription>
-              Wholesale orders are tied to your pharmacy. Enter your name and
-              the pharmacy you represent.
+              Wholesale orders are tied to your pharmacy. Enter your name, the
+              pharmacy you represent, and the pharmacy phone we can check
+              against our records.
             </DialogDescription>
           </DialogHeader>
 
@@ -399,15 +411,30 @@ export function PharmacyOnboardingDialog({ open, onComplete }: Props) {
                 />
               </div>
               <div className='grid gap-2'>
-                <Label htmlFor='onboard-pharm-phone'>Pharmacy phone</Label>
+                <Label htmlFor='onboard-pharm-phone'>
+                  Pharmacy phone{' '}
+                  <span className='text-destructive' aria-hidden>
+                    *
+                  </span>
+                </Label>
                 <Input
                   id='onboard-pharm-phone'
                   type='tel'
                   value={pharmacyPhone}
                   onChange={(e) => setPharmacyPhone(e.target.value)}
+                  onBlur={() => {
+                    if (!pharmacyPhone.trim()) return;
+                    const n = normalizeGhanaPhoneToE164(pharmacyPhone);
+                    if (n !== pharmacyPhone) setPharmacyPhone(n);
+                  }}
                   placeholder='Pharmacy line (e.g. 0244…)'
                   required
+                  aria-required='true'
                 />
+                <p className='text-xs text-muted-foreground'>
+                  Required. We use this number to match your pharmacy and verify
+                  the person placing orders.
+                </p>
               </div>
               <div className='grid gap-2'>
                 <Label htmlFor='onboard-contact-phone'>Your contact phone</Label>

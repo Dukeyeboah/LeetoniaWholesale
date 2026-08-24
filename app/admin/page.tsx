@@ -1152,7 +1152,7 @@ export default function AdminDashboard() {
     const pharmacy = order.pharmacyId
       ? pharmacies.find((p) => p.id === order.pharmacyId)
       : undefined;
-    return [account?.phone, account?.pharmacyPhone, pharmacy?.phone];
+    return [pharmacy?.phone, account?.pharmacyPhone];
   };
 
   const openCustomerStatusWhatsApp = (
@@ -1168,7 +1168,7 @@ export default function AdminDashboard() {
     );
     if (!ok) {
       toast.message(
-        'No customer phone on this order — WhatsApp was not opened. They can still confirm in the app.'
+        'No pharmacy phone on file — WhatsApp was not opened. Add the pharmacy line on the pharmacy record or the customer profile. They can still confirm in the app.'
       );
     }
   };
@@ -2487,12 +2487,13 @@ export default function AdminDashboard() {
                         <Button
                           variant='outline'
                           className='w-full'
+                          title='Opens WhatsApp to the pharmacy phone, not the agent’s personal number'
                           onClick={() =>
                             openCustomerStatusWhatsApp(order, order.status)
                           }
                         >
                           <MessageCircle className='mr-2 h-4 w-4' />
-                          WhatsApp customer
+                          WhatsApp pharmacy
                         </Button>
                         {order.status === 'proforma_sent' && (
                           <p className='text-xs text-muted-foreground'>
@@ -3577,96 +3578,130 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <Card className='border-amber-200/80 bg-amber-50/60 py-4 shadow-none'>
-            <CardHeader className='px-4 py-0'>
-              <CardTitle className='font-serif text-lg'>
-                Pending pharmacy requests
-              </CardTitle>
-              <CardDescription>
-                New accounts wait here until you confirm the pharmacy
-                affiliation. Approve to let them order; reject keeps the
-                account and notifies them.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className='max-h-56 overflow-y-auto overscroll-contain px-4 pb-0 pt-3'>
-              {pendingPharmacyRequests.length === 0 ? (
-                <p className='text-sm text-muted-foreground'>
-                  No pending requests.
-                </p>
-              ) : (
-                <ul className='space-y-3'>
-                  {pendingPharmacyRequests.map((u) => {
-                    const pharmacy = pharmacies.find(
-                      (p) => p.id === u.pharmacyId
-                    );
-                    const newPharmacy = pharmacy?.pendingVerification === true;
-                    return (
-                      <li
-                        key={u.id}
-                        className='rounded-xl border border-amber-200/80 bg-white/80 p-3'
-                      >
-                        <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
-                          <div className='min-w-0 space-y-1'>
-                            <p className='font-medium'>
-                              {u.name || u.email || 'Unnamed user'}
-                            </p>
-                            <p className='text-sm text-muted-foreground'>
-                              {[u.jobRole, u.email, u.phone]
-                                .filter(Boolean)
-                                .join(' · ')}
-                            </p>
-                            <p className='text-sm'>
-                              {u.pharmacyName || pharmacy?.name || 'Pharmacy'}
-                              {newPharmacy ? (
-                                <Badge variant='outline' className='ml-2'>
-                                  New pharmacy
-                                </Badge>
-                              ) : (
-                                <Badge
-                                  variant='outline'
-                                  className='ml-2 bg-emerald-50 text-emerald-800 border-emerald-200'
-                                >
-                                  Existing pharmacy
-                                </Badge>
+          <Card className='overflow-hidden border-amber-200/80 bg-amber-50/60 py-0 shadow-none'>
+            <Collapsible defaultOpen>
+              <CollapsibleTrigger asChild>
+                <button
+                  type='button'
+                  className='group flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-amber-100/50'
+                >
+                  <ChevronDown className='mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180' />
+                  <div className='min-w-0 flex-1'>
+                    <CardTitle className='font-serif text-lg'>
+                      Pending pharmacy requests
+                      {pendingPharmacyRequests.length > 0 ? (
+                        <Badge
+                          variant='outline'
+                          className='ml-2 align-middle border-amber-300 bg-white text-amber-900'
+                        >
+                          {pendingPharmacyRequests.length}
+                        </Badge>
+                      ) : null}
+                    </CardTitle>
+                    <CardDescription>
+                      Confirm the pharmacy affiliation. Approve to let them
+                      order; reject keeps the account and notifies them.
+                    </CardDescription>
+                  </div>
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className='h-64 overflow-y-auto overscroll-contain px-4 pb-4 pt-0'>
+                  {pendingPharmacyRequests.length === 0 ? (
+                    <p className='pt-2 text-sm text-muted-foreground'>
+                      No pending requests.
+                    </p>
+                  ) : (
+                    <ul className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                      {pendingPharmacyRequests.map((u) => {
+                        const pharmacy = pharmacies.find(
+                          (p) => p.id === u.pharmacyId
+                        );
+                        const newPharmacy =
+                          pharmacy?.pendingVerification === true;
+                        return (
+                          <li
+                            key={u.id}
+                            className='rounded-xl border border-amber-200/80 bg-white/80 p-3'
+                          >
+                            <div className='flex h-full min-w-0 flex-col gap-2'>
+                              <div className='min-w-0 space-y-1'>
+                                <p className='truncate font-medium'>
+                                  {u.name || u.email || 'Unnamed user'}
+                                </p>
+                                <p className='truncate text-sm text-muted-foreground'>
+                                  {[u.jobRole, u.email, u.phone]
+                                    .filter(Boolean)
+                                    .join(' · ')}
+                                </p>
+                                <p className='truncate text-sm'>
+                                  {u.pharmacyName ||
+                                    pharmacy?.name ||
+                                    'Pharmacy'}
+                                  {newPharmacy ? (
+                                    <Badge
+                                      variant='outline'
+                                      className='ml-2 align-middle'
+                                    >
+                                      New pharmacy
+                                    </Badge>
+                                  ) : (
+                                    <Badge
+                                      variant='outline'
+                                      className='ml-2 align-middle border-emerald-200 bg-emerald-50 text-emerald-800'
+                                    >
+                                      Existing pharmacy
+                                    </Badge>
+                                  )}
+                                </p>
+                                {u.pharmacyLocation ? (
+                                  <p className='truncate text-xs text-muted-foreground'>
+                                    {u.pharmacyLocation}
+                                  </p>
+                                ) : null}
+                                <p className='truncate text-xs'>
+                                  <span className='text-muted-foreground'>
+                                    Pharmacy phone:{' '}
+                                  </span>
+                                  <span className='font-medium tabular-nums'>
+                                    {u.pharmacyPhone || '—'}
+                                  </span>
+                                </p>
+                              </div>
+                              {isAdmin && (
+                                <div className='mt-auto flex gap-2 pt-1'>
+                                  <Button
+                                    size='sm'
+                                    className='flex-1'
+                                    onClick={() =>
+                                      void handleApprovePharmacyRequest(u)
+                                    }
+                                  >
+                                    <Check className='mr-1 h-3.5 w-3.5' />
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size='sm'
+                                    variant='outline'
+                                    className='flex-1 border-destructive/30 text-destructive hover:bg-destructive/10'
+                                    onClick={() =>
+                                      void handleRejectPharmacyRequest(u)
+                                    }
+                                  >
+                                    <X className='mr-1 h-3.5 w-3.5' />
+                                    Reject
+                                  </Button>
+                                </div>
                               )}
-                            </p>
-                            <p className='text-xs text-muted-foreground'>
-                              {[u.pharmacyLocation, u.pharmacyPhone]
-                                .filter(Boolean)
-                                .join(' · ')}
-                            </p>
-                          </div>
-                          {isAdmin && (
-                            <div className='flex shrink-0 gap-2'>
-                              <Button
-                                size='sm'
-                                onClick={() =>
-                                  void handleApprovePharmacyRequest(u)
-                                }
-                              >
-                                <Check className='mr-1 h-3.5 w-3.5' />
-                                Approve
-                              </Button>
-                              <Button
-                                size='sm'
-                                variant='outline'
-                                className='text-destructive border-destructive/30 hover:bg-destructive/10'
-                                onClick={() =>
-                                  void handleRejectPharmacyRequest(u)
-                                }
-                              >
-                                <X className='mr-1 h-3.5 w-3.5' />
-                                Reject
-                              </Button>
                             </div>
-                          )}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </CardContent>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </CardContent>
+              </CollapsibleContent>
+            </Collapsible>
           </Card>
 
           <div className='flex flex-col gap-2'>

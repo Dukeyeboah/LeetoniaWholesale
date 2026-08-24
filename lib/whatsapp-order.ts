@@ -117,12 +117,14 @@ export function whatsappDigitsFromPhone(raw?: string | null): string | null {
   return d.length >= 10 ? d : null;
 }
 
-export function customerPhoneDigitsFromOrder(
-  order: Pick<Order, 'contactPhone'>,
-  extraPhones?: Array<string | null | undefined>
+/**
+ * Digits for admin → client WhatsApp.
+ * Always the pharmacy business line — never the agent's personal / checkout contact number.
+ */
+export function pharmacyWhatsAppDigits(
+  pharmacyPhones: Array<string | null | undefined>
 ): string | null {
-  const candidates = [order.contactPhone, ...(extraPhones ?? [])];
-  for (const raw of candidates) {
+  for (const raw of pharmacyPhones) {
     const digits = whatsappDigitsFromPhone(raw);
     if (digits) return digits;
   }
@@ -217,14 +219,14 @@ export function buildCustomerStatusWhatsAppMessage(
   return lines.join('\n');
 }
 
-/** Opens WhatsApp to the customer. Returns false if there is no usable phone. */
+/** Opens WhatsApp to the pharmacy line. Returns false if there is no usable phone. */
 export function openWhatsAppToCustomer(
   order: Order,
   status: OrderStatus,
-  extraPhones?: Array<string | null | undefined>,
+  pharmacyPhones?: Array<string | null | undefined>,
   existingWindow?: Window | null
 ): boolean {
-  const digits = customerPhoneDigitsFromOrder(order, extraPhones);
+  const digits = pharmacyWhatsAppDigits(pharmacyPhones ?? []);
   if (!digits) {
     existingWindow?.close();
     return false;
