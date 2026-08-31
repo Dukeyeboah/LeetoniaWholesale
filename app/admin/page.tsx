@@ -87,11 +87,13 @@ import {
   SlidersHorizontal,
   Check,
   X,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
 import { AdminStorefrontInventoryItem } from '@/components/admin-storefront-inventory-item';
 import { AdminStoreroomInventoryItem } from '@/components/admin-storeroom-inventory-item';
+import { AdminWarehouseReceivalPanel } from '@/components/admin-warehouse-receival-panel';
 import { AdminPharmacyMobileCard } from '@/components/admin-pharmacy-mobile-card';
 import type { Pharmacy } from '@/types';
 import {
@@ -417,7 +419,7 @@ export default function AdminDashboard() {
     'default' | 'az' | 'code'
   >('default');
   const [inventoryListMode, setInventoryListMode] = useState<
-    'storefront' | 'storeroom'
+    'storefront' | 'storeroom' | 'receival'
   >('storefront');
   const [inventoryViewLayout, setInventoryViewLayout] = useState<
     'list' | 'grid'
@@ -4256,6 +4258,26 @@ export default function AdminDashboard() {
                   from storeroom.json (not the client storefront list)
                 </TooltipContent>
               </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type='button'
+                    size='sm'
+                    variant={
+                      inventoryListMode === 'receival' ? 'default' : 'outline'
+                    }
+                    onClick={() => setInventoryListMode('receival')}
+                  >
+                    <ClipboardCheck className='mr-1.5 h-3.5 w-3.5' />
+                    Port receival
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side='bottom'>
+                  September 2026 shipment checklist — mark items as they arrive
+                  from port and export filtered PDF / Excel
+                </TooltipContent>
+              </Tooltip>
+              {inventoryListMode !== 'receival' && (
               <div className='flex flex-wrap gap-1 items-center border rounded-md p-0.5 bg-muted/30'>
               <span className='sr-only'>Layout</span>
               <Tooltip>
@@ -4293,8 +4315,10 @@ export default function AdminDashboard() {
                 </TooltipContent>
               </Tooltip>
               </div>
+              )}
             </div>
             </div>
+            {inventoryListMode !== 'receival' && (
             <Button
               onClick={() => openProductDialog()}
               className='ml-auto shrink-0'
@@ -4302,7 +4326,10 @@ export default function AdminDashboard() {
             >
               <Plus className='mr-2 h-4 w-4 shrink-0' /> Add Product
             </Button>
+            )}
             </div>
+            {inventoryListMode !== 'receival' && (
+            <>
             <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
               <div className='relative min-w-0 w-full sm:flex-1'>
                 <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
@@ -4511,13 +4538,20 @@ export default function AdminDashboard() {
                 ))}
               </div>
             )}
+            </>
+            )}
           </div>
+          {inventoryListMode !== 'receival' && (
           <p className='text-xs text-muted-foreground max-w-3xl'>
             {inventoryListMode === 'storefront'
               ? 'Wholesale — what clients see when ordering (not warehouse stock). Hide/show and sellable shelf stock apply here only.'
               : `Warehouse list from data/storeroom.json (${allStoreroomRows.length} lines). Prices and quantities reflect the file; live counts come from inventory after sync (pnpm reset-storeroom --apply). Rows with zero warehouse quantity are faded.`}
           </p>
+          )}
 
+          {inventoryListMode === 'receival' ? (
+            <AdminWarehouseReceivalPanel />
+          ) : (
           <div className='rounded-md border bg-card relative min-h-[12rem] w-full min-w-0 max-w-full overflow-hidden'>
             {inventoryLoading && (
               <div
@@ -4607,6 +4641,7 @@ export default function AdminDashboard() {
               </>
             )}
           </div>
+          )}
         </TabsContent>
 
         <TabsContent value='settings' className='mt-3 space-y-6'>

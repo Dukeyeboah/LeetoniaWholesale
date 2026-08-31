@@ -256,3 +256,34 @@ export interface Notification {
   read: boolean;
   createdAt: number;
 }
+
+/** One line on a port / warehouse receival checklist (expected shipment). */
+export interface WarehouseReceivalLine {
+  id: string;
+  /** Barcode / warehouse product code from the shipment manifest. */
+  code: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  /** Checked when the physical item is confirmed on the palette. */
+  arrived: boolean;
+  arrivedAt?: number;
+  /**
+   * Count physically received. Omitted when it matches `quantity`.
+   * When arrived and this differs from `quantity`, the row is flagged.
+   */
+  receivedQty?: number;
+  notes?: string;
+}
+
+/** Monthly warehouse receival checklist (Firestore `warehouseReceivals`). */
+export interface WarehouseReceival {
+  id: string;
+  title: string;
+  /** Calendar month key, e.g. `2026-09`. */
+  monthKey: string;
+  lines: WarehouseReceivalLine[];
+  createdAt: number;
+  updatedAt: number;
+}

@@ -186,6 +186,11 @@ service cloud.firestore {
       allow read, create, update, delete: if isPrivilegedAdmin();
     }
 
+    // Warehouse port receival checklists (admin-only).
+    match /warehouseReceivals/{receivalId} {
+      allow read, create, update, delete: if isPrivilegedAdmin();
+    }
+
     // Super-admin HR: loans, leave, payroll deductions (not client-facing).
     match /staffMembers/{staffId} {
       allow read, create, update, delete: if isSuperAdmin();
