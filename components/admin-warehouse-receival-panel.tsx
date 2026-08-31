@@ -64,6 +64,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
 import { BarcodeScannerDialog } from '@/components/barcode-scanner-dialog';
 import { toast } from 'sonner';
@@ -74,10 +82,14 @@ import {
   receivalListPageSize,
 } from '@/lib/admin-list-pagination';
 
-const FILTER_OPTIONS: { value: ReceivalListFilter; label: string }[] = [
-  { value: 'all', label: 'All lines' },
-  { value: 'arrived', label: 'Arrived only' },
-  { value: 'pending', label: 'Not arrived' },
+const FILTER_OPTIONS: {
+  value: ReceivalListFilter;
+  label: string;
+  shortLabel: string;
+}[] = [
+  { value: 'all', label: 'All lines', shortLabel: 'All' },
+  { value: 'arrived', label: 'Arrived only', shortLabel: 'Arrived' },
+  { value: 'pending', label: 'Not arrived', shortLabel: 'Pending' },
 ];
 
 /** One-time undo after accidental “mark all visible” — clears arrived checks once per browser. */
@@ -99,6 +111,9 @@ export function AdminWarehouseReceivalPanel() {
   );
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scanFeedback, setScanFeedback] = useState<string | null>(null);
+  const [scanMatchId, setScanMatchId] = useState<string | null>(null);
+  const [scanQtyInput, setScanQtyInput] = useState('');
+  const [confirmingScan, setConfirmingScan] = useState(false);
   const [highlightedLineId, setHighlightedLineId] = useState<string | null>(
     null
   );
@@ -245,52 +260,72 @@ export function AdminWarehouseReceivalPanel() {
     }
   };
 
-  const handleBarcodeScan = useCallback(
-    async (code: string) => {
-      const current = receivalRef.current;
-      if (!current) return;
+  const handleBarcodeScan = useCallback(async (code: string) => {
+    const current = receivalRef.current;
+    if (!current) return;
 
-      const match = findReceivalLineByBarcode(current.lines, code);
-      if (!match) {
-        setScanFeedback(`No match for ${code}`);
-        toast.error(`No checklist item for barcode ${code}`);
-        return;
+    const match = findReceivalLineByBarcode(current.lines, code);
+    if (!match) {
+      setScanFeedback(`No match for ${code}`);
+      toast.error(`No checklist item for barcode ${code}`);
+      return;
+    }
+
+    setHighlightedLineId(match.id);
+    setSearchQuery('');
+    setListFilter('all');
+    setNameLetterFilter('all');
+    setScanMatchId(match.id);
+    setScanQtyInput(
+      match.receivedQty != null
+        ? String(match.receivedQty)
+        : String(match.quantity)
+    );
+    setScanFeedback(`Found: ${match.description}`);
+    setScannerOpen(false);
+  }, []);
+
+  const scanMatch = useMemo(() => {
+    if (!receival || !scanMatchId) return null;
+    return receival.lines.find((l) => l.id === scanMatchId) ?? null;
+  }, [receival, scanMatchId]);
+
+  const confirmScanMatch = async (scanAnother: boolean) => {
+    const current = receivalRef.current;
+    if (!current || !scanMatchId) return;
+    const match = current.lines.find((l) => l.id === scanMatchId);
+    if (!match) return;
+
+    setConfirmingScan(true);
+    setSavingLineId(match.id);
+    let next = current.lines;
+    if (!match.arrived) {
+      next = toggleReceivalLineArrived(next, match.id, true);
+    }
+    next = setReceivalLineReceivedQty(next, match.id, scanQtyInput);
+    const optimistic = { ...current, lines: next, updatedAt: Date.now() };
+    receivalRef.current = optimistic;
+    setReceival(optimistic);
+    try {
+      await persistLines(next);
+      toast.success('Saved received quantity', {
+        description: match.description,
+      });
+      setScanMatchId(null);
+      if (scanAnother) {
+        setScanFeedback(null);
+        setScannerOpen(true);
       }
-
-      setHighlightedLineId(match.id);
-      setSearchQuery('');
-      setListFilter('all');
-      setNameLetterFilter('all');
-
-      if (match.arrived) {
-        setScanFeedback(`Already arrived: ${match.description}`);
-        toast.message('Already marked arrived', {
-          description: match.description,
-        });
-        return;
-      }
-
-      setSavingLineId(match.id);
-      const next = toggleReceivalLineArrived(current.lines, match.id, true);
-      const optimistic = { ...current, lines: next, updatedAt: Date.now() };
-      receivalRef.current = optimistic;
-      setReceival(optimistic);
-      try {
-        await persistLines(next);
-        setScanFeedback(`Arrived: ${match.description}`);
-        toast.success('Marked arrived', { description: match.description });
-      } catch (e) {
-        console.error(e);
-        receivalRef.current = current;
-        setReceival(current);
-        setScanFeedback('Save failed — try again');
-        toast.error('Could not save scanned item.');
-      } finally {
-        setSavingLineId(null);
-      }
-    },
-    [persistLines]
-  );
+    } catch (e) {
+      console.error(e);
+      receivalRef.current = current;
+      setReceival(current);
+      toast.error('Could not save scanned item.');
+    } finally {
+      setSavingLineId(null);
+      setConfirmingScan(false);
+    }
+  };
 
   useEffect(() => {
     if (!highlightedLineId) return;
@@ -386,13 +421,13 @@ export function AdminWarehouseReceivalPanel() {
     summary.total > 0 ? Math.round((summary.arrived / summary.total) * 100) : 0;
 
   return (
-    <div className='space-y-4'>
+    <div className='w-full min-w-0 max-w-full space-y-4 overflow-x-hidden'>
       <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
         <div className='min-w-0'>
           <h3 className='font-serif text-lg font-semibold text-primary'>
             {receival.title}
           </h3>
-          <p className='mt-1 text-sm text-muted-foreground'>
+          <p className='mt-1 hidden text-sm text-muted-foreground sm:block'>
             Check off each line as it is confirmed on the palette. Matching
             quantities turn green; enter a different received qty to flag orange
             discrepancies.
@@ -502,14 +537,17 @@ export function AdminWarehouseReceivalPanel() {
         </DropdownMenu>
       </div>
 
-      <div className='flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center'>
+      <div
+        className='sticky z-30 -mx-3 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0'
+        style={{ top: 'var(--admin-sticky-nav-bottom, 9.75rem)' }}
+      >
         <div className='flex gap-2'>
-          <div className='relative min-w-0 flex-1 sm:max-w-sm'>
+          <div className='relative min-w-0 flex-1'>
             <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder='Search by item name or barcode…'
+              placeholder='Search name or barcode…'
               className='h-10 pl-9 sm:h-9'
               aria-label='Search receival list'
             />
@@ -527,24 +565,27 @@ export function AdminWarehouseReceivalPanel() {
             Scan
           </Button>
         </div>
-        <div className='flex flex-wrap items-center gap-1.5'>
-          {FILTER_OPTIONS.map((opt) => (
-            <Button
-              key={opt.value}
-              type='button'
-              size='sm'
-              variant={listFilter === opt.value ? 'default' : 'outline'}
-              className='h-9 shrink-0'
-              onClick={() => setListFilter(opt.value)}
-            >
-              {opt.label}
-            </Button>
-          ))}
+        <div className='flex min-w-0 items-center gap-1.5'>
+          <div className='flex min-w-0 flex-1 items-center gap-1 overflow-hidden'>
+            {FILTER_OPTIONS.map((opt) => (
+              <Button
+                key={opt.value}
+                type='button'
+                size='sm'
+                variant={listFilter === opt.value ? 'default' : 'outline'}
+                className='h-9 min-w-0 flex-1 px-2 text-xs sm:flex-none sm:px-3 sm:text-sm'
+                onClick={() => setListFilter(opt.value)}
+              >
+                <span className='sm:hidden'>{opt.shortLabel}</span>
+                <span className='hidden sm:inline'>{opt.label}</span>
+              </Button>
+            ))}
+          </div>
           <Popover open={nameFiltersOpen} onOpenChange={setNameFiltersOpen}>
             <PopoverTrigger asChild>
               <Button
                 type='button'
-                size='sm'
+                size='icon'
                 variant={
                   nameFiltersOpen ||
                   sortByName ||
@@ -552,18 +593,24 @@ export function AdminWarehouseReceivalPanel() {
                     ? 'default'
                     : 'outline'
                 }
-                className='h-9 shrink-0'
+                className='h-9 w-9 shrink-0'
+                aria-label='Name filters'
                 aria-pressed={sortByName || nameLetterFilter !== 'all'}
+                title={
+                  nameLetterFilter !== 'all'
+                    ? `Name filter: ${nameLetterFilter}`
+                    : sortByName
+                      ? 'Name A–Z on'
+                      : 'Name filters'
+                }
               >
-                <SlidersHorizontal className='mr-1.5 h-3.5 w-3.5' />
-                {nameLetterFilter !== 'all'
-                  ? `Name · ${nameLetterFilter}`
-                  : sortByName
-                    ? 'Name A–Z'
-                    : 'Filter'}
+                <SlidersHorizontal className='h-4 w-4' />
               </Button>
             </PopoverTrigger>
-            <PopoverContent align='start' className='w-[min(22rem,calc(100vw-2rem))] space-y-3'>
+            <PopoverContent
+              align='end'
+              className='w-[min(22rem,calc(100vw-2rem))] space-y-3'
+            >
               <p className='text-xs font-semibold tracking-wide text-muted-foreground'>
                 NAME FILTER
               </p>
@@ -613,12 +660,12 @@ export function AdminWarehouseReceivalPanel() {
             </PopoverContent>
           </Popover>
         </div>
-        <div className='flex flex-col gap-1.5 sm:ml-auto sm:flex-row sm:flex-wrap'>
+        <div className='hidden sm:block'>
           <Button
             type='button'
             size='sm'
             variant='ghost'
-            className='h-9 w-full sm:w-auto'
+            className='h-9'
             onClick={() => void handleReseedFromFile()}
           >
             Re-import list
@@ -636,10 +683,7 @@ export function AdminWarehouseReceivalPanel() {
           <span className='text-right'>Unit ₵</span>
           <span className='text-right'>Total ₵</span>
         </div>
-        <ul
-          ref={listRef}
-          className='max-h-[min(70vh,42rem)] divide-y overflow-y-auto overscroll-contain'
-        >
+        <ul ref={listRef} className='divide-y'>
           {visibleLines.length === 0 ? (
             <li className='p-8 text-center text-sm text-muted-foreground'>
               No lines match this search or filter.
@@ -827,6 +871,98 @@ export function AdminWarehouseReceivalPanel() {
         onScan={handleBarcodeScan}
         lastResult={scanFeedback}
       />
+
+      <Drawer
+        open={!!scanMatch}
+        onOpenChange={(open) => {
+          if (!open) setScanMatchId(null);
+        }}
+      >
+        <DrawerContent className='mx-auto w-full max-w-lg'>
+          <DrawerHeader className='text-left'>
+            <DrawerTitle>Confirm received item</DrawerTitle>
+            <DrawerDescription>
+              Enter the quantity received, save, then scan the next item if
+              needed.
+            </DrawerDescription>
+          </DrawerHeader>
+          {scanMatch ? (
+            <div className='space-y-4 px-4 pb-2'>
+              <div className='rounded-xl border bg-muted/30 px-3 py-3'>
+                <p className='font-medium leading-snug'>{scanMatch.description}</p>
+                <p className='mt-1 font-mono text-xs text-muted-foreground'>
+                  {scanMatch.code || 'No barcode on file'}
+                </p>
+                {scanMatch.arrived ? (
+                  <Badge
+                    variant='outline'
+                    className='mt-2 border-emerald-300 bg-emerald-50 text-emerald-900'
+                  >
+                    Already marked arrived
+                  </Badge>
+                ) : null}
+              </div>
+              <div className='grid grid-cols-2 gap-3'>
+                <div>
+                  <p className='mb-1 text-xs font-medium text-muted-foreground'>
+                    Expected qty
+                  </p>
+                  <p className='text-lg font-semibold tabular-nums'>
+                    {scanMatch.quantity.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor='scan-received-qty' className='mb-1 text-xs'>
+                    Received qty
+                  </Label>
+                  <Input
+                    id='scan-received-qty'
+                    type='number'
+                    min={0}
+                    inputMode='numeric'
+                    value={scanQtyInput}
+                    onChange={(e) => setScanQtyInput(e.target.value)}
+                    className='h-11 text-base tabular-nums'
+                    autoFocus
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
+          <DrawerFooter className='gap-2 sm:flex-col'>
+            <Button
+              type='button'
+              className='h-11 w-full'
+              disabled={confirmingScan || !scanMatch}
+              onClick={() => void confirmScanMatch(false)}
+            >
+              {confirmingScan ? (
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              ) : null}
+              Confirm & save
+            </Button>
+            <Button
+              type='button'
+              variant='secondary'
+              className='h-11 w-full'
+              disabled={confirmingScan || !scanMatch}
+              onClick={() => void confirmScanMatch(true)}
+            >
+              <ScanBarcode className='mr-2 h-4 w-4' />
+              Save & scan another
+            </Button>
+            <Button
+              type='button'
+              variant='ghost'
+              className='h-10 w-full'
+              disabled={confirmingScan}
+              onClick={() => setScanMatchId(null)}
+            >
+              Cancel
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

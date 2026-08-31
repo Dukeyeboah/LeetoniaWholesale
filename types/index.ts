@@ -287,3 +287,42 @@ export interface WarehouseReceival {
   createdAt: number;
   updatedAt: number;
 }
+
+/** One product row in a period performance ranking (ITO / qty / value). */
+export interface AnalyticsPeriodProductRow {
+  rank?: number;
+  /** Barcode / product code when known. */
+  code?: string;
+  name: string;
+  /** Inventory turnover rate for the period (ITO list). */
+  ito?: number;
+  /** Units sold / moved in the period. */
+  quantity?: number;
+  /** Unit price in GHS when provided. */
+  unitPrice?: number;
+  /** Sales value / revenue contribution in GHS. */
+  value?: number;
+  notes?: string;
+}
+
+/**
+ * Imported / period snapshot for business performance analytics.
+ * Populate `data/analytics/period-performance.json` from your yearly lists.
+ */
+export interface AnalyticsPeriodPerformance {
+  id: string;
+  title: string;
+  /** Inclusive period start YYYY-MM-DD */
+  periodStart: string;
+  /** Inclusive period end YYYY-MM-DD */
+  periodEnd: string;
+  currency: 'GHS';
+  sourceNote?: string;
+  updatedAt?: number | null;
+  /** Inventory turnover ranking (higher = turns faster). */
+  ito: AnalyticsPeriodProductRow[];
+  /** Ranked by units moved; include unitPrice when available. */
+  byQuantity: AnalyticsPeriodProductRow[];
+  /** Ranked by sales value / revenue. */
+  byValue: AnalyticsPeriodProductRow[];
+}

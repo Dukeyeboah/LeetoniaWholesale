@@ -2,7 +2,7 @@
 
 import { DialogDescription } from '@/components/ui/dialog';
 
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, type CSSProperties } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   INVENTORY_LIST_PAGE,
@@ -99,6 +99,7 @@ import { AdminLoadingPanel } from '@/components/admin-loading-panel';
 import { AdminStorefrontInventoryItem } from '@/components/admin-storefront-inventory-item';
 import { AdminStoreroomInventoryItem } from '@/components/admin-storeroom-inventory-item';
 import { AdminWarehouseReceivalPanel } from '@/components/admin-warehouse-receival-panel';
+import { AdminPeriodPerformancePanel } from '@/components/admin-period-performance-panel';
 import { AdminPharmacyMobileCard } from '@/components/admin-pharmacy-mobile-card';
 import type { Pharmacy } from '@/types';
 import {
@@ -2135,7 +2136,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className='w-full min-w-0'>
+    <div className='w-full min-w-0 max-w-full overflow-x-hidden'>
       <div className='mb-3 md:mb-4'>
         <h1 className='text-xl font-serif font-bold text-primary md:text-2xl'>
           {adminSection === 'overview'
@@ -2157,7 +2158,17 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <div className='sticky top-14 z-40 isolate -mx-3 mb-4 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:-mx-4 sm:px-4 md:top-0 md:-mx-8 md:px-8'>
+      <div
+        className='sticky top-14 z-40 isolate -mx-3 mb-4 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:-mx-4 sm:px-4 md:top-0 md:-mx-8 md:px-8'
+        style={
+          {
+            ['--admin-sticky-nav-bottom' as string]:
+              adminSection === 'operations' || adminSection === 'administration'
+                ? '9.75rem'
+                : '6.5rem',
+          } as CSSProperties
+        }
+      >
         <AdminSegmentNav
           value={adminSection}
           onChange={(value) =>
@@ -3323,6 +3334,8 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+
+          <AdminPeriodPerformancePanel />
         </TabsContent>
 
         {isSuperAdmin && (
