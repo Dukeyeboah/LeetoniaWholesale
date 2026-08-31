@@ -2,7 +2,7 @@
 
 import { DialogDescription } from '@/components/ui/dialog';
 
-import { useEffect, useState, useMemo, useRef, type CSSProperties } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   INVENTORY_LIST_PAGE,
@@ -288,6 +288,7 @@ export default function AdminDashboard() {
   const [adminSection, setAdminSection] = useState<
     'overview' | 'operations' | 'analytics' | 'administration'
   >('overview');
+  const stickySegNavRef = useRef<HTMLDivElement>(null);
   const [overviewModal, setOverviewModal] = useState<OverviewModalKey | null>(
     null
   );
@@ -2135,8 +2136,29 @@ export default function AdminDashboard() {
     setAdminSection('operations');
   };
 
+  useEffect(() => {
+    const el = stickySegNavRef.current;
+    if (!el || typeof window === 'undefined') return;
+
+    const publishHeight = () => {
+      document.documentElement.style.setProperty(
+        '--admin-seg-nav-h',
+        `${el.getBoundingClientRect().height}px`
+      );
+    };
+
+    publishHeight();
+    const ro = new ResizeObserver(publishHeight);
+    ro.observe(el);
+    window.addEventListener('resize', publishHeight);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', publishHeight);
+    };
+  }, [adminSection, activeTab, isSuperAdmin]);
+
   return (
-    <div className='w-full min-w-0 max-w-full overflow-x-hidden'>
+    <div className='w-full min-w-0 max-w-full overflow-x-clip'>
       <div className='mb-3 md:mb-4'>
         <h1 className='text-xl font-serif font-bold text-primary md:text-2xl'>
           {adminSection === 'overview'
@@ -2159,15 +2181,8 @@ export default function AdminDashboard() {
       </div>
 
       <div
-        className='sticky top-14 z-40 isolate -mx-3 mb-4 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:-mx-4 sm:px-4 md:top-0 md:-mx-8 md:px-8'
-        style={
-          {
-            ['--admin-sticky-nav-bottom' as string]:
-              adminSection === 'operations' || adminSection === 'administration'
-                ? '9.75rem'
-                : '6.5rem',
-          } as CSSProperties
-        }
+        ref={stickySegNavRef}
+        className='sticky top-0 z-40 isolate -mx-3 mb-4 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:-mx-4 sm:px-4 md:-mx-8 md:px-8'
       >
         <AdminSegmentNav
           value={adminSection}

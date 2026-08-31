@@ -421,9 +421,9 @@ export function AdminWarehouseReceivalPanel() {
     summary.total > 0 ? Math.round((summary.arrived / summary.total) * 100) : 0;
 
   return (
-    <div className='w-full min-w-0 max-w-full space-y-4 overflow-x-hidden'>
-      <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
-        <div className='min-w-0'>
+    <div className='w-full min-w-0 max-w-full space-y-4 overflow-x-clip'>
+      <div className='flex items-start justify-between gap-2'>
+        <div className='min-w-0 flex-1'>
           <h3 className='font-serif text-lg font-semibold text-primary'>
             {receival.title}
           </h3>
@@ -452,7 +452,7 @@ export function AdminWarehouseReceivalPanel() {
                 {summary.discrepancies === 1 ? '' : 'es'}
               </Badge>
             ) : null}
-            <span className='text-xs text-muted-foreground'>
+            <span className='hidden text-xs text-muted-foreground sm:inline'>
               Updated{' '}
               {receival.updatedAt
                 ? format(receival.updatedAt, 'MMM d, h:mm a')
@@ -469,9 +469,15 @@ export function AdminWarehouseReceivalPanel() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button type='button' variant='outline' size='sm' className='shrink-0'>
-              <Download className='mr-1.5 h-3.5 w-3.5' />
-              Export / print
+            <Button
+              type='button'
+              variant='ghost'
+              size='icon'
+              className='mt-0.5 h-8 w-8 shrink-0 text-muted-foreground'
+              aria-label='Export or print'
+              title='Export / print'
+            >
+              <Download className='h-3.5 w-3.5' />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' className='w-56'>
@@ -539,7 +545,7 @@ export function AdminWarehouseReceivalPanel() {
 
       <div
         className='sticky z-30 -mx-3 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0'
-        style={{ top: 'var(--admin-sticky-nav-bottom, 9.75rem)' }}
+        style={{ top: 'var(--admin-seg-nav-h, 6.5rem)' }}
       >
         <div className='flex gap-2'>
           <div className='relative min-w-0 flex-1'>

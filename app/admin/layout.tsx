@@ -22,16 +22,16 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   }, [viewMode, setViewMode]);
 
   return (
-    <div className='flex min-h-screen max-w-[100vw] overflow-x-hidden bg-background'>
+    <div className='flex min-h-screen max-w-[100vw] overflow-x-clip bg-background'>
       <AppSidebar />
       <main
-        className={`flex min-h-screen min-w-0 w-full max-w-full flex-1 flex-col overflow-x-hidden transition-all duration-300 ease-in-out ${
+        className={`flex min-h-screen min-w-0 w-full max-w-full flex-1 flex-col overflow-x-clip transition-all duration-300 ease-in-out ${
           isCollapsed ? 'md:ml-20' : 'md:ml-64 lg:ml-72'
         }`}
       >
         <AdminMobileHeader />
         <div
-          className={`w-full min-w-0 max-w-full flex-1 overflow-x-hidden px-3 py-3 sm:px-4 sm:py-5 md:px-8 md:py-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] ${
+          className={`w-full min-w-0 max-w-full flex-1 overflow-x-clip px-3 py-3 sm:px-4 sm:py-5 md:px-8 md:py-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] ${
             isCollapsed ? '' : 'lg:container lg:max-w-6xl'
           }`}
         >

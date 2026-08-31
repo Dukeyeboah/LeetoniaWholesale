@@ -10,7 +10,7 @@ export function AdminMobileHeader() {
   const { unreadCount } = useNotifications(user?.id);
 
   return (
-    <header className='md:hidden sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-border/60 bg-background pl-14 pr-3'>
+    <header className='md:hidden flex h-14 shrink-0 items-center justify-between border-b border-border/60 bg-background pl-14 pr-3'>
       <p className='truncate font-serif text-base font-bold text-primary'>
         Admin
       </p>
