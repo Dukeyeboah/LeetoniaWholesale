@@ -9,19 +9,23 @@ import {
 } from 'firebase/firestore';
 import { format } from 'date-fns';
 import {
-  Check,
   ClipboardCheck,
   Download,
   Loader2,
   Printer,
+  ScanBarcode,
   Search,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import type { WarehouseReceival, WarehouseReceivalLine } from '@/types';
 import {
   buildSeptember2026Receival,
+  clearAllReceivalArrived,
   effectiveReceivedQty,
   filterReceivalLines,
+  filterReceivalLinesByNameLetter,
+  findReceivalLineByBarcode,
   receivalLineHasQtyDiscrepancy,
   receivalLineTone,
   receivalSummary,
@@ -29,9 +33,14 @@ import {
   searchReceivalLines,
   SEPTEMBER_2026_RECEIVAL_ID,
   setReceivalLineReceivedQty,
+  sortReceivalLinesByName,
   toggleReceivalLineArrived,
   type ReceivalListFilter,
 } from '@/lib/warehouse-receival';
+import {
+  INVENTORY_LETTER_OPTIONS,
+  type InventoryLetterFilter,
+} from '@/lib/inventory-filters';
 import {
   exportReceivalCsv,
   exportReceivalPdf,
@@ -41,6 +50,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,7 +59,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
+import { BarcodeScannerDialog } from '@/components/barcode-scanner-dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -64,17 +80,33 @@ const FILTER_OPTIONS: { value: ReceivalListFilter; label: string }[] = [
   { value: 'pending', label: 'Not arrived' },
 ];
 
+/** One-time undo after accidental “mark all visible” — clears arrived checks once per browser. */
+const CLEAR_ARRIVED_ONCE_KEY = 'leetonia_clear_receival_arrived_2026-09_v1';
+
 export function AdminWarehouseReceivalPanel() {
   const isMobile = useIsMobile();
   const [receival, setReceival] = useState<WarehouseReceival | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [listFilter, setListFilter] = useState<ReceivalListFilter>('all');
+  const [nameLetterFilter, setNameLetterFilter] =
+    useState<InventoryLetterFilter>('all');
+  const [sortByName, setSortByName] = useState(false);
+  const [nameFiltersOpen, setNameFiltersOpen] = useState(false);
   const [savingLineId, setSavingLineId] = useState<string | null>(null);
   const [visibleLineCount, setVisibleLineCount] = useState<number>(
     RECEIVAL_LIST_PAGE.desktop
   );
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanFeedback, setScanFeedback] = useState<string | null>(null);
+  const [highlightedLineId, setHighlightedLineId] = useState<string | null>(
+    null
+  );
   const seedAttempted = useRef(false);
+  const clearArrivedOnceAttempted = useRef(false);
+  const listRef = useRef<HTMLUListElement>(null);
+  const receivalRef = useRef(receival);
+  receivalRef.current = receival;
 
   useEffect(() => {
     if (!db) {
@@ -130,9 +162,13 @@ export function AdminWarehouseReceivalPanel() {
   const filteredLines = useMemo(() => {
     if (!receival) return [];
     let lines = filterReceivalLines(receival.lines, listFilter);
+    lines = filterReceivalLinesByNameLetter(lines, nameLetterFilter);
     lines = searchReceivalLines(lines, searchQuery);
+    if (sortByName || nameLetterFilter !== 'all') {
+      lines = sortReceivalLinesByName(lines);
+    }
     return lines;
-  }, [receival, listFilter, searchQuery]);
+  }, [receival, listFilter, nameLetterFilter, searchQuery, sortByName]);
 
   const visibleLines = useMemo(
     () => filteredLines.slice(0, visibleLineCount),
@@ -141,7 +177,7 @@ export function AdminWarehouseReceivalPanel() {
 
   useEffect(() => {
     setVisibleLineCount(receivalListPageSize(isMobile));
-  }, [isMobile, listFilter, searchQuery]);
+  }, [isMobile, listFilter, nameLetterFilter, searchQuery, sortByName]);
 
   const summary = useMemo(
     () => receivalSummary(receival?.lines ?? []),
@@ -159,6 +195,42 @@ export function AdminWarehouseReceivalPanel() {
     [receival]
   );
 
+  // Undo mistaken “mark all visible” once per browser after this update.
+  useEffect(() => {
+    if (!db || !receival || clearArrivedOnceAttempted.current) return;
+    if (typeof window === 'undefined') return;
+    if (localStorage.getItem(CLEAR_ARRIVED_ONCE_KEY) === '1') {
+      clearArrivedOnceAttempted.current = true;
+      return;
+    }
+    clearArrivedOnceAttempted.current = true;
+    if (!receival.lines.some((l) => l.arrived)) {
+      localStorage.setItem(CLEAR_ARRIVED_ONCE_KEY, '1');
+      return;
+    }
+
+    const next = clearAllReceivalArrived(receival.lines);
+    const optimistic = { ...receival, lines: next, updatedAt: Date.now() };
+    receivalRef.current = optimistic;
+    setReceival(optimistic);
+    void updateDoc(doc(db, 'warehouseReceivals', receival.id), {
+      lines: sanitizeReceivalLinesForFirestore(next),
+      updatedAt: Date.now(),
+    })
+      .then(() => {
+        localStorage.setItem(CLEAR_ARRIVED_ONCE_KEY, '1');
+        toast.message('Cleared all arrived checks', {
+          description:
+            'Undid the accidental “mark all” selection. Check items one by one or with Scan.',
+        });
+      })
+      .catch((e) => {
+        console.error(e);
+        clearArrivedOnceAttempted.current = false;
+        toast.error('Could not clear arrived checks — try Re-import list.');
+      });
+  }, [receival]);
+
   const handleToggleArrived = async (lineId: string, arrived: boolean) => {
     if (!receival) return;
     setSavingLineId(lineId);
@@ -173,28 +245,67 @@ export function AdminWarehouseReceivalPanel() {
     }
   };
 
-  const handleMarkAllVisible = async (arrived: boolean) => {
-    if (!receival || filteredLines.length === 0) return;
-    const ids = new Set(filteredLines.map((l) => l.id));
-    let next = receival.lines;
-    for (const id of ids) {
-      next = toggleReceivalLineArrived(next, id, arrived);
-    }
-    setSavingLineId('batch');
-    try {
-      await persistLines(next);
-      toast.success(
-        arrived
-          ? `Marked ${ids.size} line${ids.size === 1 ? '' : 's'} as arrived`
-          : `Cleared arrived on ${ids.size} line${ids.size === 1 ? '' : 's'}`
-      );
-    } catch (e) {
-      console.error(e);
-      toast.error('Could not save batch update.');
-    } finally {
-      setSavingLineId(null);
-    }
-  };
+  const handleBarcodeScan = useCallback(
+    async (code: string) => {
+      const current = receivalRef.current;
+      if (!current) return;
+
+      const match = findReceivalLineByBarcode(current.lines, code);
+      if (!match) {
+        setScanFeedback(`No match for ${code}`);
+        toast.error(`No checklist item for barcode ${code}`);
+        return;
+      }
+
+      setHighlightedLineId(match.id);
+      setSearchQuery('');
+      setListFilter('all');
+      setNameLetterFilter('all');
+
+      if (match.arrived) {
+        setScanFeedback(`Already arrived: ${match.description}`);
+        toast.message('Already marked arrived', {
+          description: match.description,
+        });
+        return;
+      }
+
+      setSavingLineId(match.id);
+      const next = toggleReceivalLineArrived(current.lines, match.id, true);
+      const optimistic = { ...current, lines: next, updatedAt: Date.now() };
+      receivalRef.current = optimistic;
+      setReceival(optimistic);
+      try {
+        await persistLines(next);
+        setScanFeedback(`Arrived: ${match.description}`);
+        toast.success('Marked arrived', { description: match.description });
+      } catch (e) {
+        console.error(e);
+        receivalRef.current = current;
+        setReceival(current);
+        setScanFeedback('Save failed — try again');
+        toast.error('Could not save scanned item.');
+      } finally {
+        setSavingLineId(null);
+      }
+    },
+    [persistLines]
+  );
+
+  useEffect(() => {
+    if (!highlightedLineId) return;
+    const idx = filteredLines.findIndex((l) => l.id === highlightedLineId);
+    if (idx < 0) return;
+    setVisibleLineCount((count) => Math.max(count, idx + 1));
+  }, [highlightedLineId, filteredLines]);
+
+  useEffect(() => {
+    if (!highlightedLineId || !listRef.current) return;
+    const el = listRef.current.querySelector(
+      `[data-line-id="${CSS.escape(highlightedLineId)}"]`
+    );
+    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [highlightedLineId, visibleLines]);
 
   const handleReceivedQtyBlur = async (lineId: string, raw: string) => {
     if (!receival) return;
@@ -392,18 +503,31 @@ export function AdminWarehouseReceivalPanel() {
       </div>
 
       <div className='flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center'>
-        <div className='relative min-w-0 flex-1 sm:max-w-sm'>
-          <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder='Search by item name or barcode…'
-            className='h-10 pl-9 sm:h-9'
-            aria-label='Search receival list'
-          />
+        <div className='flex gap-2'>
+          <div className='relative min-w-0 flex-1 sm:max-w-sm'>
+            <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder='Search by item name or barcode…'
+              className='h-10 pl-9 sm:h-9'
+              aria-label='Search receival list'
+            />
+          </div>
+          <Button
+            type='button'
+            size='sm'
+            className='h-10 shrink-0 touch-manipulation sm:h-9'
+            onClick={() => {
+              setScanFeedback(null);
+              setScannerOpen(true);
+            }}
+          >
+            <ScanBarcode className='mr-1.5 h-4 w-4' />
+            Scan
+          </Button>
         </div>
-        <div className='-mx-1 overflow-x-auto px-1 pb-0.5 scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
-          <div className='flex min-w-max flex-nowrap gap-1.5'>
+        <div className='flex flex-wrap items-center gap-1.5'>
           {FILTER_OPTIONS.map((opt) => (
             <Button
               key={opt.value}
@@ -416,26 +540,85 @@ export function AdminWarehouseReceivalPanel() {
               {opt.label}
             </Button>
           ))}
-          </div>
+          <Popover open={nameFiltersOpen} onOpenChange={setNameFiltersOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type='button'
+                size='sm'
+                variant={
+                  nameFiltersOpen ||
+                  sortByName ||
+                  nameLetterFilter !== 'all'
+                    ? 'default'
+                    : 'outline'
+                }
+                className='h-9 shrink-0'
+                aria-pressed={sortByName || nameLetterFilter !== 'all'}
+              >
+                <SlidersHorizontal className='mr-1.5 h-3.5 w-3.5' />
+                {nameLetterFilter !== 'all'
+                  ? `Name · ${nameLetterFilter}`
+                  : sortByName
+                    ? 'Name A–Z'
+                    : 'Filter'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align='start' className='w-[min(22rem,calc(100vw-2rem))] space-y-3'>
+              <p className='text-xs font-semibold tracking-wide text-muted-foreground'>
+                NAME FILTER
+              </p>
+              <div className='flex items-center gap-2'>
+                <Checkbox
+                  id='receival-sort-name'
+                  checked={sortByName}
+                  onCheckedChange={(checked) => setSortByName(checked === true)}
+                />
+                <Label htmlFor='receival-sort-name' className='font-normal'>
+                  Sort list A–Z by item name
+                </Label>
+              </div>
+              <div className='space-y-2'>
+                <p className='text-sm font-medium'>Group by first letter</p>
+                <div className='grid grid-cols-7 gap-1 sm:grid-cols-9'>
+                  {INVENTORY_LETTER_OPTIONS.map((letter) => (
+                    <Button
+                      key={letter}
+                      type='button'
+                      variant='secondary'
+                      size='sm'
+                      className={`h-8 rounded-full border-0 px-0 text-[11px] font-medium shadow-none touch-manipulation ${
+                        nameLetterFilter === letter
+                          ? '!bg-control text-foreground'
+                          : 'bg-secondary/70 text-foreground'
+                      }`}
+                      onClick={() => setNameLetterFilter(letter)}
+                    >
+                      {letter === 'all' ? 'All' : letter}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                className='w-full'
+                onClick={() => {
+                  setSortByName(false);
+                  setNameLetterFilter('all');
+                }}
+              >
+                Clear name filters
+              </Button>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className='flex flex-col gap-1.5 sm:ml-auto sm:flex-row sm:flex-wrap'>
           <Button
             type='button'
             size='sm'
-            variant='secondary'
-            className='h-9 w-full sm:w-auto'
-            disabled={filteredLines.length === 0 || savingLineId === 'batch'}
-            onClick={() => void handleMarkAllVisible(true)}
-          >
-            <Check className='mr-1 h-3.5 w-3.5' />
-            Mark visible arrived
-          </Button>
-          <Button
-            type='button'
-            size='sm'
             variant='ghost'
             className='h-9 w-full sm:w-auto'
-            disabled={filteredLines.length === 0 || savingLineId === 'batch'}
             onClick={() => void handleReseedFromFile()}
           >
             Re-import list
@@ -453,7 +636,10 @@ export function AdminWarehouseReceivalPanel() {
           <span className='text-right'>Unit ₵</span>
           <span className='text-right'>Total ₵</span>
         </div>
-        <ul className='max-h-[min(70vh,42rem)] divide-y overflow-y-auto overscroll-contain'>
+        <ul
+          ref={listRef}
+          className='max-h-[min(70vh,42rem)] divide-y overflow-y-auto overscroll-contain'
+        >
           {visibleLines.length === 0 ? (
             <li className='p-8 text-center text-sm text-muted-foreground'>
               No lines match this search or filter.
@@ -516,7 +702,13 @@ export function AdminWarehouseReceivalPanel() {
               return (
                 <li
                   key={line.id}
-                  className={cn('transition-colors', rowToneClass)}
+                  data-line-id={line.id}
+                  className={cn(
+                    'transition-colors',
+                    rowToneClass,
+                    highlightedLineId === line.id &&
+                      'ring-2 ring-inset ring-sky-500'
+                  )}
                 >
                   <div className='grid gap-x-3 gap-y-2.5 px-3 py-3 md:grid-cols-[2.5rem_minmax(5rem,6rem)_1fr_4rem_4.5rem_5rem_5rem] md:items-center md:gap-3 md:py-2.5'>
                     <div className='flex gap-3 md:contents'>
@@ -628,6 +820,13 @@ export function AdminWarehouseReceivalPanel() {
           : ''}
         . Leave received blank when the count matches expected.
       </p>
+
+      <BarcodeScannerDialog
+        open={scannerOpen}
+        onOpenChange={setScannerOpen}
+        onScan={handleBarcodeScan}
+        lastResult={scanFeedback}
+      />
     </div>
   );
 }

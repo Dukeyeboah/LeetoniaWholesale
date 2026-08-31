@@ -1,6 +1,10 @@
 import september2026Seed from '@/data/warehouse-receivals/2026-09.json';
 import type { WarehouseReceival, WarehouseReceivalLine } from '@/types';
 import { normalizeWarehouseCode } from '@/lib/warehouse-data';
+import {
+  getFirstCharacterGroup,
+  type InventoryLetterFilter,
+} from '@/lib/inventory-filters';
 
 export const SEPTEMBER_2026_RECEIVAL_ID = '2026-09';
 
@@ -114,6 +118,58 @@ export function searchReceivalLines(
   );
 }
 
+export function filterReceivalLinesByNameLetter(
+  lines: WarehouseReceivalLine[],
+  letter: InventoryLetterFilter
+): WarehouseReceivalLine[] {
+  if (letter === 'all') return lines;
+  return lines.filter(
+    (l) => getFirstCharacterGroup(l.description || '') === letter
+  );
+}
+
+export function sortReceivalLinesByName(
+  lines: WarehouseReceivalLine[]
+): WarehouseReceivalLine[] {
+  return [...lines].sort((a, b) =>
+    a.description.localeCompare(b.description, undefined, {
+      sensitivity: 'base',
+    })
+  );
+}
+
+/** Normalize scanned barcode text for matching against receival line codes. */
+export function normalizeReceivalBarcode(raw: string): string {
+  return String(raw ?? '')
+    .trim()
+    .replace(/\s+/g, '')
+    .toLowerCase();
+}
+
+/**
+ * Find a receival line by scanned barcode.
+ * Prefers exact code match; falls back to code containing / contained-by scan.
+ */
+export function findReceivalLineByBarcode(
+  lines: WarehouseReceivalLine[],
+  scanned: string
+): WarehouseReceivalLine | null {
+  const needle = normalizeReceivalBarcode(scanned);
+  if (!needle) return null;
+
+  const exact = lines.find(
+    (l) => normalizeReceivalBarcode(l.code) === needle
+  );
+  if (exact) return exact;
+
+  const fuzzy = lines.find((l) => {
+    const code = normalizeReceivalBarcode(l.code);
+    if (!code) return false;
+    return code.includes(needle) || needle.includes(code);
+  });
+  return fuzzy ?? null;
+}
+
 export function receivalSummary(lines: WarehouseReceivalLine[]) {
   const arrivedLines = lines.filter((l) => l.arrived);
   const discrepancies = arrivedLines.filter(receivalLineHasQtyDiscrepancy);
@@ -147,6 +203,19 @@ export function toggleReceivalLineArrived(
     if (arrived) {
       return { ...l, arrived: true, arrivedAt: now };
     }
+    const next = { ...l, arrived: false };
+    delete next.arrivedAt;
+    delete next.receivedQty;
+    return next;
+  });
+}
+
+/** Clear arrived / received qty on every line (e.g. undo a mistaken batch check). */
+export function clearAllReceivalArrived(
+  lines: WarehouseReceivalLine[]
+): WarehouseReceivalLine[] {
+  return lines.map((l) => {
+    if (!l.arrived && l.receivedQty == null && l.arrivedAt == null) return l;
     const next = { ...l, arrived: false };
     delete next.arrivedAt;
     delete next.receivedQty;
