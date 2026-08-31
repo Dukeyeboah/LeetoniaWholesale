@@ -47,12 +47,15 @@ export function AppSidebar() {
     setMounted(true);
   }, []);
 
+  const onAdminRoute = pathname.startsWith('/admin');
+  const onStaffRoute = pathname.startsWith('/staff');
   // Show client routes when in client view or not admin/staff
   const showClientRoutes = (!isAdmin && !isStaff) || viewMode === 'client';
-  // Show admin routes when admin and in admin view
-  const showAdminRoutes = isAdmin && viewMode === 'admin';
-  // Show staff routes when staff
-  const showStaffRoutes = isStaff && viewMode === 'staff';
+  // Keep admin/staff dashboard links visible when already on those routes (mobile menu access)
+  const showAdminRoutes =
+    isAdmin && (viewMode === 'admin' || onAdminRoute);
+  const showStaffRoutes =
+    isStaff && (viewMode === 'staff' || onStaffRoute);
 
   const routes = [
     {

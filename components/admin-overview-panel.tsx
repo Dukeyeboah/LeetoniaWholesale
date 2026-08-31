@@ -441,7 +441,7 @@ export function AdminSegmentNav({
   className,
   tone = 'default',
 }: {
-  items: { value: string; label: string }[];
+  items: { value: string; label: string; shortLabel?: string }[];
   value: string;
   onChange: (value: string) => void;
   className?: string;
@@ -450,18 +450,19 @@ export function AdminSegmentNav({
   const isAccent = tone === 'accent';
   return (
     <div
-      className={`flex w-full flex-wrap gap-1 rounded-xl border p-1 ${
+      className={`grid w-full gap-1 rounded-xl border p-1 ${
         isAccent
           ? 'border-teal-200/80 bg-teal-50/80'
           : 'border-border/60 bg-muted/40'
       } ${className ?? ''}`}
+      style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
     >
       {items.map((item) => (
         <button
           key={item.value}
           type='button'
           onClick={() => onChange(item.value)}
-          className={`h-9 min-w-[6.5rem] flex-1 rounded-lg px-3 text-sm font-medium transition-colors ${
+          className={`h-11 min-w-0 touch-manipulation truncate rounded-lg px-1.5 text-xs font-medium transition-colors sm:h-9 sm:px-3 sm:text-sm ${
             value === item.value
               ? isAccent
                 ? 'bg-teal-700 text-white shadow-sm'
@@ -471,7 +472,8 @@ export function AdminSegmentNav({
                 : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          {item.label}
+          <span className='sm:hidden'>{item.shortLabel ?? item.label}</span>
+          <span className='hidden sm:inline'>{item.label}</span>
         </button>
       ))}
     </div>

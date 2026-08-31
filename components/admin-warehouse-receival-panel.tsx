@@ -52,6 +52,11 @@ import {
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  RECEIVAL_LIST_PAGE,
+  receivalListPageSize,
+} from '@/lib/admin-list-pagination';
 
 const FILTER_OPTIONS: { value: ReceivalListFilter; label: string }[] = [
   { value: 'all', label: 'All lines' },
@@ -60,11 +65,15 @@ const FILTER_OPTIONS: { value: ReceivalListFilter; label: string }[] = [
 ];
 
 export function AdminWarehouseReceivalPanel() {
+  const isMobile = useIsMobile();
   const [receival, setReceival] = useState<WarehouseReceival | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [listFilter, setListFilter] = useState<ReceivalListFilter>('all');
   const [savingLineId, setSavingLineId] = useState<string | null>(null);
+  const [visibleLineCount, setVisibleLineCount] = useState<number>(
+    RECEIVAL_LIST_PAGE.desktop
+  );
   const seedAttempted = useRef(false);
 
   useEffect(() => {
@@ -124,6 +133,15 @@ export function AdminWarehouseReceivalPanel() {
     lines = searchReceivalLines(lines, searchQuery);
     return lines;
   }, [receival, listFilter, searchQuery]);
+
+  const visibleLines = useMemo(
+    () => filteredLines.slice(0, visibleLineCount),
+    [filteredLines, visibleLineCount]
+  );
+
+  useEffect(() => {
+    setVisibleLineCount(receivalListPageSize(isMobile));
+  }, [isMobile, listFilter, searchQuery]);
 
   const summary = useMemo(
     () => receivalSummary(receival?.lines ?? []),
@@ -380,30 +398,32 @@ export function AdminWarehouseReceivalPanel() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder='Search by item name or barcode…'
-            className='h-9 pl-9'
+            className='h-10 pl-9 sm:h-9'
             aria-label='Search receival list'
           />
         </div>
-        <div className='flex flex-wrap gap-1.5'>
+        <div className='-mx-1 overflow-x-auto px-1 pb-0.5 scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+          <div className='flex min-w-max flex-nowrap gap-1.5'>
           {FILTER_OPTIONS.map((opt) => (
             <Button
               key={opt.value}
               type='button'
               size='sm'
               variant={listFilter === opt.value ? 'default' : 'outline'}
-              className='h-8'
+              className='h-9 shrink-0'
               onClick={() => setListFilter(opt.value)}
             >
               {opt.label}
             </Button>
           ))}
+          </div>
         </div>
-        <div className='flex flex-wrap gap-1.5 sm:ml-auto'>
+        <div className='flex flex-col gap-1.5 sm:ml-auto sm:flex-row sm:flex-wrap'>
           <Button
             type='button'
             size='sm'
             variant='secondary'
-            className='h-8'
+            className='h-9 w-full sm:w-auto'
             disabled={filteredLines.length === 0 || savingLineId === 'batch'}
             onClick={() => void handleMarkAllVisible(true)}
           >
@@ -414,7 +434,7 @@ export function AdminWarehouseReceivalPanel() {
             type='button'
             size='sm'
             variant='ghost'
-            className='h-8'
+            className='h-9 w-full sm:w-auto'
             disabled={filteredLines.length === 0 || savingLineId === 'batch'}
             onClick={() => void handleReseedFromFile()}
           >
@@ -434,12 +454,12 @@ export function AdminWarehouseReceivalPanel() {
           <span className='text-right'>Total ₵</span>
         </div>
         <ul className='max-h-[min(70vh,42rem)] divide-y overflow-y-auto overscroll-contain'>
-          {filteredLines.length === 0 ? (
+          {visibleLines.length === 0 ? (
             <li className='p-8 text-center text-sm text-muted-foreground'>
               No lines match this search or filter.
             </li>
           ) : (
-            filteredLines.map((line) => {
+            visibleLines.map((line) => {
               const busy = savingLineId === line.id;
               const tone = receivalLineTone(line);
               const receivedDisplay =
@@ -448,94 +468,160 @@ export function AdminWarehouseReceivalPanel() {
                   : line.arrived
                     ? ''
                     : '';
+              const rowToneClass = cn(
+                tone === 'arrived' && 'bg-emerald-50/90 hover:bg-emerald-50',
+                tone === 'discrepancy' &&
+                  'bg-orange-50/95 hover:bg-orange-50 ring-1 ring-inset ring-orange-200/80',
+                tone === 'pending' && 'hover:bg-muted/40'
+              );
+              const checkboxClass = cn(
+                tone === 'arrived' &&
+                  'border-emerald-600 bg-emerald-600 text-white data-[state=checked]:bg-emerald-600',
+                tone === 'discrepancy' &&
+                  'border-orange-600 bg-orange-600 text-white data-[state=checked]:bg-orange-600'
+              );
+              const receivedInput = (
+                <Input
+                  type='number'
+                  min={0}
+                  inputMode='numeric'
+                  disabled={!line.arrived || busy}
+                  defaultValue={receivedDisplay}
+                  key={`${line.id}-${line.arrived}-${line.receivedQty ?? 'match'}`}
+                  placeholder={line.arrived ? String(line.quantity) : '—'}
+                  aria-label={`Received quantity for ${line.description}`}
+                  className={cn(
+                    'h-9 w-full px-2 text-right text-sm tabular-nums sm:h-8 sm:w-[4.25rem]',
+                    tone === 'discrepancy' &&
+                      'border-orange-400 bg-white focus-visible:ring-orange-400'
+                  )}
+                  onBlur={(e) =>
+                    void handleReceivedQtyBlur(line.id, e.target.value)
+                  }
+                />
+              );
+              const checkboxControl = busy ? (
+                <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
+              ) : (
+                <Checkbox
+                  checked={line.arrived}
+                  onCheckedChange={(c) =>
+                    void handleToggleArrived(line.id, c === true)
+                  }
+                  aria-label={`${line.arrived ? 'Uncheck' : 'Mark'} ${line.description} as arrived`}
+                  className={checkboxClass}
+                />
+              );
+
               return (
                 <li
                   key={line.id}
-                  className={cn(
-                    'grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 px-3 py-2.5 transition-colors md:grid-cols-[2.5rem_minmax(5rem,6rem)_1fr_4rem_4.5rem_5rem_5rem] md:items-center md:gap-3',
-                    tone === 'arrived' && 'bg-emerald-50/90 hover:bg-emerald-50',
-                    tone === 'discrepancy' &&
-                      'bg-orange-50/95 hover:bg-orange-50 ring-1 ring-inset ring-orange-200/80',
-                    tone === 'pending' && 'hover:bg-muted/40'
-                  )}
+                  className={cn('transition-colors', rowToneClass)}
                 >
-                  <div className='flex items-center md:justify-center'>
-                    {busy ? (
-                      <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
-                    ) : (
-                      <Checkbox
-                        checked={line.arrived}
-                        onCheckedChange={(c) =>
-                          void handleToggleArrived(line.id, c === true)
-                        }
-                        aria-label={`${line.arrived ? 'Uncheck' : 'Mark'} ${line.description} as arrived`}
-                        className={cn(
-                          tone === 'arrived' &&
-                            'border-emerald-600 bg-emerald-600 text-white data-[state=checked]:bg-emerald-600',
-                          tone === 'discrepancy' &&
-                            'border-orange-600 bg-orange-600 text-white data-[state=checked]:bg-orange-600'
-                        )}
-                      />
-                    )}
-                  </div>
-                  <span className='font-mono text-xs text-muted-foreground md:text-sm'>
-                    {line.code || '—'}
-                  </span>
-                  <span
-                    className={cn(
-                      'col-span-2 text-sm font-medium leading-snug md:col-span-1',
-                      tone === 'arrived' && 'text-emerald-950',
-                      tone === 'discrepancy' && 'text-orange-950'
-                    )}
-                  >
-                    {line.description}
-                    {receivalLineHasQtyDiscrepancy(line) ? (
-                      <span className='mt-0.5 block text-xs font-normal text-orange-800'>
-                        Expected {line.quantity}, received{' '}
-                        {effectiveReceivedQty(line)}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className='text-right text-sm tabular-nums md:col-start-auto'>
-                    {line.quantity.toLocaleString()}
-                  </span>
-                  <div className='flex justify-end md:col-start-auto'>
-                    <Input
-                      type='number'
-                      min={0}
-                      inputMode='numeric'
-                      disabled={!line.arrived || busy}
-                      defaultValue={receivedDisplay}
-                      key={`${line.id}-${line.arrived}-${line.receivedQty ?? 'match'}`}
-                      placeholder={
-                        line.arrived ? String(line.quantity) : '—'
-                      }
-                      aria-label={`Received quantity for ${line.description}`}
+                  <div className='grid gap-x-3 gap-y-2.5 px-3 py-3 md:grid-cols-[2.5rem_minmax(5rem,6rem)_1fr_4rem_4.5rem_5rem_5rem] md:items-center md:gap-3 md:py-2.5'>
+                    <div className='flex gap-3 md:contents'>
+                      <div className='flex shrink-0 items-start pt-0.5 md:items-center md:justify-center'>
+                        {checkboxControl}
+                      </div>
+                      <div className='min-w-0 flex-1 md:hidden'>
+                        <p
+                          className={cn(
+                            'text-sm font-medium leading-snug',
+                            tone === 'arrived' && 'text-emerald-950',
+                            tone === 'discrepancy' && 'text-orange-950'
+                          )}
+                        >
+                          {line.description}
+                        </p>
+                        <p className='mt-0.5 font-mono text-xs text-muted-foreground'>
+                          {line.code || '—'}
+                        </p>
+                        {receivalLineHasQtyDiscrepancy(line) ? (
+                          <p className='mt-1 text-xs font-normal text-orange-800'>
+                            Expected {line.quantity}, received{' '}
+                            {effectiveReceivedQty(line)}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <span className='hidden font-mono text-sm text-muted-foreground md:block'>
+                      {line.code || '—'}
+                    </span>
+                    <span
                       className={cn(
-                        'h-8 w-[4.25rem] px-2 text-right text-sm tabular-nums',
-                        tone === 'discrepancy' &&
-                          'border-orange-400 bg-white focus-visible:ring-orange-400'
+                        'hidden text-sm font-medium leading-snug md:block',
+                        tone === 'arrived' && 'text-emerald-950',
+                        tone === 'discrepancy' && 'text-orange-950'
                       )}
-                      onBlur={(e) =>
-                        void handleReceivedQtyBlur(line.id, e.target.value)
-                      }
-                    />
+                    >
+                      {line.description}
+                      {receivalLineHasQtyDiscrepancy(line) ? (
+                        <span className='mt-0.5 block text-xs font-normal text-orange-800'>
+                          Expected {line.quantity}, received{' '}
+                          {effectiveReceivedQty(line)}
+                        </span>
+                      ) : null}
+                    </span>
+
+                    <div className='grid grid-cols-2 gap-2 pl-9 sm:grid-cols-4 md:contents'>
+                      <div className='md:text-right'>
+                        <p className='text-[10px] font-medium uppercase tracking-wide text-muted-foreground md:sr-only'>
+                          Expected
+                        </p>
+                        <p className='text-sm tabular-nums'>
+                          {line.quantity.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className='md:flex md:justify-end'>
+                        <p className='mb-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground md:sr-only'>
+                          Received
+                        </p>
+                        {receivedInput}
+                      </div>
+                      <div className='md:text-right'>
+                        <p className='text-[10px] font-medium uppercase tracking-wide text-muted-foreground md:sr-only'>
+                          Unit ₵
+                        </p>
+                        <p className='text-sm tabular-nums text-muted-foreground'>
+                          {line.unitPrice.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className='md:text-right'>
+                        <p className='text-[10px] font-medium uppercase tracking-wide text-muted-foreground md:sr-only'>
+                          Total ₵
+                        </p>
+                        <p className='text-sm font-medium tabular-nums'>
+                          {line.total.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <span className='text-right text-sm tabular-nums text-muted-foreground'>
-                    {line.unitPrice.toFixed(2)}
-                  </span>
-                  <span className='text-right text-sm font-medium tabular-nums'>
-                    {line.total.toFixed(2)}
-                  </span>
                 </li>
               );
             })
           )}
         </ul>
+        {filteredLines.length > visibleLines.length ? (
+          <div className='border-t p-3'>
+            <Button
+              type='button'
+              variant='outline'
+              className='w-full touch-manipulation'
+              onClick={() =>
+                setVisibleLineCount((count) => count + RECEIVAL_LIST_PAGE.step)
+              }
+            >
+              Show more ({visibleLines.length} of{' '}
+              {filteredLines.length.toLocaleString()} lines)
+            </Button>
+          </div>
+        ) : null}
       </div>
 
       <p className='text-xs text-muted-foreground'>
-        Showing {filteredLines.length} of {receival.lines.length} lines ·{' '}
+        Showing {visibleLines.length} of {filteredLines.length} filtered ·{' '}
+        {receival.lines.length} total lines ·{' '}
         {summary.pending} still to confirm
         {summary.discrepancies > 0
           ? ` · ${summary.discrepancies} with quantity mismatches`

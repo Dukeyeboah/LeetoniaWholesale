@@ -99,7 +99,7 @@ export function StorefrontTopBar() {
       name: 'Admin Dashboard',
       path: '/admin',
       icon: LayoutDashboard,
-      show: showAdminRoutes,
+      show: isAdmin,
     },
     {
       name: 'Staff Dashboard',

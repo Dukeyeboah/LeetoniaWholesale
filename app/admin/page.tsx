@@ -3,6 +3,11 @@
 import { DialogDescription } from '@/components/ui/dialog';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  INVENTORY_LIST_PAGE,
+  inventoryListPageSize,
+} from '@/lib/admin-list-pagination';
 import {
   query,
   orderBy,
@@ -272,6 +277,8 @@ export default function AdminDashboard() {
   const [pharmaciesLoading, setPharmaciesLoading] = useState(true);
 
   // Filter states
+  const isMobile = useIsMobile();
+  const mobileReceivalBootstrapped = useRef(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [userFilter, setUserFilter] = useState<string>('all');
   const [productFilter, setProductFilter] = useState<string>('all');
@@ -434,6 +441,9 @@ export default function AdminDashboard() {
     category: false,
     type: false,
   });
+  const [inventoryVisibleCount, setInventoryVisibleCount] = useState<number>(
+    INVENTORY_LIST_PAGE.desktop
+  );
   const [paymentDialogOrder, setPaymentDialogOrder] = useState<Order | null>(
     null
   );
@@ -443,7 +453,25 @@ export default function AdminDashboard() {
   );
   const [directPaidInput, setDirectPaidInput] = useState('');
 
+  const needsInventoryData = useMemo(() => {
+    if (adminSection === 'overview' || adminSection === 'analytics') return true;
+    if (adminSection !== 'operations') return false;
+    if (activeTab === 'orders' || activeTab === 'history') return true;
+    if (activeTab === 'inventory' && inventoryListMode !== 'receival') return true;
+    return false;
+  }, [adminSection, activeTab, inventoryListMode]);
+
+  const needsStoreroomCatalog = useMemo(
+    () =>
+      needsInventoryData &&
+      adminSection === 'operations' &&
+      activeTab === 'inventory' &&
+      inventoryListMode === 'storeroom',
+    [needsInventoryData, adminSection, activeTab, inventoryListMode]
+  );
+
   const sortedInventoryProducts = useMemo(() => {
+    if (!needsInventoryData) return [];
     const list = [...products];
     if (inventorySortMode === 'az') {
       list.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
@@ -453,9 +481,10 @@ export default function AdminDashboard() {
       );
     }
     return list;
-  }, [products, inventorySortMode]);
+  }, [products, inventorySortMode, needsInventoryData]);
 
   const inventoryProductsFiltered = useMemo(() => {
+    if (!needsInventoryData) return [];
     let list = sortedInventoryProducts;
     const q = inventorySearchQuery.trim().toLowerCase();
     if (q) {
@@ -485,18 +514,27 @@ export default function AdminDashboard() {
     inventoryLetterFilter,
     inventoryCategoryFilter,
     inventorySubCategoryFilter,
+    needsInventoryData,
   ]);
 
-  const allStoreroomRows = useMemo(() => getStoreroomRows(), []);
+  const allStoreroomRows = useMemo(
+    () => (needsStoreroomCatalog ? getStoreroomRows() : []),
+    [needsStoreroomCatalog]
+  );
   const productsByWarehouseCode = useMemo(
-    () => indexInventoryByProductCode(products),
-    [products]
+    () =>
+      needsStoreroomCatalog ? indexInventoryByProductCode(products) : new Map(),
+    [products, needsStoreroomCatalog]
   );
   const productsByNormalizedLabel = useMemo(
-    () => indexInventoryByNormalizedLabel(products),
-    [products]
+    () =>
+      needsStoreroomCatalog
+        ? indexInventoryByNormalizedLabel(products)
+        : new Map(),
+    [products, needsStoreroomCatalog]
   );
   const warehouseRowsFiltered = useMemo(() => {
+    if (!needsStoreroomCatalog) return [];
     const letter = inventoryFilters.name ? inventoryLetterFilter : 'all';
     let rows = filterSortWarehouseRows(
       allStoreroomRows,
@@ -518,7 +556,40 @@ export default function AdminDashboard() {
     inventorySortMode,
     inventorySearchQuery,
     inventoryFilters,
+    needsStoreroomCatalog,
   ]);
+
+  useEffect(() => {
+    if (mobileReceivalBootstrapped.current) return;
+    if (typeof window === 'undefined') return;
+    if (!window.matchMedia('(max-width: 767px)').matches) return;
+    mobileReceivalBootstrapped.current = true;
+    setAdminSection('operations');
+    setActiveTab('inventory');
+    setInventoryListMode('receival');
+  }, []);
+
+  useEffect(() => {
+    setInventoryVisibleCount(inventoryListPageSize(isMobile));
+  }, [
+    isMobile,
+    inventorySearchQuery,
+    inventoryFilters,
+    inventoryLetterFilter,
+    inventoryCategoryFilter,
+    inventorySubCategoryFilter,
+    inventoryListMode,
+    inventorySortMode,
+  ]);
+
+  const visibleInventoryProducts = useMemo(
+    () => inventoryProductsFiltered.slice(0, inventoryVisibleCount),
+    [inventoryProductsFiltered, inventoryVisibleCount]
+  );
+  const visibleWarehouseRows = useMemo(
+    () => warehouseRowsFiltered.slice(0, inventoryVisibleCount),
+    [warehouseRowsFiltered, inventoryVisibleCount]
+  );
 
   const ordersForPaymentsTab = useMemo(
     () => [...orders].sort((a, b) => b.createdAt - a.createdAt),
@@ -546,26 +617,6 @@ export default function AdminDashboard() {
         console.error('orders listener', err);
         toast.error(
           'Could not load orders. Check Firestore rules and your connection.'
-        );
-      }
-    );
-
-    // Listen to Inventory
-    // const inventoryQuery = query(collection(db, 'inventory'), orderBy('name'));
-    const inventoryQuery = query(collection(db, 'inventory'))
-    const unsubInventory = onSnapshot(
-      inventoryQuery,
-      (snapshot) => {
-        setProducts(
-          snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Product))
-        );
-        setInventoryLoading(false);
-      },
-      (err) => {
-        console.error('inventory listener', err);
-        setInventoryLoading(false);
-        toast.error(
-          'Could not load inventory. Check Firestore rules and your connection.'
         );
       }
     );
@@ -601,11 +652,42 @@ export default function AdminDashboard() {
 
     return () => {
       unsubOrders();
-      unsubInventory();
       unsubUsers();
       unsubPharmacies();
     };
   }, []);
+
+  useEffect(() => {
+    if (!db) {
+      setInventoryLoading(false);
+      return;
+    }
+    if (!needsInventoryData) {
+      setInventoryLoading(false);
+      return;
+    }
+
+    setInventoryLoading(true);
+    const inventoryQuery = query(collection(db, 'inventory'));
+    const unsubInventory = onSnapshot(
+      inventoryQuery,
+      (snapshot) => {
+        setProducts(
+          snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Product))
+        );
+        setInventoryLoading(false);
+      },
+      (err) => {
+        console.error('inventory listener', err);
+        setInventoryLoading(false);
+        toast.error(
+          'Could not load inventory. Check Firestore rules and your connection.'
+        );
+      }
+    );
+
+    return () => unsubInventory();
+  }, [needsInventoryData]);
 
   useEffect(() => {
     if (!db || activeTab !== 'pharmacies' || !isSuperAdmin) return;
@@ -2054,8 +2136,8 @@ export default function AdminDashboard() {
 
   return (
     <div className='w-full min-w-0'>
-      <div className='mb-4'>
-        <h1 className='text-2xl font-serif font-bold text-primary'>
+      <div className='mb-3 md:mb-4'>
+        <h1 className='text-xl font-serif font-bold text-primary md:text-2xl'>
           {adminSection === 'overview'
             ? 'Overview'
             : adminSection === 'operations'
@@ -2064,7 +2146,7 @@ export default function AdminDashboard() {
                 ? 'Analytics'
                 : 'Administration'}
         </h1>
-        <p className='mt-0.5 text-sm text-muted-foreground'>
+        <p className='mt-0.5 hidden text-sm text-muted-foreground sm:block'>
           {adminSection === 'overview'
             ? 'What’s happening across orders, inventory, and the business.'
             : adminSection === 'operations'
@@ -2075,7 +2157,7 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <div className='sticky top-14 z-20 -mx-3 mb-4 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:-mx-4 sm:px-4 md:top-0 md:-mx-8 md:px-8'>
+      <div className='sticky top-14 z-40 isolate -mx-3 mb-4 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:-mx-4 sm:px-4 md:top-0 md:-mx-8 md:px-8'>
         <AdminSegmentNav
           value={adminSection}
           onChange={(value) =>
@@ -2084,10 +2166,14 @@ export default function AdminDashboard() {
             )
           }
           items={[
-            { value: 'overview', label: 'Overview' },
-            { value: 'operations', label: 'Operations' },
-            { value: 'analytics', label: 'Analytics' },
-            { value: 'administration', label: 'Administration' },
+            { value: 'overview', label: 'Overview', shortLabel: 'Overview' },
+            { value: 'operations', label: 'Operations', shortLabel: 'Ops' },
+            { value: 'analytics', label: 'Analytics', shortLabel: 'Stats' },
+            {
+              value: 'administration',
+              label: 'Administration',
+              shortLabel: 'Admin',
+            },
           ]}
         />
 
@@ -2097,9 +2183,13 @@ export default function AdminDashboard() {
             value={activeTab}
             onChange={setActiveTab}
             items={[
-              { value: 'inventory', label: 'Inventory' },
-              { value: 'orders', label: 'Orders' },
-              { value: 'history', label: 'Order History' },
+              { value: 'inventory', label: 'Inventory', shortLabel: 'Stock' },
+              { value: 'orders', label: 'Orders', shortLabel: 'Orders' },
+              {
+                value: 'history',
+                label: 'Order History',
+                shortLabel: 'History',
+              },
             ]}
           />
         )}
@@ -2110,9 +2200,15 @@ export default function AdminDashboard() {
             value={activeTab}
             onChange={setActiveTab}
             items={[
-              ...(isSuperAdmin ? [{ value: 'staff', label: 'Staff' }] : []),
-              { value: 'pharmacies', label: 'Pharmacies' },
-              { value: 'settings', label: 'Settings' },
+              ...(isSuperAdmin
+                ? [{ value: 'staff', label: 'Staff', shortLabel: 'Staff' }]
+                : []),
+              {
+                value: 'pharmacies',
+                label: 'Pharmacies',
+                shortLabel: 'Pharmacies',
+              },
+              { value: 'settings', label: 'Settings', shortLabel: 'Settings' },
             ]}
           />
         )}
@@ -4208,11 +4304,14 @@ export default function AdminDashboard() {
           value='inventory'
           className='mt-3 space-y-4 w-full min-w-0 max-w-full overflow-x-hidden'
         >
+          {activeTab === 'inventory' ? (
+          <>
           <div className='flex flex-col gap-3 w-full min-w-0'>
-            <div className='flex flex-wrap items-center gap-2 w-full min-w-0'>
-              <div className='flex min-w-0 flex-1 flex-wrap items-center gap-2'>
+            <div className='flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between w-full min-w-0'>
+            <div className='flex min-w-0 flex-1 flex-col gap-2'>
               <span className='text-sm text-muted-foreground shrink-0'>View:</span>
-              <div className='flex flex-wrap gap-2 items-center'>
+              <div className='-mx-3 overflow-x-auto px-3 pb-0.5 scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+                <div className='flex min-w-max flex-nowrap items-center gap-2'>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -4221,6 +4320,7 @@ export default function AdminDashboard() {
                     variant={
                       inventoryListMode === 'storefront' ? 'default' : 'outline'
                     }
+                    className='shrink-0'
                     onClick={() => setInventoryListMode('storefront')}
                   >
                     Wholesale
@@ -4239,6 +4339,7 @@ export default function AdminDashboard() {
                     variant={
                       inventoryListMode === 'storeroom' ? 'default' : 'outline'
                     }
+                    className='shrink-0'
                     onClick={() => {
                       setInventoryListMode('storeroom');
                       setInventoryFilters((prev) => ({
@@ -4266,6 +4367,7 @@ export default function AdminDashboard() {
                     variant={
                       inventoryListMode === 'receival' ? 'default' : 'outline'
                     }
+                    className='shrink-0'
                     onClick={() => setInventoryListMode('receival')}
                   >
                     <ClipboardCheck className='mr-1.5 h-3.5 w-3.5' />
@@ -4278,7 +4380,7 @@ export default function AdminDashboard() {
                 </TooltipContent>
               </Tooltip>
               {inventoryListMode !== 'receival' && (
-              <div className='flex flex-wrap gap-1 items-center border rounded-md p-0.5 bg-muted/30'>
+              <div className='flex shrink-0 gap-1 items-center border rounded-md p-0.5 bg-muted/30'>
               <span className='sr-only'>Layout</span>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -4316,12 +4418,13 @@ export default function AdminDashboard() {
               </Tooltip>
               </div>
               )}
-            </div>
+                </div>
+              </div>
             </div>
             {inventoryListMode !== 'receival' && (
             <Button
               onClick={() => openProductDialog()}
-              className='ml-auto shrink-0'
+              className='w-full shrink-0 sm:ml-auto sm:w-auto'
               size='sm'
             >
               <Plus className='mr-2 h-4 w-4 shrink-0' /> Add Product
@@ -4584,7 +4687,7 @@ export default function AdminDashboard() {
                       : 'w-full min-w-0'
                   }
                 >
-                  {inventoryProductsFiltered.map((product) => (
+                  {visibleInventoryProducts.map((product) => (
                     <AdminStorefrontInventoryItem
                       key={product.id}
                       product={product}
@@ -4595,6 +4698,23 @@ export default function AdminDashboard() {
                     />
                   ))}
                 </div>
+                {inventoryProductsFiltered.length > visibleInventoryProducts.length && (
+                  <div className='border-t p-3'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      className='w-full touch-manipulation'
+                      onClick={() =>
+                        setInventoryVisibleCount(
+                          (count) => count + INVENTORY_LIST_PAGE.step
+                        )
+                      }
+                    >
+                      Show more ({visibleInventoryProducts.length} of{' '}
+                      {inventoryProductsFiltered.length.toLocaleString()})
+                    </Button>
+                  </div>
+                )}
                 {!inventoryLoading &&
                   inventoryProductsFiltered.length === 0 && (
                     <div className='p-8 text-center text-sm text-muted-foreground'>
@@ -4616,7 +4736,7 @@ export default function AdminDashboard() {
                         : 'w-full min-w-0'
                     }
                   >
-                    {warehouseRowsFiltered.map((row) => {
+                    {visibleWarehouseRows.map((row) => {
                       const codeKey = normalizeWarehouseCode(row.code);
                       const resolved = resolveWarehouseRowToProduct(
                         row,
@@ -4638,10 +4758,29 @@ export default function AdminDashboard() {
                     })}
                   </div>
                 )}
+                {warehouseRowsFiltered.length > visibleWarehouseRows.length && (
+                  <div className='border-t p-3'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      className='w-full touch-manipulation'
+                      onClick={() =>
+                        setInventoryVisibleCount(
+                          (count) => count + INVENTORY_LIST_PAGE.step
+                        )
+                      }
+                    >
+                      Show more ({visibleWarehouseRows.length} of{' '}
+                      {warehouseRowsFiltered.length.toLocaleString()})
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           </div>
           )}
+          </>
+          ) : null}
         </TabsContent>
 
         <TabsContent value='settings' className='mt-3 space-y-6'>

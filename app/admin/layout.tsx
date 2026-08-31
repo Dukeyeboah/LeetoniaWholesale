@@ -3,25 +3,35 @@
 import type React from 'react';
 
 import { AppSidebar } from '@/components/app-sidebar';
+import { AdminMobileHeader } from '@/components/admin-mobile-header';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { SidebarProvider, useSidebar } from '@/components/sidebar-context';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { isCollapsed } = useSidebar();
+  const { viewMode, setViewMode } = useAuth();
+  const syncedAdminView = useRef(false);
+
+  useEffect(() => {
+    if (syncedAdminView.current || viewMode === 'admin') return;
+    syncedAdminView.current = true;
+    setViewMode('admin');
+  }, [viewMode, setViewMode]);
 
   return (
     <div className='flex min-h-screen bg-background'>
       <AppSidebar />
       <main
-        className={`flex-1 min-w-0 w-full transition-all duration-300 ease-in-out ${
+        className={`flex min-h-screen min-w-0 w-full flex-1 flex-col transition-all duration-300 ease-in-out ${
           isCollapsed ? 'md:ml-20' : 'md:ml-64 lg:ml-72'
         }`}
       >
+        <AdminMobileHeader />
         <div
-          className={`w-full min-w-0 py-4 sm:py-5 md:py-6 px-3 sm:px-4 md:px-8 mt-12 md:mt-0 ${
+          className={`w-full min-w-0 flex-1 px-3 py-3 sm:px-4 sm:py-5 md:px-8 md:py-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] ${
             isCollapsed ? '' : 'lg:container lg:max-w-6xl'
           }`}
         >
