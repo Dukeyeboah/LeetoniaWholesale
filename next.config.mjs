@@ -23,7 +23,9 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        // Firebase's proxied /__/ auth pages must not get COOP, or the popup loses its
+        // link back to the app and sign-in times out as "popup closed".
+        source: '/((?!__/).*)',
         headers: [
           {
             key: 'Cross-Origin-Opener-Policy',
