@@ -274,7 +274,21 @@ export interface WarehouseReceivalLine {
    * When arrived and this differs from `quantity`, the row is flagged.
    */
   receivedQty?: number;
+  /** Cumulative qty already pushed to warehouse storeroom stock. */
+  transferredQty?: number;
   notes?: string;
+}
+
+/** One manual transfer batch from receival into warehouse inventory. */
+export interface WarehouseReceivalTransferBatch {
+  id: string;
+  /** Optional label, e.g. "Morning palette" or "Partial batch 2". */
+  label?: string;
+  at: number;
+  lineCount: number;
+  unitCount: number;
+  /** Receival line ids included in this batch. */
+  lineIds: string[];
 }
 
 /** Monthly warehouse receival checklist (Firestore `warehouseReceivals`). */
@@ -284,45 +298,8 @@ export interface WarehouseReceival {
   /** Calendar month key, e.g. `2026-09`. */
   monthKey: string;
   lines: WarehouseReceivalLine[];
+  /** History of manual transfers into warehouse inventory. */
+  transfers?: WarehouseReceivalTransferBatch[];
   createdAt: number;
   updatedAt: number;
-}
-
-/** One product row in a period performance ranking (ITO / qty / value). */
-export interface AnalyticsPeriodProductRow {
-  rank?: number;
-  /** Barcode / product code when known. */
-  code?: string;
-  name: string;
-  /** Inventory turnover rate for the period (ITO list). */
-  ito?: number;
-  /** Units sold / moved in the period. */
-  quantity?: number;
-  /** Unit price in GHS when provided. */
-  unitPrice?: number;
-  /** Sales value / revenue contribution in GHS. */
-  value?: number;
-  notes?: string;
-}
-
-/**
- * Imported / period snapshot for business performance analytics.
- * Populate `data/analytics/period-performance.json` from your yearly lists.
- */
-export interface AnalyticsPeriodPerformance {
-  id: string;
-  title: string;
-  /** Inclusive period start YYYY-MM-DD */
-  periodStart: string;
-  /** Inclusive period end YYYY-MM-DD */
-  periodEnd: string;
-  currency: 'GHS';
-  sourceNote?: string;
-  updatedAt?: number | null;
-  /** Inventory turnover ranking (higher = turns faster). */
-  ito: AnalyticsPeriodProductRow[];
-  /** Ranked by units moved; include unitPrice when available. */
-  byQuantity: AnalyticsPeriodProductRow[];
-  /** Ranked by sales value / revenue. */
-  byValue: AnalyticsPeriodProductRow[];
 }

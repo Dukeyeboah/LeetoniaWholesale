@@ -191,6 +191,15 @@ service cloud.firestore {
       allow read, create, update, delete: if isPrivilegedAdmin();
     }
 
+    // Uploaded sales file analyses and their product rows (admin-only).
+    match /salesAnalyses/{analysisId} {
+      allow read, create, update, delete: if isPrivilegedAdmin();
+
+      match /rows/{chunkId} {
+        allow read, create, update, delete: if isPrivilegedAdmin();
+      }
+    }
+
     // Super-admin HR: loans, leave, payroll deductions (not client-facing).
     match /staffMembers/{staffId} {
       allow read, create, update, delete: if isSuperAdmin();

@@ -99,7 +99,7 @@ import { AdminLoadingPanel } from '@/components/admin-loading-panel';
 import { AdminStorefrontInventoryItem } from '@/components/admin-storefront-inventory-item';
 import { AdminStoreroomInventoryItem } from '@/components/admin-storeroom-inventory-item';
 import { AdminWarehouseReceivalPanel } from '@/components/admin-warehouse-receival-panel';
-import { AdminPeriodPerformancePanel } from '@/components/admin-period-performance-panel';
+import { AdminSalesAnalysisPanel } from '@/components/admin-sales-analysis-panel';
 import { AdminPharmacyMobileCard } from '@/components/admin-pharmacy-mobile-card';
 import type { Pharmacy } from '@/types';
 import {
@@ -459,7 +459,7 @@ export default function AdminDashboard() {
     if (adminSection === 'overview' || adminSection === 'analytics') return true;
     if (adminSection !== 'operations') return false;
     if (activeTab === 'orders' || activeTab === 'history') return true;
-    if (activeTab === 'inventory' && inventoryListMode !== 'receival') return true;
+    if (activeTab === 'inventory') return true;
     return false;
   }, [adminSection, activeTab, inventoryListMode]);
 
@@ -3350,7 +3350,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <AdminPeriodPerformancePanel />
+          <AdminSalesAnalysisPanel />
         </TabsContent>
 
         {isSuperAdmin && (
@@ -4681,7 +4681,10 @@ export default function AdminDashboard() {
           )}
 
           {inventoryListMode === 'receival' ? (
-            <AdminWarehouseReceivalPanel />
+            <AdminWarehouseReceivalPanel
+              products={products}
+              inventoryLoading={inventoryLoading}
+            />
           ) : (
           <div className='rounded-md border bg-card relative min-h-[12rem] w-full min-w-0 max-w-full overflow-hidden'>
             {inventoryLoading && (

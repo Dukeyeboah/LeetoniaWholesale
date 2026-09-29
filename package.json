@@ -8,6 +8,7 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
+    "test": "node --import tsx --test \"lib/**/*.test.ts\"",
     "seed": "tsx scripts/seed-inventory.ts",
     "import-drugs": "tsx scripts/import-drugs-with-images.ts",
     "fix-image-urls": "tsx scripts/fix-image-urls.ts",
@@ -60,7 +61,9 @@
     "cmdk": "1.0.4",
     "date-fns": "latest",
     "embla-carousel-react": "8.5.1",
+    "exceljs": "^4.4.0",
     "firebase": "latest",
+    "firebase-admin": "^13.8.0",
     "heic2any": "^0.0.4",
     "input-otp": "1.4.1",
     "jspdf": "^4.2.1",
@@ -78,6 +81,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "3.25.76"
   },
   "devDependencies": {
@@ -86,7 +90,6 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^16.4.5",
-    "firebase-admin": "^13.8.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tsx": "^4.19.2",

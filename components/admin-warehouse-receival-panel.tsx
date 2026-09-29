@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  collection,
   doc,
   onSnapshot,
   setDoc,
@@ -9,24 +10,31 @@ import {
 } from 'firebase/firestore';
 import { format } from 'date-fns';
 import {
+  ChevronDown,
   ClipboardCheck,
   Download,
   Loader2,
+  PackagePlus,
+  Plus,
   Printer,
   ScanBarcode,
   Search,
   SlidersHorizontal,
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
-import type { WarehouseReceival, WarehouseReceivalLine } from '@/types';
+import type { Product, WarehouseReceival, WarehouseReceivalLine } from '@/types';
 import {
+  buildReceivalFromImport,
   buildSeptember2026Receival,
   clearAllReceivalArrived,
   effectiveReceivedQty,
   filterReceivalLines,
   filterReceivalLinesByNameLetter,
   findReceivalLineByBarcode,
+  parseReceivalImportFile,
+  receivalLineFullyTransferred,
   receivalLineHasQtyDiscrepancy,
+  receivalLineTransferableQty,
   receivalLineTone,
   receivalSummary,
   sanitizeReceivalLinesForFirestore,
@@ -74,6 +82,8 @@ import {
 } from '@/components/ui/drawer';
 import { AdminLoadingPanel } from '@/components/admin-loading-panel';
 import { BarcodeScannerDialog } from '@/components/barcode-scanner-dialog';
+import { AdminReceivalCreateDialog } from '@/components/admin-receival-create-dialog';
+import { AdminReceivalTransferDialog } from '@/components/admin-receival-transfer-dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -94,11 +104,36 @@ const FILTER_OPTIONS: {
 
 /** One-time undo after accidental “mark all visible” — clears arrived checks once per browser. */
 const CLEAR_ARRIVED_ONCE_KEY = 'leetonia_clear_receival_arrived_2026-09_v1';
+const SELECTED_RECEIVAL_KEY = 'leetonia_selected_receival_id';
 
-export function AdminWarehouseReceivalPanel() {
+type ReceivalCatalogEntry = {
+  id: string;
+  title: string;
+  monthKey: string;
+  lineCount: number;
+  updatedAt: number;
+};
+
+type AdminWarehouseReceivalPanelProps = {
+  products?: Product[];
+  inventoryLoading?: boolean;
+};
+
+export function AdminWarehouseReceivalPanel({
+  products = [],
+  inventoryLoading = false,
+}: AdminWarehouseReceivalPanelProps) {
   const isMobile = useIsMobile();
+  const [receivalCatalog, setReceivalCatalog] = useState<ReceivalCatalogEntry[]>(
+    []
+  );
+  const [selectedReceivalId, setSelectedReceivalId] = useState<string | null>(
+    null
+  );
   const [receival, setReceival] = useState<WarehouseReceival | null>(null);
   const [loading, setLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [listFilter, setListFilter] = useState<ReceivalListFilter>('all');
   const [nameLetterFilter, setNameLetterFilter] =
@@ -117,19 +152,68 @@ export function AdminWarehouseReceivalPanel() {
   const [highlightedLineId, setHighlightedLineId] = useState<string | null>(
     null
   );
-  const seedAttempted = useRef(false);
+  const seedAttempted = useRef<Set<string>>(new Set());
   const clearArrivedOnceAttempted = useRef(false);
+  const importFileRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const receivalRef = useRef(receival);
   receivalRef.current = receival;
 
   useEffect(() => {
-    if (!db) {
-      setLoading(false);
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem(SELECTED_RECEIVAL_KEY);
+    if (saved) setSelectedReceivalId(saved);
+    else setSelectedReceivalId(SEPTEMBER_2026_RECEIVAL_ID);
+  }, []);
+
+  useEffect(() => {
+    if (!db) return;
+    const unsub = onSnapshot(
+      collection(db, 'warehouseReceivals'),
+      (snap) => {
+        const entries: ReceivalCatalogEntry[] = snap.docs.map((d) => {
+          const data = d.data();
+          const lines = Array.isArray(data.lines) ? data.lines : [];
+          return {
+            id: d.id,
+            title: String(data.title ?? d.id),
+            monthKey: String(data.monthKey ?? d.id),
+            lineCount: lines.length,
+            updatedAt: Number(data.updatedAt) || 0,
+          };
+        });
+        entries.sort((a, b) => b.updatedAt - a.updatedAt);
+        setReceivalCatalog(entries);
+        setSelectedReceivalId((current) => {
+          if (current && entries.some((e) => e.id === current)) return current;
+          if (entries.some((e) => e.id === SEPTEMBER_2026_RECEIVAL_ID)) {
+            return SEPTEMBER_2026_RECEIVAL_ID;
+          }
+          return entries[0]?.id ?? null;
+        });
+      },
+      (err) => {
+        console.error('warehouseReceivals catalog', err);
+        toast.error('Could not load receival list.');
+      }
+    );
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (selectedReceivalId && typeof window !== 'undefined') {
+      localStorage.setItem(SELECTED_RECEIVAL_KEY, selectedReceivalId);
+    }
+  }, [selectedReceivalId]);
+
+  useEffect(() => {
+    if (!db || !selectedReceivalId) {
+      if (!selectedReceivalId) setLoading(false);
       return;
     }
 
-    const ref = doc(db, 'warehouseReceivals', SEPTEMBER_2026_RECEIVAL_ID);
+    setLoading(true);
+    const ref = doc(db, 'warehouseReceivals', selectedReceivalId);
     const unsub = onSnapshot(
       ref,
       async (snap) => {
@@ -139,30 +223,36 @@ export function AdminWarehouseReceivalPanel() {
           return;
         }
 
-        if (seedAttempted.current) {
-          setReceival(null);
-          setLoading(false);
+        if (
+          selectedReceivalId === SEPTEMBER_2026_RECEIVAL_ID &&
+          !seedAttempted.current.has(selectedReceivalId)
+        ) {
+          seedAttempted.current.add(selectedReceivalId);
+          const seed = buildSeptember2026Receival();
+          if (seed.lines.length === 0) {
+            setReceival(null);
+            setLoading(false);
+            return;
+          }
+          try {
+            await setDoc(ref, {
+              title: seed.title,
+              monthKey: seed.monthKey,
+              lines: sanitizeReceivalLinesForFirestore(seed.lines),
+              transfers: [],
+              createdAt: seed.createdAt,
+              updatedAt: seed.updatedAt,
+            });
+          } catch (e) {
+            console.error('seed warehouse receival', e);
+            toast.error('Could not create receival checklist.');
+            setLoading(false);
+          }
           return;
         }
-        seedAttempted.current = true;
 
-        const seed = buildSeptember2026Receival();
-        if (seed.lines.length === 0) {
-          setReceival(null);
-          setLoading(false);
-          return;
-        }
-
-        try {
-          await setDoc(ref, {
-            ...seed,
-            lines: sanitizeReceivalLinesForFirestore(seed.lines),
-          });
-        } catch (e) {
-          console.error('seed warehouse receival', e);
-          toast.error('Could not create receival checklist.');
-          setLoading(false);
-        }
+        setReceival(null);
+        setLoading(false);
       },
       (err) => {
         console.error('warehouseReceivals listener', err);
@@ -172,7 +262,7 @@ export function AdminWarehouseReceivalPanel() {
     );
 
     return () => unsub();
-  }, []);
+  }, [selectedReceivalId]);
 
   const filteredLines = useMemo(() => {
     if (!receival) return [];
@@ -210,9 +300,10 @@ export function AdminWarehouseReceivalPanel() {
     [receival]
   );
 
-  // Undo mistaken “mark all visible” once per browser after this update.
+  // Undo mistaken “mark all visible” once per browser after this update (Sept 2026 only).
   useEffect(() => {
     if (!db || !receival || clearArrivedOnceAttempted.current) return;
+    if (receival.id !== SEPTEMBER_2026_RECEIVAL_ID) return;
     if (typeof window === 'undefined') return;
     if (localStorage.getItem(CLEAR_ARRIVED_ONCE_KEY) === '1') {
       clearArrivedOnceAttempted.current = true;
@@ -357,7 +448,7 @@ export function AdminWarehouseReceivalPanel() {
   };
 
   const handleReseedFromFile = async () => {
-    if (!db) return;
+    if (!db || !receival) return;
     const seed = buildSeptember2026Receival();
     if (seed.lines.length === 0) {
       toast.error(
@@ -366,7 +457,6 @@ export function AdminWarehouseReceivalPanel() {
       return;
     }
     if (
-      receival &&
       receival.lines.some((l) => l.arrived) &&
       !window.confirm(
         'Re-import will replace all lines and clear arrived checks. Continue?'
@@ -375,9 +465,11 @@ export function AdminWarehouseReceivalPanel() {
       return;
     }
     try {
-      await setDoc(doc(db, 'warehouseReceivals', SEPTEMBER_2026_RECEIVAL_ID), {
-        ...seed,
+      await setDoc(doc(db, 'warehouseReceivals', receival.id), {
+        title: seed.title,
+        monthKey: seed.monthKey,
         lines: sanitizeReceivalLinesForFirestore(seed.lines),
+        transfers: receival.transfers ?? [],
         updatedAt: Date.now(),
       });
       toast.success(`Loaded ${seed.lines.length} lines from file.`);
@@ -387,33 +479,127 @@ export function AdminWarehouseReceivalPanel() {
     }
   };
 
-  if (loading) {
+  const handleReplaceManifest = async (file: File) => {
+    if (!db || !receival) return;
+    try {
+      const text = await file.text();
+      const rows = parseReceivalImportFile(text, file.name);
+      if (rows.length === 0) {
+        toast.error('No valid lines in file.');
+        return;
+      }
+      if (
+        receival.lines.some((l) => l.arrived || (l.transferredQty ?? 0) > 0) &&
+        !window.confirm(
+          'Replace manifest will clear arrived checks and transfer history on lines. Continue?'
+        )
+      ) {
+        return;
+      }
+      const rebuilt = buildReceivalFromImport(receival.title, rows, {
+        id: receival.id,
+        monthKey: receival.monthKey,
+      });
+      await setDoc(doc(db, 'warehouseReceivals', receival.id), {
+        title: receival.title,
+        monthKey: receival.monthKey,
+        lines: sanitizeReceivalLinesForFirestore(rebuilt.lines),
+        transfers: [],
+        updatedAt: Date.now(),
+      });
+      toast.success(`Replaced with ${rows.length} lines from ${file.name}.`);
+    } catch (e) {
+      console.error(e);
+      toast.error('Could not replace manifest.');
+    }
+  };
+
+  if (loading && !receival) {
     return (
       <AdminLoadingPanel
         title='Loading port receival checklist…'
-        subtitle='September 2026 warehouse shipment'
+        subtitle='Warehouse shipment receivals'
       />
+    );
+  }
+
+  if (receivalCatalog.length === 0 && !receival) {
+    return (
+      <>
+        <div className='rounded-md border bg-card p-8 text-center'>
+          <ClipboardCheck className='mx-auto mb-3 h-10 w-10 text-muted-foreground/60' />
+          <h3 className='font-serif text-lg font-semibold'>Port receival</h3>
+          <p className='mx-auto mt-2 max-w-md text-sm text-muted-foreground'>
+            Create a named receival for each shipment. Import a manifest (JSON or
+            CSV) with barcode, item name, quantity, unit price, and total.
+          </p>
+          <Button className='mt-4' onClick={() => setCreateOpen(true)}>
+            <Plus className='mr-2 h-4 w-4' />
+            New receival
+          </Button>
+        </div>
+        <AdminReceivalCreateDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          existingIds={[]}
+          onCreated={setSelectedReceivalId}
+        />
+      </>
     );
   }
 
   if (!receival || receival.lines.length === 0) {
     return (
-      <div className='rounded-md border bg-card p-8 text-center'>
-        <ClipboardCheck className='mx-auto mb-3 h-10 w-10 text-muted-foreground/60' />
-        <h3 className='font-serif text-lg font-semibold'>
-          September 2026 warehouse receival
-        </h3>
-        <p className='mx-auto mt-2 max-w-md text-sm text-muted-foreground'>
-          No shipment list loaded yet. Add your port manifest to{' '}
-          <code className='rounded bg-muted px-1 py-0.5 text-xs'>
-            data/warehouse-receivals/2026-09.json
-          </code>{' '}
-          (barcode, item name, quantity, unit price, total), then import below.
-        </p>
-        <Button className='mt-4' onClick={() => void handleReseedFromFile()}>
-          Import from file
-        </Button>
-      </div>
+      <>
+        <div className='space-y-4'>
+          <ReceivalPicker
+            catalog={receivalCatalog}
+            selectedId={selectedReceivalId}
+            onSelect={setSelectedReceivalId}
+            onNew={() => setCreateOpen(true)}
+          />
+          <div className='rounded-md border bg-card p-8 text-center'>
+            <ClipboardCheck className='mx-auto mb-3 h-10 w-10 text-muted-foreground/60' />
+            <h3 className='font-serif text-lg font-semibold'>
+              {receival?.title ?? 'Empty receival'}
+            </h3>
+            <p className='mx-auto mt-2 max-w-md text-sm text-muted-foreground'>
+              No lines loaded yet. Import a manifest or re-seed from the bundled
+              September file if applicable.
+            </p>
+            <div className='mt-4 flex flex-wrap justify-center gap-2'>
+              <Button
+                variant='outline'
+                onClick={() => importFileRef.current?.click()}
+              >
+                Import manifest
+              </Button>
+              {selectedReceivalId === SEPTEMBER_2026_RECEIVAL_ID ? (
+                <Button onClick={() => void handleReseedFromFile()}>
+                  Seed from 2026-09 file
+                </Button>
+              ) : null}
+            </div>
+            <input
+              ref={importFileRef}
+              type='file'
+              accept='.json,.csv,.tsv,.txt'
+              className='hidden'
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleReplaceManifest(file);
+                e.target.value = '';
+              }}
+            />
+          </div>
+        </div>
+        <AdminReceivalCreateDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          existingIds={receivalCatalog.map((e) => e.id)}
+          onCreated={setSelectedReceivalId}
+        />
+      </>
     );
   }
 
@@ -422,15 +608,21 @@ export function AdminWarehouseReceivalPanel() {
 
   return (
     <div className='w-full min-w-0 max-w-full space-y-4 overflow-x-clip'>
+      <ReceivalPicker
+        catalog={receivalCatalog}
+        selectedId={selectedReceivalId}
+        onSelect={setSelectedReceivalId}
+        onNew={() => setCreateOpen(true)}
+      />
+
       <div className='flex items-start justify-between gap-2'>
         <div className='min-w-0 flex-1'>
           <h3 className='font-serif text-lg font-semibold text-primary'>
             {receival.title}
           </h3>
           <p className='mt-1 hidden text-sm text-muted-foreground sm:block'>
-            Check off each line as it is confirmed on the palette. Matching
-            quantities turn green; enter a different received qty to flag orange
-            discrepancies.
+            Check off each line as it is confirmed on the palette. Transfer
+            confirmed stock to warehouse inventory in partial batches when ready.
           </p>
           <div className='mt-3 flex flex-wrap items-center gap-2'>
             <Badge variant='outline' className='tabular-nums'>
@@ -443,6 +635,22 @@ export function AdminWarehouseReceivalPanel() {
               {summary.receivedQty.toLocaleString()} /{' '}
               {summary.expectedQty.toLocaleString()} units
             </Badge>
+            {summary.transferableQty > 0 ? (
+              <Badge
+                variant='outline'
+                className='border-sky-200 bg-sky-50 text-sky-900 tabular-nums'
+              >
+                {summary.transferableQty.toLocaleString()} ready to transfer
+              </Badge>
+            ) : null}
+            {summary.transferredQty > 0 ? (
+              <Badge
+                variant='outline'
+                className='border-violet-200 bg-violet-50 text-violet-900 tabular-nums'
+              >
+                {summary.transferredQty.toLocaleString()} in warehouse
+              </Badge>
+            ) : null}
             {summary.discrepancies > 0 ? (
               <Badge
                 variant='outline'
@@ -467,7 +675,20 @@ export function AdminWarehouseReceivalPanel() {
           </div>
         </div>
 
-        <DropdownMenu>
+        <div className='flex shrink-0 flex-col items-end gap-1'>
+          <Button
+            type='button'
+            size='sm'
+            variant='default'
+            className='h-8 touch-manipulation'
+            disabled={summary.transferableQty <= 0 || inventoryLoading}
+            onClick={() => setTransferOpen(true)}
+            title='Transfer confirmed qty to warehouse inventory'
+          >
+            <PackagePlus className='mr-1.5 h-3.5 w-3.5' />
+            <span className='hidden sm:inline'>Transfer</span>
+          </Button>
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               type='button'
@@ -522,6 +743,16 @@ export function AdminWarehouseReceivalPanel() {
               Pending only
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuLabel>Manifest</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => importFileRef.current?.click()}>
+              Replace manifest (JSON / CSV)
+            </DropdownMenuItem>
+            {selectedReceivalId === SEPTEMBER_2026_RECEIVAL_ID ? (
+              <DropdownMenuItem onClick={() => void handleReseedFromFile()}>
+                Re-seed from bundled 2026-09 file
+              </DropdownMenuItem>
+            ) : null}
+            <DropdownMenuSeparator />
             <DropdownMenuLabel>Print</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
@@ -541,7 +772,30 @@ export function AdminWarehouseReceivalPanel() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </div>
+
+      {(receival.transfers?.length ?? 0) > 0 ? (
+        <p className='text-xs text-muted-foreground'>
+          {receival.transfers!.length} warehouse transfer batch
+          {receival.transfers!.length === 1 ? '' : 'es'}
+          {receival.transfers!.length > 0
+            ? ` · last ${format(receival.transfers![receival.transfers!.length - 1].at, 'MMM d, h:mm a')}`
+            : ''}
+        </p>
+      ) : null}
+
+      <input
+        ref={importFileRef}
+        type='file'
+        accept='.json,.csv,.tsv,.txt'
+        className='hidden'
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void handleReplaceManifest(file);
+          e.target.value = '';
+        }}
+      />
 
       <div
         className='sticky z-30 -mx-3 space-y-2 border-b border-border/50 bg-background px-3 py-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0'
@@ -784,6 +1038,16 @@ export function AdminWarehouseReceivalPanel() {
                             {effectiveReceivedQty(line)}
                           </p>
                         ) : null}
+                        {(line.transferredQty ?? 0) > 0 ? (
+                          <p className='mt-1 text-xs text-violet-800'>
+                            {line.transferredQty!.toLocaleString()} transferred
+                            {receivalLineFullyTransferred(line)
+                              ? ' · fully in warehouse'
+                              : receivalLineTransferableQty(line) > 0
+                                ? ` · ${receivalLineTransferableQty(line)} remaining`
+                                : ''}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
 
@@ -802,6 +1066,11 @@ export function AdminWarehouseReceivalPanel() {
                         <span className='mt-0.5 block text-xs font-normal text-orange-800'>
                           Expected {line.quantity}, received{' '}
                           {effectiveReceivedQty(line)}
+                        </span>
+                      ) : null}
+                      {(line.transferredQty ?? 0) > 0 ? (
+                        <span className='mt-0.5 block text-xs text-violet-800'>
+                          {line.transferredQty!.toLocaleString()} in warehouse
                         </span>
                       ) : null}
                     </span>
@@ -969,6 +1238,75 @@ export function AdminWarehouseReceivalPanel() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
+
+      <AdminReceivalCreateDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        existingIds={receivalCatalog.map((e) => e.id)}
+        onCreated={setSelectedReceivalId}
+      />
+
+      <AdminReceivalTransferDialog
+        open={transferOpen}
+        onOpenChange={setTransferOpen}
+        receival={receival}
+        products={products}
+        inventoryLoading={inventoryLoading}
+      />
+    </div>
+  );
+}
+
+function ReceivalPicker({
+  catalog,
+  selectedId,
+  onSelect,
+  onNew,
+}: {
+  catalog: ReceivalCatalogEntry[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  onNew: () => void;
+}) {
+  const selected = catalog.find((e) => e.id === selectedId);
+  return (
+    <div className='flex min-w-0 items-center gap-2'>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            className='min-w-0 flex-1 justify-between sm:max-w-md'
+          >
+            <span className='truncate text-left'>
+              {selected?.title ?? 'Select receival'}
+            </span>
+            <ChevronDown className='ml-2 h-4 w-4 shrink-0 opacity-60' />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align='start' className='max-h-72 w-[min(22rem,100vw-2rem)] overflow-y-auto'>
+          <DropdownMenuLabel>Shipments / receivals</DropdownMenuLabel>
+          {catalog.map((entry) => (
+            <DropdownMenuItem
+              key={entry.id}
+              onClick={() => onSelect(entry.id)}
+              className={cn(entry.id === selectedId && 'bg-accent')}
+            >
+              <div className='min-w-0'>
+                <p className='truncate font-medium'>{entry.title}</p>
+                <p className='text-xs text-muted-foreground tabular-nums'>
+                  {entry.lineCount} lines · {entry.monthKey}
+                </p>
+              </div>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Button type='button' size='sm' variant='secondary' onClick={onNew}>
+        <Plus className='mr-1.5 h-4 w-4' />
+        <span className='hidden sm:inline'>New</span>
+      </Button>
     </div>
   );
 }
