@@ -6,6 +6,20 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Serves Firebase's sign-in handler from our own domain so the Google popup shows
+  // it (requires NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=www.leetoniawholesale.com on Vercel).
+  async rewrites() {
+    return [
+      {
+        source: '/__/auth/:path*',
+        destination: 'https://leetonia-43222.firebaseapp.com/__/auth/:path*',
+      },
+      {
+        source: '/__/firebase/:path*',
+        destination: 'https://leetonia-43222.firebaseapp.com/__/firebase/:path*',
+      },
+    ];
+  },
   async headers() {
     return [
       {
